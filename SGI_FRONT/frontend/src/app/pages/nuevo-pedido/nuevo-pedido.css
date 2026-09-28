@@ -1,0 +1,363 @@
+.nuevo-pedido-page {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+
+/* ==============================
+   ENCABEZADO
+================================ */
+
+.page-heading {
+  margin-bottom: 24px;
+}
+
+.page-heading h2 {
+  margin: 0;
+  font-size: 26px;
+  font-weight: 650;
+  color: #1e293b;
+}
+
+.page-heading p {
+  margin: 6px 0 0;
+  font-size: 14px;
+  color: #64748b;
+}
+
+
+/* ==============================
+   TARJETAS
+================================ */
+
+.form-card {
+  margin-bottom: 18px;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  overflow: hidden;
+}
+
+.card-title {
+  padding: 20px 22px;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.card-title h3 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 650;
+  color: #1e293b;
+}
+
+.card-title p {
+  margin: 4px 0 0;
+  font-size: 13px;
+  color: #94a3b8;
+}
+
+
+/* ==============================
+   FORMULARIOS
+================================ */
+
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  padding: 22px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.form-group label {
+  font-size: 13px;
+  font-weight: 600;
+  color: #334155;
+}
+
+.form-group select,
+.form-group input {
+  width: 100%;
+  height: 42px;
+  padding: 0 12px;
+
+  box-sizing: border-box;
+
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+
+  background: #ffffff;
+  color: #1e293b;
+
+  font-family: inherit;
+  font-size: 14px;
+
+  outline: none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.form-group select:focus,
+.form-group input:focus {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px #eff6ff;
+}
+
+
+/* ==============================
+   PRODUCTOS
+================================ */
+
+.products-title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.secondary-button {
+  border: 1px solid #bfdbfe;
+  background: #eff6ff;
+
+  color: #2563eb;
+
+  padding: 9px 14px;
+  border-radius: 8px;
+
+  font-size: 13px;
+  font-weight: 600;
+
+  cursor: pointer;
+}
+
+.secondary-button:hover {
+  background: #dbeafe;
+}
+
+.product-row {
+  display: grid;
+  grid-template-columns: minmax(220px, 1fr) 130px 190px 40px;
+  align-items: end;
+  gap: 16px;
+
+  padding: 22px;
+}
+
+.quantity input,
+.price input {
+  text-align: right;
+}
+
+.input-money {
+  position: relative;
+}
+
+.input-money span {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+
+  color: #64748b;
+  font-size: 14px;
+}
+
+.input-money input {
+  padding-left: 28px;
+}
+
+.delete-button {
+  width: 40px;
+  height: 42px;
+
+  border: 1px solid #fecaca;
+  border-radius: 8px;
+
+  background: #fef2f2;
+  color: #dc2626;
+
+  font-size: 22px;
+
+  cursor: pointer;
+}
+
+.delete-button:hover {
+  background: #fee2e2;
+}
+
+
+/* ==============================
+   RESUMEN
+================================ */
+
+.summary-card {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+
+  margin-bottom: 22px;
+
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+}
+
+.summary-card > div {
+  padding: 18px 22px;
+  border-right: 1px solid #f1f5f9;
+
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.summary-card > div:last-child {
+  border-right: none;
+}
+
+.summary-card span {
+  font-size: 12px;
+  color: #64748b;
+}
+
+.summary-card strong {
+  font-size: 20px;
+  color: #1e293b;
+}
+
+
+/* ==============================
+   BOTONES
+================================ */
+
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-bottom: 30px;
+}
+
+.cancel-button,
+.primary-button {
+  height: 42px;
+  padding: 0 18px;
+
+  border-radius: 8px;
+
+  font-size: 14px;
+  font-weight: 600;
+
+  cursor: pointer;
+}
+
+.cancel-button {
+  border: 1px solid #cbd5e1;
+  background: #ffffff;
+  color: #475569;
+}
+
+.cancel-button:hover {
+  background: #f8fafc;
+}
+
+.primary-button {
+  border: none;
+  background: #2563eb;
+  color: #ffffff;
+}
+
+.primary-button:hover {
+  background: #1e40af;
+}
+
+
+/* ==============================
+   TABLET
+================================ */
+
+@media (max-width: 800px) {
+
+  .product-row {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .product-name {
+    grid-column: 1 / -1;
+  }
+
+  .delete-button {
+    align-self: end;
+  }
+
+}
+
+
+/* ==============================
+   CELULAR
+================================ */
+
+@media (max-width: 600px) {
+
+  .page-heading h2 {
+    font-size: 22px;
+  }
+
+  .page-heading p {
+    font-size: 13px;
+    line-height: 1.5;
+  }
+
+  .form-grid {
+    grid-template-columns: 1fr;
+    padding: 18px;
+  }
+
+  .products-title {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .secondary-button {
+    width: 100%;
+  }
+
+  .product-row {
+    grid-template-columns: 1fr;
+    padding: 18px;
+  }
+
+  .product-name {
+    grid-column: auto;
+  }
+
+  .delete-button {
+    width: 100%;
+  }
+
+  .summary-card {
+    grid-template-columns: 1fr;
+  }
+
+  .summary-card > div {
+    border-right: none;
+    border-bottom: 1px solid #f1f5f9;
+  }
+
+  .summary-card > div:last-child {
+    border-bottom: none;
+  }
+
+  .form-actions {
+    flex-direction: column-reverse;
+  }
+
+  .cancel-button,
+  .primary-button {
+    width: 100%;
+  }
+
+}

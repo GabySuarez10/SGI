@@ -1,0 +1,154 @@
+<div class="pedidos-page">
+
+  <!-- Encabezado -->
+  <section class="page-heading">
+
+    <div>
+      <h2>Pedidos de proveedor</h2>
+      <p>Gestiona los pedidos realizados a tus proveedores.</p>
+    </div>
+
+    <button class="primary-button">
+      + Nuevo pedido
+    </button>
+
+  </section>
+
+
+  <!-- Filtros -->
+ <section class="filters">
+
+  <button
+    class="filter-button"
+    [class.active]="filtroActual === 'todos'"
+    (click)="cambiarFiltro('todos')">
+    Todos
+  </button>
+
+  <button
+    class="filter-button"
+    [class.active]="filtroActual === 'pendientes'"
+    (click)="cambiarFiltro('pendientes')">
+    Pendientes
+  </button>
+
+  <button
+    class="filter-button"
+    [class.active]="filtroActual === 'recibidos'"
+    (click)="cambiarFiltro('recibidos')">
+    Recibidos
+  </button>
+
+</section>
+  <!-- Lista de pedidos -->
+  <section class="orders-list">
+
+
+    <!-- Pedido 001 -->
+    <article
+  class="order-card"
+  *ngIf="filtroActual === 'todos' || filtroActual === 'pendientes'">
+
+      <div class="order-main">
+
+        <div class="order-number">
+          <span>Pedido #001</span>
+          <strong>Freddy Bogotá</strong>
+        </div>
+
+        <div class="order-details">
+          <span>12 productos</span>
+          <span>35 unidades</span>
+          <span>28 de septiembre de 2026</span>
+        </div>
+
+      </div>
+
+      <div class="order-right">
+
+        <span class="status pending">
+          Pendiente
+        </span>
+
+        <button class="view-button">
+          Ver pedido →
+        </button>
+
+      </div>
+
+    </article>
+
+
+    <!-- Pedido 002 -->
+   <article
+  class="order-card"
+  *ngIf="filtroActual === 'todos' || filtroActual === 'pendientes'">
+
+      <div class="order-main">
+
+        <div class="order-number">
+          <span>Pedido #002</span>
+          <strong>Diego Cali</strong>
+        </div>
+
+        <div class="order-details">
+          <span>8 productos</span>
+          <span>20 unidades</span>
+          <span>25 de septiembre de 2026</span>
+        </div>
+
+      </div>
+
+      <div class="order-right">
+
+        <span class="status pending">
+          Pendiente
+        </span>
+
+        <button class="view-button">
+          Ver pedido →
+        </button>
+
+      </div>
+
+    </article>
+
+
+    <!-- Pedido 003 -->
+   <article
+  class="order-card"
+  *ngIf="filtroActual === 'todos' || filtroActual === 'recibidos'">
+
+      <div class="order-main">
+
+        <div class="order-number">
+          <span>Pedido #003</span>
+          <strong>Freddy Bogotá</strong>
+        </div>
+
+        <div class="order-details">
+          <span>10 productos</span>
+          <span>28 unidades</span>
+          <span>20 de septiembre de 2026</span>
+        </div>
+
+      </div>
+
+      <div class="order-right">
+
+        <span class="status received">
+          Recibido
+        </span>
+
+        <button class="view-button">
+          Ver pedido →
+        </button>
+
+      </div>
+
+    </article>
+
+
+  </section>
+
+</div>

@@ -1,0 +1,306 @@
+.pedidos-page {
+  width: 100%;
+  max-width: 1500px;
+  margin: 0 auto;
+}
+
+
+/* ==============================
+   ENCABEZADO
+================================ */
+
+.page-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 24px;
+}
+
+.page-heading h2 {
+  margin: 0;
+  font-size: 26px;
+  font-weight: 650;
+  color: #1e293b;
+}
+
+.page-heading p {
+  margin: 6px 0 0;
+  font-size: 14px;
+  color: #64748b;
+}
+
+.primary-button {
+  border: none;
+  padding: 11px 18px;
+  border-radius: 9px;
+
+  background: #2563eb;
+  color: #ffffff;
+
+  font-size: 14px;
+  font-weight: 600;
+
+  cursor: pointer;
+
+  transition: background 0.2s ease;
+}
+
+.primary-button:hover {
+  background: #1e40af;
+}
+
+
+/* ==============================
+   FILTROS
+================================ */
+
+.filters {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  margin-bottom: 18px;
+}
+
+.filter-button {
+  border: 1px solid #e2e8f0;
+  background: #ffffff;
+
+  color: #64748b;
+
+  padding: 8px 16px;
+  border-radius: 8px;
+
+  font-size: 14px;
+  font-weight: 500;
+
+  cursor: pointer;
+
+  transition: all 0.2s ease;
+}
+
+.filter-button:hover {
+  border-color: #bfdbfe;
+  color: #2563eb;
+}
+
+.filter-button.active {
+  background: #eff6ff;
+  border-color: #bfdbfe;
+  color: #2563eb;
+  font-weight: 600;
+}
+
+
+/* ==============================
+   LISTA DE PEDIDOS
+================================ */
+
+.orders-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+
+/* ==============================
+   TARJETA
+================================ */
+
+.order-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  gap: 20px;
+
+  padding: 20px 22px;
+
+  background: #ffffff;
+
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.order-card:hover {
+  border-color: #cbd5e1;
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.05);
+}
+
+
+/* ==============================
+   INFORMACIÓN DEL PEDIDO
+================================ */
+
+.order-main {
+  min-width: 0;
+  flex: 1;
+}
+
+.order-number {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.order-number span {
+  font-size: 14px;
+  font-weight: 600;
+  color: #1e293b;
+}
+
+.order-number strong {
+  font-size: 14px;
+  font-weight: 500;
+  color: #64748b;
+}
+
+.order-details {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 18px;
+
+  margin-top: 8px;
+}
+
+.order-details span {
+  font-size: 13px;
+  color: #94a3b8;
+}
+
+
+/* ==============================
+   PARTE DERECHA
+================================ */
+
+.order-right {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+
+  flex-shrink: 0;
+}
+
+
+/* ==============================
+   ESTADOS
+================================ */
+
+.status {
+  padding: 6px 10px;
+
+  border-radius: 7px;
+
+  font-size: 12px;
+  font-weight: 600;
+
+  white-space: nowrap;
+}
+
+.status.pending {
+  background: #fff7ed;
+  color: #c2410c;
+}
+
+.status.received {
+  background: #ecfdf5;
+  color: #047857;
+}
+
+
+/* ==============================
+   BOTÓN VER
+================================ */
+
+.view-button {
+  border: none;
+  background: transparent;
+
+  color: #2563eb;
+
+  font-size: 13px;
+  font-weight: 600;
+
+  cursor: pointer;
+
+  white-space: nowrap;
+}
+
+.view-button:hover {
+  color: #1e40af;
+}
+
+
+/* ==============================
+   TABLET
+================================ */
+
+@media (max-width: 800px) {
+
+  .order-card {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .order-right {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+}
+
+
+/* ==============================
+   CELULAR
+================================ */
+
+@media (max-width: 600px) {
+
+  .page-heading {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .page-heading h2 {
+    font-size: 22px;
+  }
+
+  .page-heading p {
+    font-size: 13px;
+    line-height: 1.5;
+  }
+
+  .primary-button {
+    width: 100%;
+  }
+
+  .filters {
+    overflow-x: auto;
+    padding-bottom: 2px;
+  }
+
+  .filter-button {
+    white-space: nowrap;
+  }
+
+  .order-card {
+    padding: 18px;
+  }
+
+  .order-number {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .order-details {
+    flex-direction: column;
+    gap: 4px;
+  }
+
+}

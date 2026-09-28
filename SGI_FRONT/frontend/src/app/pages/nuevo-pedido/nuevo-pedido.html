@@ -1,0 +1,190 @@
+<div class="nuevo-pedido-page">
+
+  <!-- Encabezado -->
+  <section class="page-heading">
+
+    <div>
+      <h2>Nuevo pedido</h2>
+      <p>Registra un nuevo pedido realizado a un proveedor.</p>
+    </div>
+
+  </section>
+
+
+  <!-- Información del pedido -->
+  <section class="form-card">
+
+    <div class="card-title">
+      <h3>Información del pedido</h3>
+      <p>Selecciona el proveedor y establece la fecha del pedido.</p>
+    </div>
+
+
+    <div class="form-grid">
+
+      <!-- Proveedor -->
+      <div class="form-group">
+
+        <label for="proveedor">
+          Proveedor
+        </label>
+
+        <select id="proveedor">
+          <option value="">Selecciona un proveedor</option>
+          <option>Freddy Bogotá</option>
+          <option>Diego Cali</option>
+        </select>
+
+      </div>
+
+
+      <!-- Fecha -->
+      <div class="form-group">
+
+        <label for="fecha">
+          Fecha del pedido
+        </label>
+
+        <input
+          id="fecha"
+          type="date">
+
+      </div>
+
+    </div>
+
+  </section>
+
+
+  <!-- Productos -->
+  <section class="form-card">
+
+    <div class="card-title products-title">
+
+      <div>
+        <h3>Productos del pedido</h3>
+        <p>Agrega los productos y las cantidades que deseas solicitar.</p>
+      </div>
+
+      <button
+        type="button"
+        class="secondary-button">
+
+        + Agregar producto
+
+      </button>
+
+    </div>
+
+
+    <!-- Producto -->
+    <div class="product-row">
+
+      <div class="form-group product-name">
+
+        <label>
+          Producto
+        </label>
+
+        <select>
+          <option value="">Selecciona un producto</option>
+          <option>Muñeco de nieve</option>
+          <option>Princesa Sofía</option>
+          <option>Calabaza</option>
+          <option>Bola negra</option>
+        </select>
+
+      </div>
+
+
+      <div class="form-group quantity">
+
+        <label>
+          Cantidad
+        </label>
+
+        <input
+          type="number"
+          min="1"
+          placeholder="0">
+
+      </div>
+
+
+      <div class="form-group price">
+
+        <label>
+          Precio esperado
+        </label>
+
+        <div class="input-money">
+
+          <span>$</span>
+
+          <input
+            type="number"
+            min="0"
+            placeholder="0">
+
+        </div>
+
+      </div>
+
+
+      <button
+        type="button"
+        class="delete-button"
+        aria-label="Eliminar producto">
+
+        ×
+
+      </button>
+
+    </div>
+
+  </section>
+
+
+  <!-- Resumen -->
+  <section class="summary-card">
+
+    <div>
+      <span>Total de productos</span>
+      <strong>1</strong>
+    </div>
+
+    <div>
+      <span>Total de unidades</span>
+      <strong>0</strong>
+    </div>
+
+    <div>
+      <span>Precio total esperado</span>
+      <strong>$0</strong>
+    </div>
+
+  </section>
+
+
+  <!-- Acciones -->
+  <div class="form-actions">
+
+    <button
+      type="button"
+      class="cancel-button">
+
+      Cancelar
+
+    </button>
+
+    <button
+      type="button"
+      class="primary-button">
+
+      Guardar pedido
+
+    </button>
+
+  </div>
+
+</div>
