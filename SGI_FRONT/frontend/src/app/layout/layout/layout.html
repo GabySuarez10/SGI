@@ -1,0 +1,30 @@
+<div class="app-layout">
+
+  <!-- Sidebar -->
+  <app-sidebar
+    [open]="sidebarOpen">
+  </app-sidebar>
+
+
+  <!-- Fondo oscuro en móvil -->
+  <div
+    class="sidebar-overlay"
+    [class.visible]="sidebarOpen"
+    (click)="closeSidebar()">
+  </div>
+
+
+  <!-- Contenido principal -->
+  <div class="main-area">
+
+    <app-header
+      (menuToggle)="toggleSidebar()">
+    </app-header>
+
+    <main class="content">
+      <router-outlet></router-outlet>
+    </main>
+
+  </div>
+
+</div>

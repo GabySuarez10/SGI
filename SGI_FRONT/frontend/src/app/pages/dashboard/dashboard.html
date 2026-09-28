@@ -1,0 +1,269 @@
+<div class="dashboard">
+
+  <!-- Encabezado -->
+  <section class="dashboard-heading">
+
+    <div>
+      <h2>Resumen general</h2>
+      <p>
+        Consulta el estado actual del inventario y las operaciones de Pintarte.
+      </p>
+    </div>
+
+    <button class="primary-button">
+      + Nuevo pedido
+    </button>
+
+  </section>
+
+
+  <!-- Tarjetas principales -->
+  <section class="stats-grid">
+
+    <article class="stat-card">
+
+      <div class="stat-icon blue">
+        ▦
+      </div>
+
+      <div class="stat-content">
+        <span class="stat-label">Productos</span>
+        <strong>128</strong>
+        <small>registrados</small>
+      </div>
+
+    </article>
+
+
+    <article class="stat-card">
+
+      <div class="stat-icon green">
+        ◫
+      </div>
+
+      <div class="stat-content">
+        <span class="stat-label">En bodega</span>
+        <strong>350</strong>
+        <small>unidades disponibles</small>
+      </div>
+
+    </article>
+
+
+    <article class="stat-card">
+
+      <div class="stat-icon purple">
+        ◫
+      </div>
+
+      <div class="stat-content">
+        <span class="stat-label">En local</span>
+        <strong>86</strong>
+        <small>unidades disponibles</small>
+      </div>
+
+    </article>
+
+
+    <article class="stat-card">
+
+      <div class="stat-icon orange">
+        ▣
+      </div>
+
+      <div class="stat-content">
+        <span class="stat-label">Pedidos pendientes</span>
+        <strong>4</strong>
+        <small>por recibir</small>
+      </div>
+
+    </article>
+
+  </section>
+
+
+  <!-- Segunda sección -->
+  <section class="dashboard-grid">
+
+
+    <!-- Pedidos -->
+    <article class="dashboard-card">
+
+      <div class="card-header">
+
+        <div>
+          <h3>Pedidos pendientes</h3>
+          <p>Pedidos realizados a proveedores</p>
+        </div>
+
+        <button class="text-button">
+          Ver todos
+        </button>
+
+      </div>
+
+
+      <div class="orders-list">
+
+        <div class="order-item">
+
+          <div class="order-info">
+            <strong>Pedido #001</strong>
+            <span>Proveedor: Freddy Bogotá</span>
+          </div>
+
+          <div class="order-status pending">
+            Pendiente
+          </div>
+
+        </div>
+
+
+        <div class="order-item">
+
+          <div class="order-info">
+            <strong>Pedido #002</strong>
+            <span>Proveedor: Diego Cali</span>
+          </div>
+
+          <div class="order-status pending">
+            Pendiente
+          </div>
+
+        </div>
+
+
+        <div class="order-item">
+
+          <div class="order-info">
+            <strong>Pedido #003</strong>
+            <span>Proveedor: Freddy Bogotá</span>
+          </div>
+
+          <div class="order-status received">
+            Recibido
+          </div>
+
+        </div>
+
+      </div>
+
+    </article>
+
+
+    <!-- Alertas -->
+    <article class="dashboard-card">
+
+      <div class="card-header">
+
+        <div>
+          <h3>Alertas</h3>
+          <p>Situaciones que requieren revisión</p>
+        </div>
+
+      </div>
+
+
+      <div class="alerts-list">
+
+        <div class="alert-item warning">
+
+          <span class="alert-icon">!</span>
+
+          <div>
+            <strong>Productos faltantes</strong>
+            <p>3 productos no llegaron en el último pedido.</p>
+          </div>
+
+        </div>
+
+
+        <div class="alert-item danger">
+
+          <span class="alert-icon">!</span>
+
+          <div>
+            <strong>Productos dañados</strong>
+            <p>2 unidades fueron registradas como dañadas.</p>
+          </div>
+
+        </div>
+
+      </div>
+
+    </article>
+
+  </section>
+
+
+  <!-- Actividad reciente -->
+  <section class="dashboard-card activity-card">
+
+    <div class="card-header">
+
+      <div>
+        <h3>Actividad reciente</h3>
+        <p>Últimos movimientos registrados</p>
+      </div>
+
+      <button class="text-button">
+        Ver historial
+      </button>
+
+    </div>
+
+
+    <div class="activity-list">
+
+      <div class="activity-item">
+
+        <div class="activity-icon transfer">
+          ⇄
+        </div>
+
+        <div class="activity-info">
+          <strong>Traslado de mercancía</strong>
+          <span>Mario bros · 10 unidades</span>
+        </div>
+
+        <time>Hoy, 9:20 a. m.</time>
+
+      </div>
+
+
+      <div class="activity-item">
+
+        <div class="activity-icon sale">
+          $
+        </div>
+
+        <div class="activity-info">
+          <strong>Venta / salida</strong>
+          <span>Muñeco de nieve · 5 unidades</span>
+        </div>
+
+        <time>Hoy, 8:45 a. m.</time>
+
+      </div>
+
+
+      <div class="activity-item">
+
+        <div class="activity-icon order">
+          ▣
+        </div>
+
+        <div class="activity-info">
+          <strong>Pedido registrado</strong>
+          <span>Calabazas · 20 unidades</span>
+        </div>
+
+        <time>Ayer, 4:30 p. m.</time>
+
+      </div>
+
+    </div>
+
+  </section>
+
+</div>

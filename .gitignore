@@ -1,0 +1,16 @@
+# Python
+SGI_FASE1/venv/
+SGI_FASE1/__pycache__/
+SGI_FASE1/.env
+
+# Angular / Node
+SGI_FRONT/frontend/node_modules/
+SGI_FRONT/frontend/.angular/
+
+# Archivos de entorno
+.env
+.env.*
+
+# Sistema operativo
+.DS_Store
+Thumbs.db
