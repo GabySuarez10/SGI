@@ -1,190 +1,494 @@
 <div class="nuevo-pedido-page">
 
-  <!-- Encabezado -->
-  <section class="page-heading">
+  <!-- ENCABEZADO -->
+  <div class="page-header">
 
     <div>
-      <h2>Nuevo pedido</h2>
-      <p>Registra un nuevo pedido realizado a un proveedor.</p>
+      <h1>Nuevo pedido</h1>
+      <p>
+        Registra los productos que necesitas solicitar al proveedor.
+      </p>
     </div>
 
-  </section>
+    <button
+      type="button"
+      class="btn-secondary"
+      (click)="cancelar()">
+      Cancelar
+    </button>
+
+  </div>
 
 
-  <!-- Información del pedido -->
-  <section class="form-card">
+  <!-- PASO 1 -->
+  <ng-container *ngIf="pasoActual === 1">
 
-    <div class="card-title">
-      <h3>Información del pedido</h3>
-      <p>Selecciona el proveedor y establece la fecha del pedido.</p>
-    </div>
+    <!-- INFORMACIÓN DEL PEDIDO -->
+    <section class="section-card">
 
+      <div class="section-header">
 
-    <div class="form-grid">
+        <div class="step-number">
+          1
+        </div>
 
-      <!-- Proveedor -->
-      <div class="form-group">
-
-        <label for="proveedor">
-          Proveedor
-        </label>
-
-        <select id="proveedor">
-          <option value="">Selecciona un proveedor</option>
-          <option>Freddy Bogotá</option>
-          <option>Diego Cali</option>
-        </select>
-
-      </div>
-
-
-      <!-- Fecha -->
-      <div class="form-group">
-
-        <label for="fecha">
-          Fecha del pedido
-        </label>
-
-        <input
-          id="fecha"
-          type="date">
-
-      </div>
-
-    </div>
-
-  </section>
-
-
-  <!-- Productos -->
-  <section class="form-card">
-
-    <div class="card-title products-title">
-
-      <div>
-        <h3>Productos del pedido</h3>
-        <p>Agrega los productos y las cantidades que deseas solicitar.</p>
-      </div>
-
-      <button
-        type="button"
-        class="secondary-button">
-
-        + Agregar producto
-
-      </button>
-
-    </div>
-
-
-    <!-- Producto -->
-    <div class="product-row">
-
-      <div class="form-group product-name">
-
-        <label>
-          Producto
-        </label>
-
-        <select>
-          <option value="">Selecciona un producto</option>
-          <option>Muñeco de nieve</option>
-          <option>Princesa Sofía</option>
-          <option>Calabaza</option>
-          <option>Bola negra</option>
-        </select>
+        <div>
+          <h2>Información del pedido</h2>
+          <p>
+            Selecciona el proveedor, la fecha y el destino del pedido.
+          </p>
+        </div>
 
       </div>
 
 
-      <div class="form-group quantity">
+      <div class="form-grid">
 
-        <label>
-          Cantidad
-        </label>
+        <div class="form-group">
 
-        <input
-          type="number"
-          min="1"
-          placeholder="0">
+          <label for="proveedor">
+            Proveedor
+          </label>
 
-      </div>
+          <select
+            id="proveedor"
+            [(ngModel)]="proveedor"
+            (ngModelChange)="actualizarProveedor()">
+
+            <option value="">
+              Seleccionar proveedor
+            </option>
+
+            <option
+              *ngFor="let item of proveedores"
+              [value]="item">
+
+              {{ item }}
+
+            </option>
+
+          </select>
+
+        </div>
 
 
-      <div class="form-group price">
+        <div class="form-group">
 
-        <label>
-          Precio esperado
-        </label>
-
-        <div class="input-money">
-
-          <span>$</span>
+          <label for="fecha">
+            Fecha del pedido
+          </label>
 
           <input
-            type="number"
-            min="0"
-            placeholder="0">
+            id="fecha"
+            type="date"
+            [(ngModel)]="fecha">
+
+        </div>
+
+
+        <div class="form-group">
+
+          <label for="destino">
+            Destino del pedido
+          </label>
+
+          <select
+            id="destino"
+            [(ngModel)]="destino">
+
+            <option value="">
+              Seleccionar destino
+            </option>
+
+            <option value="Centro Recreacional X">
+              Centro Recreacional X
+            </option>
+
+            <option value="Centro Recreacional Y">
+              Centro Recreacional Y
+            </option>
+
+            <option value="Inventario general">
+              Inventario general
+            </option>
+
+          </select>
+
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- PRODUCTOS -->
+    <section class="section-card products-section">
+
+      <div class="section-header">
+
+        <div class="step-number">
+          2
+        </div>
+
+        <div>
+          <h2>Selecciona los productos</h2>
+
+          <p>
+            Busca una figura y agrega la cantidad que necesitas.
+          </p>
+        </div>
+
+      </div>
+
+
+      <!-- BUSCADOR -->
+      <div class="search-area">
+
+        <div class="search-box">
+
+          <span class="search-icon">
+            ⌕
+          </span>
+
+          <input
+            type="text"
+            [(ngModel)]="busqueda"
+            placeholder="Buscar por nombre o referencia...">
+
+        </div>
+
+        <span
+          *ngIf="proveedor"
+          class="provider-filter">
+
+          {{ proveedor }}
+
+        </span>
+
+      </div>
+
+
+      <!-- PRODUCTOS -->
+      <div class="products-grid">
+
+        <div
+          class="product-card"
+          *ngFor="let producto of productosFiltrados">
+
+          <div class="product-image">
+
+            <img
+              [src]="producto.imagen"
+              [alt]="producto.nombre">
+
+          </div>
+
+
+          <div class="product-info">
+
+            <span class="product-reference">
+              {{ producto.referencia }}
+            </span>
+
+            <h3>
+              {{ producto.nombre }}
+            </h3>
+
+          </div>
+
+
+          <div class="quantity-control">
+
+            <button
+              type="button"
+              class="quantity-button"
+              (click)="disminuirCantidad(producto)">
+              −
+            </button>
+
+            <input
+              type="number"
+              min="0"
+              [(ngModel)]="producto.cantidad">
+
+            <button
+              type="button"
+              class="quantity-button"
+              (click)="aumentarCantidad(producto)">
+              +
+            </button>
+
+          </div>
+
+        </div>
+
+
+        <!-- SIN RESULTADOS -->
+        <div
+          class="empty-products"
+          *ngIf="productosFiltrados.length === 0">
+
+          <div class="empty-icon">
+            🔎
+          </div>
+
+          <h3>No encontramos productos</h3>
+
+          <p>
+            Prueba con otro nombre o referencia.
+          </p>
 
         </div>
 
       </div>
 
 
-      <button
-        type="button"
-        class="delete-button"
-        aria-label="Eliminar producto">
+      <!-- PIE DE PRODUCTOS -->
+      <div class="selection-footer">
 
-        ×
+        <div class="selection-summary">
 
-      </button>
+          <strong>
+            {{ totalUnidades }}
+          </strong>
 
-    </div>
+          <span>
+            unidades seleccionadas
+          </span>
 
-  </section>
+        </div>
 
+        <button
+          type="button"
+          class="btn-primary"
+          (click)="continuar()">
 
-  <!-- Resumen -->
-  <section class="summary-card">
+          Continuar
+          <span>→</span>
 
-    <div>
-      <span>Total de productos</span>
-      <strong>1</strong>
-    </div>
+        </button>
 
-    <div>
-      <span>Total de unidades</span>
-      <strong>0</strong>
-    </div>
+      </div>
 
-    <div>
-      <span>Precio total esperado</span>
-      <strong>$0</strong>
-    </div>
+    </section>
 
-  </section>
+  </ng-container>
 
 
-  <!-- Acciones -->
-  <div class="form-actions">
+  <!-- PASO 2 -->
+  <ng-container *ngIf="pasoActual === 2">
 
-    <button
-      type="button"
-      class="cancel-button">
+    <section class="section-card review-section">
 
-      Cancelar
+      <div class="section-header">
 
-    </button>
+        <div class="step-number">
+          3
+        </div>
 
-    <button
-      type="button"
-      class="primary-button">
+        <div>
+          <h2>Revisar pedido</h2>
 
-      Guardar pedido
+          <p>
+            Verifica las cantidades y asigna el precio esperado de cada producto.
+          </p>
+        </div>
 
-    </button>
+      </div>
 
-  </div>
+
+      <!-- INFORMACIÓN RESUMIDA -->
+      <div class="order-info">
+
+        <div>
+          <span>Proveedor</span>
+          <strong>{{ proveedor }}</strong>
+        </div>
+
+        <div>
+          <span>Fecha</span>
+          <strong>{{ fecha }}</strong>
+        </div>
+
+        <div>
+          <span>Destino</span>
+          <strong>{{ destino }}</strong>
+        </div>
+
+      </div>
+
+
+      <!-- LISTA -->
+      <div class="review-list">
+
+        <div
+          class="review-item"
+          *ngFor="let producto of productosSeleccionados">
+
+          <div class="review-product">
+
+            <img
+              [src]="producto.imagen"
+              [alt]="producto.nombre">
+
+            <div>
+
+              <span>
+                {{ producto.referencia }}
+              </span>
+
+              <strong>
+                {{ producto.nombre }}
+              </strong>
+
+            </div>
+
+          </div>
+
+
+          <div class="review-quantity">
+
+            <label>
+              Cantidad
+            </label>
+
+            <input
+              type="number"
+              min="1"
+              [(ngModel)]="producto.cantidad">
+
+          </div>
+
+
+          <div class="review-price">
+
+            <label>
+              Precio esperado
+            </label>
+
+            <div class="price-input">
+
+              <span>$</span>
+
+              <input
+                type="number"
+                min="0"
+                [(ngModel)]="producto.precioEsperado">
+
+            </div>
+
+          </div>
+
+
+          <div class="review-total">
+
+            <span>
+              Total
+            </span>
+
+            <strong>
+              ${{ producto.cantidad * producto.precioEsperado | number }}
+            </strong>
+
+          </div>
+
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- RESUMEN -->
+    <section class="summary-card">
+
+      <div class="summary-content">
+
+        <div class="summary-title">
+
+          <span class="summary-icon">
+            ✓
+          </span>
+
+          <div>
+            <h2>Resumen del pedido</h2>
+            <p>
+              Revisa estos valores antes de guardar.
+            </p>
+          </div>
+
+        </div>
+
+
+        <div class="summary-values">
+
+          <div class="summary-value">
+
+            <span>
+              Productos
+            </span>
+
+            <strong>
+              {{ totalProductos }}
+            </strong>
+
+          </div>
+
+
+          <div class="summary-value">
+
+            <span>
+              Unidades
+            </span>
+
+            <strong>
+              {{ totalUnidades }}
+            </strong>
+
+          </div>
+
+
+          <div class="summary-value total">
+
+            <span>
+              Precio total esperado
+            </span>
+
+            <strong>
+              ${{ precioTotal | number }}
+            </strong>
+
+          </div>
+
+        </div>
+
+      </div>
+
+
+      <div class="summary-actions">
+
+        <button
+          type="button"
+          class="btn-secondary"
+          (click)="volverAProductos()">
+
+          ← Volver
+
+        </button>
+
+        <button
+          type="button"
+          class="btn-primary"
+          (click)="guardarPedido()">
+
+          Guardar pedido
+
+        </button>
+
+      </div>
+
+    </section>
+
+  </ng-container>
 
 </div>

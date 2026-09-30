@@ -1,0 +1,466 @@
+<div class="detalle-page">
+
+  <!-- ENCABEZADO -->
+  <div class="page-header">
+
+    <div class="header-info">
+
+      <button
+        type="button"
+        class="back-button"
+        (click)="volver()">
+        ←
+      </button>
+
+      <div>
+        <span class="page-label">Pedido de proveedor</span>
+
+        <h1>Detalle del pedido</h1>
+
+        <p>
+          Revisa la recepción de los productos y registra las cantidades recibidas.
+        </p>
+      </div>
+
+    </div>
+
+    <div class="order-status">
+      <span class="status-dot"></span>
+      Pendiente de recepción
+    </div>
+
+  </div>
+
+
+ 
+<!-- INFORMACIÓN DEL PEDIDO -->
+<section class="order-info-card">
+
+  <div class="order-info-item">
+
+    <span>Pedido</span>
+
+    <strong>#001</strong>
+
+  </div>
+
+
+  <div class="order-info-item">
+
+    <span>Proveedor</span>
+
+    <strong>Freddy Bogotá</strong>
+
+  </div>
+
+
+  <div class="order-info-item">
+
+    <span>Fecha del pedido</span>
+
+    <strong>28 Sep 2026</strong>
+
+  </div>
+
+
+  <div class="order-info-item">
+
+    <span>Destino del pedido</span>
+
+    <strong>Centro Recreacional X</strong>
+
+  </div>
+
+</section>
+
+
+
+  <!-- TABLA DE RECEPCIÓN -->
+  <section class="products-card">
+
+    <div class="section-heading">
+
+      <div>
+        <h2>Productos del pedido</h2>
+
+        <p>
+          Registra lo que realmente llegó y marca las unidades dañadas.
+        </p>
+      </div>
+
+      <span class="product-count">
+        {{ productos.length }} productos
+      </span>
+
+    </div>
+
+
+    <div class="table-wrapper">
+
+      <table>
+
+        <thead>
+
+          <tr>
+            <th>Producto</th>
+            <th>Solicitado</th>
+            <th>Recibido</th>
+            <th>Faltante</th>
+            <th>Sobrante</th>
+            <th>Dañado</th>
+            <th>Precio unitario</th>
+            <th>Total esperado</th>
+          </tr>
+
+        </thead>
+
+
+        <tbody>
+
+          <tr *ngFor="let producto of productos">
+
+            <!-- PRODUCTO -->
+            <td>
+
+              <div class="product-cell">
+
+                <div class="product-thumbnail">
+
+                  <img
+                    *ngIf="producto.nombre === 'Muñeco de nieve'"
+                    src="https://images.unsplash.com/photo-1482517967863-00e15c9b44be?auto=format&fit=crop&w=200&q=80"
+                    [alt]="producto.nombre">
+
+                  <img
+                    *ngIf="producto.nombre === 'Princesa Sofía'"
+                    src="https://images.unsplash.com/photo-1518837695005-2083093ee35b?auto=format&fit=crop&w=200&q=80"
+                    [alt]="producto.nombre">
+
+                  <img
+                    *ngIf="producto.nombre === 'Calabaza'"
+                    src="https://images.unsplash.com/photo-1508361001413-7a9c0b5b4f0f?auto=format&fit=crop&w=200&q=80"
+                    [alt]="producto.nombre">
+
+                </div>
+
+                <div class="product-details">
+
+                  <span class="product-reference">
+                    {{ producto.nombre === 'Muñeco de nieve' ? 'FB0001' :
+                       producto.nombre === 'Princesa Sofía' ? 'FB0002' :
+                       'FB0003' }}
+                  </span>
+
+                  <strong>
+                    {{ producto.nombre }}
+                  </strong>
+
+                </div>
+
+              </div>
+
+            </td>
+
+
+            <!-- SOLICITADO -->
+            <td>
+
+              <span class="requested-quantity">
+                {{ producto.solicitado }}
+              </span>
+
+            </td>
+
+
+            <!-- RECIBIDO -->
+            <td>
+
+              <input
+                class="quantity-input"
+                type="number"
+                min="0"
+                [(ngModel)]="producto.recibido">
+
+            </td>
+
+
+            <!-- FALTANTE -->
+            <td>
+
+              <span class="quantity-result quantity-missing">
+                {{ getFaltantes(producto) }}
+              </span>
+
+            </td>
+
+
+            <!-- SOBRANTE -->
+            <td>
+
+              <span class="quantity-result quantity-surplus">
+                {{ getSobrantes(producto) }}
+              </span>
+
+            </td>
+
+
+            <!-- DAÑADO -->
+            <td>
+
+              <input
+                class="quantity-input damaged-input"
+                type="number"
+                min="0"
+                [max]="producto.recibido"
+                [(ngModel)]="producto.danado">
+
+            </td>
+
+
+            <!-- PRECIO -->
+            <td>
+
+              <span class="unit-price">
+                ${{ producto.precioEsperado | number }}
+              </span>
+
+            </td>
+
+
+            <!-- TOTAL -->
+            <td>
+
+              <strong class="total-product">
+                ${{ getTotalProducto(producto) | number }}
+              </strong>
+
+            </td>
+
+          </tr>
+
+        </tbody>
+
+      </table>
+
+    </div>
+
+  </section>
+
+
+  <!-- RESUMEN DE CANTIDADES -->
+  <section class="quantity-summary">
+
+    <div class="quantity-card">
+
+      <span class="quantity-label">
+        Total solicitado
+      </span>
+
+      <strong>
+        {{ getTotalSolicitado() }}
+      </strong>
+
+    </div>
+
+
+    <div class="quantity-card">
+
+      <span class="quantity-label">
+        Total recibido
+      </span>
+
+      <strong class="text-blue">
+        {{ getTotalRecibido() }}
+      </strong>
+
+    </div>
+
+
+    <div class="quantity-card">
+
+      <span class="quantity-label">
+        Faltantes
+      </span>
+
+      <strong class="text-warning">
+        {{ getTotalFaltantes() }}
+      </strong>
+
+    </div>
+
+
+    <div class="quantity-card">
+
+      <span class="quantity-label">
+        Sobrantes
+      </span>
+
+      <strong class="text-purple">
+        {{ getTotalSobrantes() }}
+      </strong>
+
+    </div>
+
+
+    <div class="quantity-card">
+
+      <span class="quantity-label">
+        Dañadas
+      </span>
+
+      <strong class="text-danger">
+        {{ getTotalDanados() }}
+      </strong>
+
+    </div>
+
+  </section>
+
+
+  <!-- RESUMEN ECONÓMICO -->
+  <section class="financial-card">
+
+    <div class="financial-header">
+
+      <div>
+
+        <h2>Resumen económico</h2>
+
+        <p>
+          Valores calculados según las cantidades solicitadas, recibidas y dañadas.
+        </p>
+
+      </div>
+
+      <div class="financial-icon">
+        $
+      </div>
+
+    </div>
+
+
+    <div class="financial-grid">
+
+      <div class="financial-item">
+
+        <span>
+          Total esperado
+        </span>
+
+        <strong>
+          ${{ getTotalEsperado() | number }}
+        </strong>
+
+        <small>
+          Valor de las unidades solicitadas
+        </small>
+
+      </div>
+
+
+      <div class="financial-item">
+
+        <span>
+          Valor faltante
+        </span>
+
+        <strong class="text-warning">
+          ${{ getValorFaltante() | number }}
+        </strong>
+
+        <small>
+          Unidades que no llegaron
+        </small>
+
+      </div>
+
+
+      <div class="financial-item">
+
+        <span>
+          Valor dañado
+        </span>
+
+        <strong class="text-danger">
+          ${{ getValorDanado() | number }}
+        </strong>
+
+        <small>
+          Unidades recibidas con daño
+        </small>
+
+      </div>
+
+
+      <div class="financial-item">
+
+        <span>
+          Costo utilizable
+        </span>
+
+        <strong class="text-success">
+          ${{ getCostoUtilizable() | number }}
+        </strong>
+
+        <small>
+          Unidades recibidas en buen estado
+        </small>
+
+      </div>
+
+    </div>
+
+  </section>
+
+
+  <!-- OBSERVACIONES -->
+  <section class="observations-card">
+
+    <div class="observations-header">
+
+      <div>
+
+        <h2>Observaciones</h2>
+
+        <p>
+          Registra cualquier novedad encontrada durante la recepción.
+        </p>
+
+      </div>
+
+    </div>
+
+
+    <textarea
+      rows="4"
+      placeholder="Ejemplo: Llegaron 2 unidades con detalles en la pintura...">
+    </textarea>
+
+  </section>
+
+
+  <!-- ACCIONES -->
+  <div class="page-actions">
+
+    <button
+      type="button"
+      class="btn-secondary"
+      (click)="volver()">
+
+      Cancelar
+
+    </button>
+
+
+    <button
+      type="button"
+      class="btn-primary"
+      (click)="registrarRecepcion()">
+
+      Registrar recepción
+
+    </button>
+
+  </div>
+
+</div>

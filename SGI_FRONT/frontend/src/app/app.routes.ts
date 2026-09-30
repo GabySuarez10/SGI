@@ -3,6 +3,7 @@ import { Layout } from './layout/layout/layout';
 import { Dashboard } from './pages/dashboard/dashboard';
 import { PedidosProveedor } from './pages/pedidos-proveedor/pedidos-proveedor';
 import { NuevoPedido } from './pages/nuevo-pedido/nuevo-pedido';
+import { DetallePedido } from './pages/detalle-pedido/detalle-pedido';
 
 export const routes: Routes = [
   {
@@ -20,6 +21,10 @@ export const routes: Routes = [
       {
         path: 'nuevo-pedido',
         component: NuevoPedido
+      },
+      {
+  path: 'detalle-pedido',
+  component: DetallePedido
       }
     ]
   }
