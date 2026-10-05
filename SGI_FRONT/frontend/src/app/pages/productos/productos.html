@@ -1,0 +1,203 @@
+<div class="productos-page">
+
+  <!-- ENCABEZADO -->
+  <div class="page-header">
+
+    <div>
+      <span class="page-label">Catálogo</span>
+
+      <h1>Productos</h1>
+
+      <p>
+        Consulta y administra los productos disponibles en Pintarte.
+      </p>
+    </div>
+
+   <button
+  type="button"
+  class="btn-primary"
+  routerLink="/nuevo-producto">
+
+      <span class="btn-icon">+</span>
+
+      Nuevo producto
+
+    </button>
+
+  </div>
+
+
+  <!-- FILTROS -->
+  <section class="filters-card">
+
+    <div class="search-box">
+
+      <span class="search-icon">⌕</span>
+
+      <input
+        type="text"
+        [(ngModel)]="busqueda"
+        placeholder="Buscar por nombre o código...">
+
+    </div>
+
+
+    <div class="filter-select">
+
+      <select [(ngModel)]="proveedorSeleccionado">
+
+        <option value="">
+          Todos los proveedores
+        </option>
+
+        <option
+          *ngFor="let proveedor of proveedores"
+          [value]="proveedor">
+
+          {{ proveedor }}
+
+        </option>
+
+      </select>
+
+    </div>
+
+
+    <button
+      *ngIf="busqueda || proveedorSeleccionado"
+      type="button"
+      class="clear-button"
+      (click)="limpiarFiltros()">
+
+      Limpiar filtros
+
+    </button>
+
+  </section>
+
+
+  <!-- RESULTADOS -->
+  <div class="results-header">
+
+    <div>
+      <strong>
+        {{ productosFiltrados.length }}
+      </strong>
+
+      <span>
+        productos encontrados
+      </span>
+    </div>
+
+  </div>
+
+
+  <!-- PRODUCTOS -->
+  <section class="products-grid">
+
+    <article
+      class="product-card"
+      *ngFor="let producto of productosFiltrados">
+
+      <!-- IMAGEN -->
+      <div class="product-image">
+
+        <img
+          [src]="producto.imagen"
+          [alt]="producto.nombre">
+
+        <span class="product-code">
+          {{ producto.codigo }}
+        </span>
+
+      </div>
+
+
+      <!-- INFORMACIÓN -->
+      <div class="product-content">
+
+        <span class="product-provider">
+          {{ producto.proveedor }}
+        </span>
+
+        <h2>
+          {{ producto.nombre }}
+        </h2>
+
+        <p>
+          {{ producto.descripcion }}
+        </p>
+
+
+        <div class="product-meta">
+
+          <div>
+            <span>Tamaño</span>
+           <strong>{{ producto['tamaño'] }}</strong>
+          </div>
+
+          <div>
+            <span>Referencia</span>
+            <strong>{{ producto.codigo }}</strong>
+          </div>
+
+        </div>
+
+
+        <!-- ACCIONES -->
+        <div class="product-actions">
+
+          <button
+            type="button"
+            class="btn-edit"
+            (click)="editarProducto(producto)">
+
+            Editar
+
+          </button>
+
+          <button
+            type="button"
+            class="btn-more"
+            aria-label="Más opciones">
+
+            ⋮
+
+          </button>
+
+        </div>
+
+      </div>
+
+    </article>
+
+
+    <!-- SIN RESULTADOS -->
+    <div
+      class="empty-state"
+      *ngIf="productosFiltrados.length === 0">
+
+      <div class="empty-icon">
+        ⌕
+      </div>
+
+      <h2>No encontramos productos</h2>
+
+      <p>
+        Intenta cambiar la búsqueda o los filtros.
+      </p>
+
+      <button
+        type="button"
+        class="btn-secondary"
+        (click)="limpiarFiltros()">
+
+        Limpiar filtros
+
+      </button>
+
+    </div>
+
+  </section>
+
+</div>

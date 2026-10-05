@@ -1,0 +1,132 @@
+<div class="nuevo-proveedor-page">
+
+  <div class="page-header">
+
+    <div class="header-left">
+
+      <button
+        class="back-button"
+        type="button"
+        (click)="cancelar()">
+        ←
+      </button>
+
+      <div>
+        <h1>Nuevo proveedor</h1>
+        <p>Registra una persona o empresa que suministre productos a Pintarte.</p>
+      </div>
+
+    </div>
+
+  </div>
+
+
+  <div class="form-card">
+
+    <div class="card-header">
+      <h2>Información del proveedor</h2>
+      <p>Completa los datos principales para registrar el proveedor.</p>
+    </div>
+
+
+    <div class="form-grid">
+
+      <div class="form-group">
+
+        <label for="nombre">
+          Nombre del proveedor <span>*</span>
+        </label>
+
+        <input
+          id="nombre"
+          type="text"
+          [(ngModel)]="nombre"
+          placeholder="Ej. Freddy Bogotá">
+
+      </div>
+
+
+      <div class="form-group">
+
+        <label for="telefono">
+          Teléfono <span>*</span>
+        </label>
+
+        <input
+          id="telefono"
+          type="tel"
+          [(ngModel)]="telefono"
+          placeholder="Ej. 300 123 4567">
+
+      </div>
+
+
+      <div class="form-group">
+
+        <label for="ciudad">
+          Ciudad <span>*</span>
+        </label>
+
+        <input
+          id="ciudad"
+          type="text"
+          [(ngModel)]="ciudad"
+          placeholder="Ej. Bogotá">
+
+      </div>
+
+
+      <div class="form-group">
+
+        <label for="direccion">
+          Dirección
+        </label>
+
+        <input
+          id="direccion"
+          type="text"
+          [(ngModel)]="direccion"
+          placeholder="Ej. Calle 80 # 20-15">
+
+      </div>
+
+
+      <div class="form-group full-width">
+
+        <label for="descripcion">
+          Descripción
+        </label>
+
+        <textarea
+          id="descripcion"
+          [(ngModel)]="descripcion"
+          rows="5"
+          placeholder="Describe qué productos suministra este proveedor...">
+        </textarea>
+
+      </div>
+
+    </div>
+
+  </div>
+
+
+  <div class="actions">
+
+    <button
+      class="btn-secondary"
+      type="button"
+      (click)="cancelar()">
+      Cancelar
+    </button>
+
+    <button
+      class="btn-primary"
+      type="button"
+      (click)="guardarProveedor()">
+      Guardar proveedor
+    </button>
+
+  </div>
+
+</div>

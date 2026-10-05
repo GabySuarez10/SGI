@@ -1,0 +1,350 @@
+<div class="nuevo-producto-page">
+
+  <!-- ENCABEZADO -->
+  <div class="page-header">
+
+    <div class="header-info">
+
+      <button
+        type="button"
+        class="back-button"
+        (click)="cancelar()"
+        aria-label="Volver">
+
+        ←
+
+      </button>
+
+      <div>
+
+        <span class="page-label">
+          Catálogo
+        </span>
+
+        <h1>Nuevo producto</h1>
+
+        <p>
+          Registra uno o varios productos en el catálogo de Pintarte.
+        </p>
+
+      </div>
+
+    </div>
+
+  </div>
+
+
+  <!-- PROVEEDOR -->
+  <section class="form-card">
+
+    <div class="section-heading">
+
+      <div>
+
+        <h2>Proveedor</h2>
+
+        <p>
+          Selecciona el proveedor de los productos que vas a registrar.
+        </p>
+
+      </div>
+
+    </div>
+
+
+    <div class="form-grid">
+
+      <div class="form-group">
+
+        <label for="proveedor">
+          Proveedor
+          <span>*</span>
+        </label>
+
+        <select
+          id="proveedor"
+          [(ngModel)]="proveedor">
+
+          <option value="">
+            Selecciona un proveedor
+          </option>
+
+          <option
+            *ngFor="let proveedorRegistrado of proveedores"
+            [value]="proveedorRegistrado">
+
+            {{ proveedorRegistrado }}
+
+          </option>
+
+        </select>
+
+      </div>
+
+    </div>
+
+  </section>
+
+
+  <!-- PRODUCTOS -->
+  <section class="form-card">
+
+    <div class="section-heading">
+
+      <div>
+
+        <h2>Productos</h2>
+
+        <p>
+          Agrega todos los productos nuevos que pertenezcan a este proveedor.
+        </p>
+
+      </div>
+
+    </div>
+
+
+    <!-- PRODUCTO INDIVIDUAL -->
+    <div
+      class="product-form"
+      *ngFor="let producto of productos; let i = index">
+
+
+      <!-- ENCABEZADO DEL PRODUCTO -->
+      <div class="product-form-header">
+
+        <div>
+
+          <span class="product-number">
+            Producto {{ i + 1 }}
+          </span>
+
+          <h3>
+            Información del producto
+          </h3>
+
+        </div>
+
+
+        <button
+          *ngIf="productos.length > 1"
+          type="button"
+          class="remove-product-button"
+          (click)="eliminarProducto(i)">
+
+          Eliminar
+
+        </button>
+
+      </div>
+
+
+      <!-- DATOS -->
+      <div class="form-grid">
+
+
+        <!-- NOMBRE -->
+        <div class="form-group">
+
+          <label [for]="'nombre-' + i">
+
+            Nombre del producto
+
+            <span>*</span>
+
+          </label>
+
+          <input
+            [id]="'nombre-' + i"
+            type="text"
+            [(ngModel)]="producto.nombre"
+            [name]="'nombre-' + i"
+            placeholder="Ej. Muñeco de nieve">
+
+        </div>
+
+
+        <!-- TAMAÑO -->
+        <div class="form-group">
+
+          <label [for]="'tamano-' + i">
+
+            Tamaño
+
+            <span>*</span>
+
+          </label>
+
+          <input
+            [id]="'tamano-' + i"
+            type="text"
+            [(ngModel)]="producto.tamano"
+            [name]="'tamano-' + i"
+            placeholder="Ej. 15 cm">
+
+        </div>
+
+
+        <!-- DESCRIPCIÓN -->
+        <div class="form-group form-group-full">
+
+          <label [for]="'descripcion-' + i">
+
+            Descripción
+
+          </label>
+
+          <textarea
+            [id]="'descripcion-' + i"
+            rows="4"
+            [(ngModel)]="producto.descripcion"
+            [name]="'descripcion-' + i"
+            placeholder="Describe brevemente el producto...">
+          </textarea>
+
+        </div>
+
+
+        <!-- IMAGEN -->
+        <div class="form-group form-group-full">
+
+          <label>
+            Imagen del producto
+          </label>
+
+
+          <div class="image-upload-area">
+
+
+            <!-- VISTA PREVIA -->
+            <div
+              class="image-preview"
+              [class.has-image]="producto.imagen">
+
+
+              <img
+                *ngIf="producto.imagen"
+                [src]="producto.imagen"
+                [alt]="producto.nombre || 'Vista previa del producto'">
+
+
+              <div
+                class="empty-image"
+                *ngIf="!producto.imagen">
+
+                <span class="image-icon">
+                  ▧
+                </span>
+
+                <strong>
+                  Sin imagen
+                </strong>
+
+                <span>
+                  Agrega una foto del producto
+                </span>
+
+              </div>
+
+            </div>
+
+
+            <!-- CARGAR -->
+            <div class="upload-content">
+
+              <h3>
+                Foto del producto
+              </h3>
+
+              <p>
+                Utiliza una imagen clara para reconocer fácilmente la figura.
+              </p>
+
+
+              <label class="upload-button">
+
+                Seleccionar imagen
+
+                <input
+                  type="file"
+                  accept="image/*"
+                  (change)="seleccionarImagen($event, i)">
+
+              </label>
+
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+
+
+    <!-- AGREGAR PRODUCTO -->
+    <button
+      type="button"
+      class="add-product-button"
+      (click)="agregarProducto()">
+
+      <span>
+        +
+      </span>
+
+      Agregar otro producto
+
+    </button>
+
+  </section>
+
+
+  <!-- REFERENCIA -->
+  <section class="reference-card">
+
+    <div class="reference-icon">
+      #
+    </div>
+
+    <div>
+
+      <strong>
+        Código de los productos
+      </strong>
+
+      <p>
+        El código de referencia podrá asignarse automáticamente
+        según el proveedor cuando guardemos los productos.
+      </p>
+
+    </div>
+
+  </section>
+
+
+  <!-- ACCIONES -->
+  <div class="page-actions">
+
+    <button
+      type="button"
+      class="btn-secondary"
+      (click)="cancelar()">
+
+      Cancelar
+
+    </button>
+
+
+    <button
+      type="button"
+      class="btn-primary"
+      (click)="guardarProductos()">
+
+      Guardar productos
+
+    </button>
+
+  </div>
+
+</div>

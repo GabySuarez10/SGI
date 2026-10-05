@@ -1,0 +1,217 @@
+<div class="bodega-page">
+
+  <div class="page-header">
+
+    <div>
+      <h1>Bodega</h1>
+      <p>Consulta y controla las existencias disponibles en bodega.</p>
+    </div>
+
+  </div>
+
+
+  <!-- Resumen -->
+
+  <div class="stats-grid">
+
+    <div class="stat-card">
+
+      <div class="stat-icon blue">
+        ▦
+      </div>
+
+      <div>
+        <span class="stat-label">Productos</span>
+        <strong>{{ totalProductos }}</strong>
+      </div>
+
+    </div>
+
+
+    <div class="stat-card">
+
+      <div class="stat-icon green">
+        #
+      </div>
+
+      <div>
+        <span class="stat-label">Unidades disponibles</span>
+        <strong>{{ totalUnidades }}</strong>
+      </div>
+
+    </div>
+
+
+    <div class="stat-card">
+
+      <div class="stat-icon warning">
+        !
+      </div>
+
+      <div>
+        <span class="stat-label">Stock bajo</span>
+        <strong>{{ productosStockBajo }}</strong>
+      </div>
+
+    </div>
+
+  </div>
+
+
+  <!-- Filtros -->
+
+  <div class="filters-card">
+
+    <div class="search-box">
+
+      <span class="search-icon">⌕</span>
+
+      <input
+        type="text"
+        [(ngModel)]="busqueda"
+        placeholder="Buscar por nombre o código...">
+
+    </div>
+
+
+    <select [(ngModel)]="proveedorSeleccionado">
+
+      <option value="">Todos los proveedores</option>
+
+      <option
+        *ngFor="let proveedor of proveedores"
+        [value]="proveedor">
+
+        {{ proveedor }}
+
+      </option>
+
+    </select>
+
+
+    <button
+      class="clear-button"
+      type="button"
+      (click)="limpiarFiltros()">
+
+      Limpiar
+
+    </button>
+
+  </div>
+
+
+  <!-- Productos -->
+
+  <div class="products-header">
+
+    <div>
+      <h2>Productos en bodega</h2>
+      <span>{{ productosFiltrados.length }} productos encontrados</span>
+    </div>
+
+  </div>
+
+
+  <div
+    class="products-grid"
+    *ngIf="productosFiltrados.length > 0">
+
+    <div
+      class="product-card"
+      *ngFor="let producto of productosFiltrados">
+
+      <div class="product-image">
+
+        <img
+          [src]="producto.imagen"
+          [alt]="producto.nombre">
+
+      </div>
+
+
+      <div class="product-content">
+
+        <div class="product-top">
+
+          <span class="product-code">
+            {{ producto.codigo }}
+          </span>
+
+          <span
+            class="stock-badge"
+            [class.low-stock]="producto.existencias <= 5">
+
+            {{ producto.existencias }} unidades
+
+          </span>
+
+        </div>
+
+
+        <h3>{{ producto.nombre }}</h3>
+
+        <p class="provider">
+          {{ producto.proveedor }}
+        </p>
+
+
+        <div class="product-details">
+
+          <div>
+            <span>Tamaño</span>
+            <strong>{{ producto['tamaño'] }}</strong>
+          </div>
+
+          <div>
+            <span>Disponibilidad</span>
+
+            <strong
+              [class.stock-low]="producto.existencias <= 5">
+
+              {{
+                producto.existencias <= 5
+                  ? 'Stock bajo'
+                  : 'Disponible'
+              }}
+
+            </strong>
+
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+
+
+  <!-- Sin resultados -->
+
+  <div
+    class="empty-state"
+    *ngIf="productosFiltrados.length === 0">
+
+    <div class="empty-icon">
+      ▦
+    </div>
+
+    <h3>No encontramos productos</h3>
+
+    <p>
+      Intenta cambiar la búsqueda o los filtros.
+    </p>
+
+    <button
+      type="button"
+      (click)="limpiarFiltros()">
+
+      Limpiar filtros
+
+    </button>
+
+  </div>
+
+</div>

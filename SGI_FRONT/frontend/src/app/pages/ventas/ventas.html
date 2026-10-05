@@ -1,0 +1,809 @@
+<div class="ventas-page">
+
+  <!-- ================================
+       ENCABEZADO
+  ================================= -->
+
+  <div class="page-header">
+    <div>
+      <h1>Ventas / Salidas</h1>
+      <p>
+        Registra la salida de productos y prepara los pedidos de clientes.
+      </p>
+    </div>
+  </div>
+
+
+  <!-- ================================
+       INFORMACIÓN DE LA VENTA
+  ================================= -->
+
+  <section class="info-card">
+
+    <div class="section-title">
+      <div>
+        <h2>Información de la venta</h2>
+        <p>
+          Define primero el tipo y la modalidad de esta salida.
+        </p>
+      </div>
+    </div>
+
+
+    <div class="form-grid">
+
+      <!-- CLIENTE -->
+      <div class="form-group">
+
+        <label for="cliente">
+          Cliente o destino
+        </label>
+
+        <input
+          id="cliente"
+          type="text"
+          [(ngModel)]="cliente"
+          placeholder="Ej. Centro Recreacional Calima"
+        />
+
+      </div>
+
+
+      <!-- FECHA -->
+      <div class="form-group">
+
+        <label for="fecha">
+          Fecha
+        </label>
+
+        <input
+          id="fecha"
+          type="date"
+          [(ngModel)]="fecha"
+        />
+
+      </div>
+
+
+      <!-- ================================
+           TIPO DE VENTA
+      ================================= -->
+
+      <div class="form-group full-width">
+
+        <label>
+          Tipo de venta
+        </label>
+
+        <div class="sale-type-options">
+
+          <!-- DISTRIBUCIÓN -->
+          <button
+            type="button"
+            class="sale-type-option"
+            [class.active]="tipoVenta === 'Distribución / Institucional'"
+            (click)="tipoVenta = 'Distribución / Institucional'"
+          >
+
+            <span class="sale-type-icon">
+              🏢
+            </span>
+
+            <span class="sale-type-content">
+
+              <strong>
+                Distribución / Institucional
+              </strong>
+
+              <small>
+                Pedidos para centros recreacionales y clientes institucionales.
+              </small>
+
+            </span>
+
+          </button>
+
+
+          <!-- VENTA NORMAL -->
+          <button
+            type="button"
+            class="sale-type-option"
+            [class.active]="tipoVenta === 'Venta normal'"
+            (click)="tipoVenta = 'Venta normal'"
+          >
+
+            <span class="sale-type-icon">
+              🏪
+            </span>
+
+            <span class="sale-type-content">
+
+              <strong>
+                Venta normal
+              </strong>
+
+              <small>
+                Venta de productos del local.
+              </small>
+
+            </span>
+
+          </button>
+
+
+          <!-- MAYORISTA -->
+          <button
+            type="button"
+            class="sale-type-option"
+            [class.active]="tipoVenta === 'Mayorista'"
+            (click)="tipoVenta = 'Mayorista'"
+          >
+
+            <span class="sale-type-icon">
+              📦
+            </span>
+
+            <span class="sale-type-content">
+
+              <strong>
+                Mayorista
+              </strong>
+
+              <small>
+                Venta por volumen con precio mayorista.
+              </small>
+
+            </span>
+
+          </button>
+
+        </div>
+
+      </div>
+
+
+      <!-- ================================
+           MODALIDAD
+      ================================= -->
+
+      <div class="form-group full-width">
+
+        <label>
+          Modalidad de venta
+        </label>
+
+        <div class="modality-options">
+
+          <!-- CRUDA -->
+          <button
+            type="button"
+            class="modality-option"
+            [class.active]="modalidad === 'Figura cruda'"
+            (click)="modalidad = 'Figura cruda'"
+          >
+
+            <span class="modality-icon">
+              🏺
+            </span>
+
+            <span>
+              <strong>
+                Figura cruda
+              </strong>
+
+              <small>
+                Figura sin pintar.
+              </small>
+            </span>
+
+          </button>
+
+
+          <!-- KIT -->
+          <button
+            type="button"
+            class="modality-option kit-option"
+            [class.active]="modalidad === 'Figura en kit'"
+            (click)="modalidad = 'Figura en kit'"
+          >
+
+            <span class="modality-icon">
+              🎨
+            </span>
+
+            <span>
+              <strong>
+                Figura en kit
+              </strong>
+
+              <small>
+                Figura + 5 pinturas + 1 pincel.
+              </small>
+            </span>
+
+          </button>
+
+
+          <!-- PINTADA -->
+          <button
+            type="button"
+            class="modality-option"
+            [class.active]="modalidad === 'Figura pintada'"
+            (click)="modalidad = 'Figura pintada'"
+          >
+
+            <span class="modality-icon">
+              🖌️
+            </span>
+
+            <span>
+              <strong>
+                Figura pintada
+              </strong>
+
+              <small>
+                Figura terminada. No descuenta materiales.
+              </small>
+            </span>
+
+          </button>
+
+        </div>
+
+      </div>
+
+
+      <!-- ================================
+           INFORMACIÓN DEL KIT
+      ================================= -->
+
+      <div
+        class="kit-notice full-width"
+        *ngIf="modalidad === 'Figura en kit'"
+      >
+
+        <span class="notice-icon">
+          🎨
+        </span>
+
+        <div>
+
+          <strong>
+            Venta en modalidad de kit
+          </strong>
+
+          <p>
+            Cada figura seleccionada consumirá
+            <strong>5 pinturas y 1 pincel</strong>.
+          </p>
+
+          <p
+            *ngIf="tipoVenta === 'Distribución / Institucional'"
+          >
+            Precio de distribución:
+            <strong>
+              ${{ precioKitDistribucion.toLocaleString('es-CO') }}
+              por figura.
+            </strong>
+          </p>
+
+        </div>
+
+      </div>
+
+
+      <!-- ================================
+           OBSERVACIÓN
+      ================================= -->
+
+      <div class="form-group full-width">
+
+        <label for="observacion">
+          Observación
+        </label>
+
+        <textarea
+          id="observacion"
+          [(ngModel)]="observacion"
+          rows="3"
+          placeholder="Observaciones sobre la salida..."
+        ></textarea>
+
+      </div>
+
+    </div>
+
+  </section>
+
+
+
+  <!-- ================================
+       PRODUCTOS
+  ================================= -->
+
+  <section class="products-section">
+
+    <div class="section-header">
+
+      <div>
+
+        <h2>
+          Seleccionar productos
+        </h2>
+
+        <p>
+          Selecciona las figuras y cantidades que harán parte de esta salida.
+        </p>
+
+      </div>
+
+
+      <!-- BUSCADOR -->
+      <div class="search-box">
+
+        <span>
+          ⌕
+        </span>
+
+        <input
+          type="text"
+          [(ngModel)]="busqueda"
+          placeholder="Buscar producto o código..."
+        />
+
+      </div>
+
+    </div>
+
+
+    <!-- ================================
+         RESUMEN DE CONFIGURACIÓN
+    ================================= -->
+
+    <div class="sale-config-summary">
+
+      <div>
+
+        <span>
+          Tipo de venta
+        </span>
+
+        <strong>
+          {{ tipoVenta }}
+        </strong>
+
+      </div>
+
+
+      <div>
+
+        <span>
+          Modalidad
+        </span>
+
+        <strong>
+          {{ modalidad }}
+        </strong>
+
+      </div>
+
+
+      <div
+        *ngIf="modalidad === 'Figura en kit'"
+      >
+
+        <span>
+          Materiales por figura
+        </span>
+
+        <strong>
+          5 pinturas + 1 pincel
+        </strong>
+
+      </div>
+
+    </div>
+
+
+
+    <!-- ================================
+         GRID DE PRODUCTOS
+    ================================= -->
+
+    <div class="products-grid">
+
+      <div
+        class="product-card"
+        *ngFor="let producto of productosFiltrados"
+        [class.selected]="producto.cantidad > 0"
+      >
+
+        <!-- IMAGEN -->
+
+        <div class="product-image">
+
+          <img
+            [src]="producto.imagen"
+            [alt]="producto.nombre"
+          />
+
+
+          <span
+            class="selected-badge"
+            *ngIf="producto.cantidad > 0"
+          >
+            ✓ Seleccionado
+          </span>
+
+        </div>
+
+
+        <!-- CONTENIDO -->
+
+        <div class="product-content">
+
+          <div class="product-code">
+            {{ producto.codigo }}
+          </div>
+
+          <h3>
+            {{ producto.nombre }}
+          </h3>
+
+          <p class="available">
+            Disponible:
+            <strong>
+              {{ producto.existencias }}
+            </strong>
+          </p>
+
+
+          <!-- CANTIDAD -->
+
+          <div class="quantity-section">
+
+            <span class="quantity-label">
+              Cantidad
+            </span>
+
+            <div class="quantity-control">
+
+              <button
+                type="button"
+                (click)="disminuirCantidad(producto)"
+                [disabled]="producto.cantidad === 0"
+              >
+                −
+              </button>
+
+              <span>
+                {{ producto.cantidad }}
+              </span>
+
+              <button
+                type="button"
+                (click)="aumentarCantidad(producto)"
+                [disabled]="producto.cantidad >= producto.existencias"
+              >
+                +
+              </button>
+
+            </div>
+
+          </div>
+
+
+          <!-- ================================
+               PRECIO
+          ================================= -->
+
+          <div
+            class="product-price"
+            *ngIf="producto.cantidad > 0"
+          >
+
+            <div>
+
+              <span>
+                Precio unitario
+              </span>
+
+              <strong>
+                ${{ getPrecio(producto).toLocaleString('es-CO') }}
+              </strong>
+
+            </div>
+
+
+            <div>
+
+              <span>
+                Subtotal
+              </span>
+
+              <strong class="subtotal">
+                ${{ getSubtotal(producto).toLocaleString('es-CO') }}
+              </strong>
+
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+
+
+    <!-- SIN RESULTADOS -->
+
+    <div
+      class="empty-state"
+      *ngIf="productosFiltrados.length === 0"
+    >
+
+      <div class="empty-icon">
+        🔎
+      </div>
+
+      <h3>
+        No encontramos productos
+      </h3>
+
+      <p>
+        Intenta buscar con otro nombre o código.
+      </p>
+
+    </div>
+
+  </section>
+
+
+
+  <!-- ================================
+       RESUMEN FINAL
+  ================================= -->
+
+  <section
+    class="summary-card"
+    *ngIf="productosSeleccionados.length > 0"
+  >
+
+    <div class="summary-header">
+
+      <div>
+
+        <h2>
+          Resumen de la salida
+        </h2>
+
+        <p>
+          {{ productosSeleccionados.length }}
+          {{
+            productosSeleccionados.length === 1
+              ? 'producto seleccionado'
+              : 'productos seleccionados'
+          }}
+        </p>
+
+      </div>
+
+
+      <div class="summary-total">
+
+        <span>
+          Total
+        </span>
+
+        <strong>
+          ${{ totalVenta.toLocaleString('es-CO') }}
+        </strong>
+
+      </div>
+
+    </div>
+
+
+
+    <!-- PRODUCTOS SELECCIONADOS -->
+
+    <div class="summary-products">
+
+      <div
+        class="summary-product"
+        *ngFor="let producto of productosSeleccionados"
+      >
+
+        <div class="summary-product-info">
+
+          <img
+            [src]="producto.imagen"
+            [alt]="producto.nombre"
+          />
+
+          <div>
+
+            <strong>
+              {{ producto.nombre }}
+            </strong>
+
+            <span>
+              {{ producto.cantidad }} unidades
+            </span>
+
+          </div>
+
+        </div>
+
+
+        <strong>
+          ${{ getSubtotal(producto).toLocaleString('es-CO') }}
+        </strong>
+
+      </div>
+
+    </div>
+
+
+
+    <!-- ================================
+         MATERIALES
+    ================================= -->
+
+    <div
+      class="materials-summary"
+      *ngIf="modalidad === 'Figura en kit'"
+    >
+
+      <!-- PINTURAS -->
+
+      <div class="material-item">
+
+        <span class="material-icon">
+          🎨
+        </span>
+
+        <div>
+
+          <strong>
+            Pinturas
+          </strong>
+
+          <span>
+            {{ pinturasNecesarias }} utilizadas
+          </span>
+
+        </div>
+
+        <span
+          class="stock-status"
+          [class.warning]="pinturasNecesarias > pinturasDisponibles"
+        >
+
+          {{ pinturasDisponibles }}
+          disponibles
+
+        </span>
+
+      </div>
+
+
+      <!-- PINCELES -->
+
+      <div class="material-item">
+
+        <span class="material-icon">
+          🖌️
+        </span>
+
+        <div>
+
+          <strong>
+            Pinceles
+          </strong>
+
+          <span>
+            {{ pincelesNecesarios }} utilizados
+          </span>
+
+        </div>
+
+        <span
+          class="stock-status"
+          [class.warning]="pincelesNecesarios > pincelesDisponibles"
+        >
+
+          {{ pincelesDisponibles }}
+          disponibles
+
+        </span>
+
+      </div>
+
+    </div>
+
+
+
+    <!-- ================================
+         TOTALES
+    ================================= -->
+
+    <div class="totals-row">
+
+      <div>
+
+        <span>
+          Total de unidades
+        </span>
+
+        <strong>
+          {{ totalUnidades }}
+        </strong>
+
+      </div>
+
+
+      <div>
+
+        <span>
+          Modalidad
+        </span>
+
+        <strong>
+          {{ modalidad }}
+        </strong>
+
+      </div>
+
+
+      <div
+        *ngIf="modalidad === 'Figura en kit'"
+      >
+
+        <span>
+          Pinturas
+        </span>
+
+        <strong>
+          {{ pinturasNecesarias }}
+        </strong>
+
+      </div>
+
+
+      <div
+        *ngIf="modalidad === 'Figura en kit'"
+      >
+
+        <span>
+          Pinceles
+        </span>
+
+        <strong>
+          {{ pincelesNecesarios }}
+        </strong>
+
+      </div>
+
+    </div>
+
+
+
+    <!-- BOTÓN -->
+
+    <div class="summary-actions">
+
+      <button
+        type="button"
+        class="register-button"
+        (click)="registrarSalida()"
+      >
+        Registrar salida
+      </button>
+
+    </div>
+
+  </section>
+
+</div>

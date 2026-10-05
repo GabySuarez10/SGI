@@ -1,0 +1,178 @@
+<div class="editar-producto-page">
+
+  <div class="page-header">
+
+    <div>
+      <h1>Editar producto</h1>
+      <p>
+        Actualiza la información del producto.
+      </p>
+    </div>
+
+    <button
+      type="button"
+      class="back-button"
+      (click)="cancelar()"
+    >
+      ← Volver
+    </button>
+
+  </div>
+
+
+  <section class="form-card">
+
+    <div class="form-card-header">
+
+      <div>
+        <h2>Información del producto</h2>
+        <p>
+          Modifica los datos que necesites.
+        </p>
+      </div>
+
+      <span class="product-code">
+        {{ producto.codigo }}
+      </span>
+
+    </div>
+
+
+    <div class="form-content">
+
+      <div class="image-section">
+
+        <div class="image-preview">
+
+          <img
+            [src]="producto.imagen"
+            [alt]="producto.nombre"
+          />
+
+        </div>
+
+        <label
+          for="imagen"
+          class="image-button"
+        >
+          Cambiar imagen
+        </label>
+
+        <input
+          id="imagen"
+          type="file"
+          accept="image/*"
+          (change)="cambiarImagen($event)"
+          hidden
+        />
+
+        <p>
+          Imagen representativa del producto.
+        </p>
+
+      </div>
+
+
+      <div class="fields-section">
+
+        <div class="form-group">
+
+          <label for="nombre">
+            Nombre del producto *
+          </label>
+
+          <input
+            id="nombre"
+            type="text"
+            [(ngModel)]="producto.nombre"
+            placeholder="Ej. Muñeco de nieve"
+          />
+
+        </div>
+
+
+        <div class="form-group">
+
+          <label for="proveedor">
+            Proveedor *
+          </label>
+
+          <select
+            id="proveedor"
+            [(ngModel)]="producto.proveedor"
+          >
+            <option value="Freddy Bogotá">
+              Freddy Bogotá
+            </option>
+
+            <option value="Diego Cali">
+              Diego Cali
+            </option>
+
+            <option value="Proveedor X">
+              Proveedor X
+            </option>
+          </select>
+
+        </div>
+
+
+        <div class="form-group">
+
+          <label for="tamaño">
+            Tamaño *
+          </label>
+
+          <input
+            id="tamaño"
+            type="text"
+            [(ngModel)]="producto['tamaño']"
+            placeholder="Ej. 15 cm"
+          />
+
+        </div>
+
+
+        <div class="form-group full-width">
+
+          <label for="descripcion">
+            Descripción
+          </label>
+
+          <textarea
+            id="descripcion"
+            rows="5"
+            [(ngModel)]="producto.descripcion"
+            placeholder="Describe el producto..."
+          ></textarea>
+
+        </div>
+
+      </div>
+
+    </div>
+
+
+    <div class="form-actions">
+
+      <button
+        type="button"
+        class="cancel-button"
+        (click)="cancelar()"
+      >
+        Cancelar
+      </button>
+
+      <button
+        type="button"
+        class="save-button"
+        (click)="guardarCambios()"
+      >
+        Guardar cambios
+      </button>
+
+    </div>
+
+  </section>
+
+</div>

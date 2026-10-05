@@ -1,0 +1,204 @@
+<div class="traslados-page">
+
+  <div class="page-header">
+
+    <div>
+      <h1>Traslados</h1>
+      <p>Traslada productos de bodega al inventario del local.</p>
+    </div>
+
+  </div>
+
+
+  <!-- Información del traslado -->
+
+  <div class="info-card">
+
+    <div class="info-icon">
+      ⇄
+    </div>
+
+    <div>
+      <strong>Bodega → Local</strong>
+      <span>
+        Selecciona los productos y las cantidades que deseas trasladar.
+      </span>
+    </div>
+
+  </div>
+
+
+  <!-- Búsqueda -->
+
+  <div class="search-card">
+
+    <div class="search-box">
+
+      <span>⌕</span>
+
+      <input
+        type="text"
+        [(ngModel)]="busqueda"
+        placeholder="Buscar producto por nombre o código...">
+
+    </div>
+
+  </div>
+
+
+  <!-- Productos -->
+
+  <div class="section-header">
+
+    <div>
+      <h2>Productos disponibles</h2>
+      <p>
+        {{ productosFiltrados.length }} productos encontrados
+      </p>
+    </div>
+
+  </div>
+
+
+  <div
+    class="products-grid"
+    *ngIf="productosFiltrados.length > 0">
+
+    <div
+      class="product-card"
+      *ngFor="let producto of productosFiltrados"
+      [class.selected]="producto.cantidadTraslado > 0">
+
+      <div class="product-image">
+
+        <img
+          [src]="producto.imagen"
+          [alt]="producto.nombre">
+
+      </div>
+
+
+      <div class="product-content">
+
+        <div class="product-top">
+
+          <span class="product-code">
+            {{ producto.codigo }}
+          </span>
+
+          <span class="available">
+            {{ producto.existencias }} disponibles
+          </span>
+
+        </div>
+
+
+        <h3>{{ producto.nombre }}</h3>
+
+        <p class="provider">
+          {{ producto.proveedor }}
+        </p>
+
+
+        <div class="quantity-section">
+
+          <span>Cantidad a trasladar</span>
+
+          <div class="quantity-control">
+
+            <button
+              type="button"
+              (click)="disminuir(producto)">
+              −
+            </button>
+
+            <strong>
+              {{ producto.cantidadTraslado }}
+            </strong>
+
+            <button
+              type="button"
+              (click)="aumentar(producto)">
+              +
+            </button>
+
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+
+
+  <!-- Sin resultados -->
+
+  <div
+    class="empty-state"
+    *ngIf="productosFiltrados.length === 0">
+
+    <div class="empty-icon">
+      ⌕
+    </div>
+
+    <h3>No encontramos productos</h3>
+
+    <p>
+      Intenta buscar por otro nombre o código.
+    </p>
+
+  </div>
+
+
+  <!-- Resumen -->
+
+  <div
+    class="selection-footer"
+    *ngIf="productosSeleccionados.length > 0">
+
+    <div class="selection-info">
+
+      <div class="selection-icon">
+        ✓
+      </div>
+
+      <div>
+        <strong>
+          {{ productosSeleccionados.length }} productos seleccionados
+        </strong>
+
+        <span>
+          {{ totalUnidades }} unidades serán trasladadas al local
+        </span>
+      </div>
+
+    </div>
+
+
+    <div class="selection-actions">
+
+      <button
+        type="button"
+        class="btn-secondary"
+        (click)="limpiar()">
+
+        Limpiar
+
+      </button>
+
+      <button
+        type="button"
+        class="btn-primary"
+        (click)="registrarTraslado()">
+
+        Registrar traslado
+
+      </button>
+
+    </div>
+
+  </div>
+
+</div>

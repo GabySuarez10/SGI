@@ -134,21 +134,53 @@ export class DetallePedido {
 
   registrarRecepcion() {
 
-    const recepcionValida = this.productos.every(
-      producto =>
-        producto.recibido >= 0 &&
-        producto.danado >= 0 &&
-        producto.danado <= producto.recibido
+  const recepcionValida = this.productos.every(
+    producto =>
+      producto.recibido >= 0 &&
+      producto.danado >= 0 &&
+      producto.danado <= producto.recibido
+  );
+
+  if (!recepcionValida) {
+    alert(
+      'La cantidad dañada no puede ser mayor que la cantidad recibida.'
     );
-
-    if (!recepcionValida) {
-      alert(
-        'La cantidad dañada no puede ser mayor que la cantidad recibida.'
-      );
-      return;
-    }
-
-    alert('Recepción registrada correctamente.');
+    return;
   }
+
+  const unidadesUtilizables = this.productos.reduce(
+    (total, producto) => {
+      return total + Math.max(
+        producto.recibido - producto.danado,
+        0
+      );
+    },
+    0
+  );
+
+  const faltantes = this.getTotalFaltantes();
+  const sobrantes = this.getTotalSobrantes();
+  const danados = this.getTotalDanados();
+
+  let mensaje = 'Recepción registrada correctamente.\n\n';
+
+  mensaje += `Unidades que ingresan a Bodega: ${unidadesUtilizables}\n`;
+
+  if (faltantes > 0) {
+    mensaje += `Faltantes: ${faltantes}\n`;
+  }
+
+  if (sobrantes > 0) {
+    mensaje += `Sobrantes: ${sobrantes}\n`;
+  }
+
+  if (danados > 0) {
+    mensaje += `Dañadas: ${danados}\n`;
+  }
+
+  alert(mensaje);
+
+  this.router.navigate(['/pedidos-proveedor']);
+}
 
 }

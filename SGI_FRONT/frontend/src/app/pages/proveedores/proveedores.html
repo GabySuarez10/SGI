@@ -1,0 +1,197 @@
+<div class="proveedores-page">
+
+  <!-- ENCABEZADO -->
+  <div class="page-header">
+
+    <div>
+
+      <span class="page-label">
+        Gestión
+      </span>
+
+      <h1>Proveedores</h1>
+
+      <p>
+        Administra las empresas y personas que suministran productos a Pintarte.
+      </p>
+
+    </div>
+
+    <button
+      type="button"
+      class="btn-primary"
+      routerLink="/nuevo-proveedor">
+
+      <span class="btn-icon">+</span>
+
+      Nuevo proveedor
+
+    </button>
+
+  </div>
+
+
+  <!-- BÚSQUEDA -->
+  <section class="search-card">
+
+    <div class="search-box">
+
+      <span class="search-icon">⌕</span>
+
+      <input
+        type="text"
+        [(ngModel)]="busqueda"
+        placeholder="Buscar por nombre, ciudad o teléfono...">
+
+    </div>
+
+    <button
+      *ngIf="busqueda"
+      type="button"
+      class="clear-button"
+      (click)="limpiarBusqueda()">
+
+      Limpiar
+
+    </button>
+
+  </section>
+
+
+  <!-- RESULTADOS -->
+  <div class="results-header">
+
+    <div>
+
+      <strong>
+        {{ proveedoresFiltrados.length }}
+      </strong>
+
+      <span>
+        proveedores
+      </span>
+
+    </div>
+
+  </div>
+
+
+  <!-- TARJETAS -->
+  <section class="providers-grid">
+
+    <article
+      class="provider-card"
+      *ngFor="let proveedor of proveedoresFiltrados">
+
+      <div class="provider-header">
+
+        <div class="provider-avatar">
+          {{ proveedor.nombre.charAt(0) }}
+        </div>
+
+        <button
+          type="button"
+          class="more-button"
+          aria-label="Más opciones">
+
+          ⋮
+
+        </button>
+
+      </div>
+
+
+      <div class="provider-content">
+
+        <h2>
+          {{ proveedor.nombre }}
+        </h2>
+
+        <p class="provider-description">
+          {{ proveedor.descripcion }}
+        </p>
+
+
+        <div class="provider-details">
+
+          <div class="detail-item">
+
+            <span class="detail-icon">☎</span>
+
+            <div>
+              <span>Teléfono</span>
+              <strong>{{ proveedor.telefono }}</strong>
+            </div>
+
+          </div>
+
+
+          <div class="detail-item">
+
+            <span class="detail-icon">⌖</span>
+
+            <div>
+              <span>Ciudad</span>
+              <strong>{{ proveedor.ciudad }}</strong>
+            </div>
+
+          </div>
+
+
+          <div class="detail-item">
+
+            <span class="detail-icon">⌂</span>
+
+            <div>
+              <span>Dirección</span>
+              <strong>{{ proveedor.direccion }}</strong>
+            </div>
+
+          </div>
+
+        </div>
+
+
+        <button
+          type="button"
+          class="edit-button"
+          (click)="editarProveedor(proveedor)">
+
+          Editar proveedor
+
+        </button>
+
+      </div>
+
+    </article>
+
+
+    <!-- SIN RESULTADOS -->
+    <div
+      class="empty-state"
+      *ngIf="proveedoresFiltrados.length === 0">
+
+      <div class="empty-icon">
+        ⌕
+      </div>
+
+      <h2>No encontramos proveedores</h2>
+
+      <p>
+        Intenta buscar con otro nombre, ciudad o teléfono.
+      </p>
+
+      <button
+        type="button"
+        class="btn-secondary"
+        (click)="limpiarBusqueda()">
+
+        Limpiar búsqueda
+
+      </button>
+
+    </div>
+
+  </section>
+
+</div>
