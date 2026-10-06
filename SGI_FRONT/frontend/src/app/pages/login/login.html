@@ -1,0 +1,113 @@
+<div class="login-page">
+
+  <div class="login-container">
+
+    <!-- MARCA -->
+    <div class="brand">
+
+      <div class="brand-icon">
+        SGI
+      </div>
+
+      <div>
+        <h1>SGI</h1>
+        <span>Sistema de Gestión de Inventario</span>
+      </div>
+
+    </div>
+
+
+    <!-- TARJETA -->
+    <div class="login-card">
+
+      <div class="card-header">
+        <h2>Bienvenido</h2>
+
+        <p>
+          Ingresa a tu cuenta para continuar.
+        </p>
+      </div>
+
+
+      <!-- USUARIO -->
+      <div class="form-group">
+
+        <label for="usuario">
+          Usuario o correo
+        </label>
+
+        <input
+          id="usuario"
+          type="text"
+          [(ngModel)]="usuario"
+          placeholder="Ingresa tu usuario"
+          autocomplete="username"
+        >
+
+      </div>
+
+
+      <div class="form-group">
+
+  <label for="contrasena">
+    Contraseña
+  </label>
+
+  <div class="password-wrapper">
+
+    <input
+      id="contrasena"
+      [type]="mostrarContrasena ? 'text' : 'password'"
+      [(ngModel)]="contrasena"
+      placeholder="Ingresa tu contraseña"
+      autocomplete="current-password"
+    >
+
+    <button
+      type="button"
+      class="password-button"
+      (click)="alternarContrasena()"
+      [attr.aria-label]="mostrarContrasena ? 'Ocultar contraseña' : 'Mostrar contraseña'">
+
+      {{ mostrarContrasena ? 'Ocultar' : 'Mostrar' }}
+
+    </button>
+
+  </div>
+
+</div>
+
+
+      <!-- INGRESAR -->
+      <button
+        type="button"
+        class="login-button"
+        (click)="iniciarSesion()">
+
+        Iniciar sesión
+
+      </button>
+
+
+      <!-- REGISTRO -->
+      <div class="register-link">
+
+        <span>¿No tienes una cuenta?</span>
+
+        <a routerLink="/registro">
+          Crear cuenta
+        </a>
+
+      </div>
+
+    </div>
+
+
+    <!-- PIE -->
+    <p class="login-footer">
+      SGI · Sistema de Gestión de Inventario
+    </p>
+
+  </div>
+
+</div>

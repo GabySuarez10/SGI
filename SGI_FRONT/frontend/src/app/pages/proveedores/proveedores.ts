@@ -65,10 +65,10 @@ export class Proveedores {
   nuevoProveedor() {
     alert('Aquí crearemos el formulario para registrar un proveedor.');
   }
-
-  editarProveedor(proveedor: Proveedor) {
-    alert(`Editar proveedor: ${proveedor.nombre}`);
-  }
+editarProveedor(proveedor: Proveedor): void {
+  console.log('Proveedor seleccionado:', proveedor);
+  this.router.navigate(['/editar-proveedor', proveedor.nombre]);
+}
 
   limpiarBusqueda() {
     this.busqueda = '';

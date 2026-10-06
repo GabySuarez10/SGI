@@ -1,1 +1,194 @@
-<p>historial works!</p>
+<div class="historial-page">
+
+  <!-- ENCABEZADO -->
+  <div class="page-header">
+    <div>
+      <span class="page-label">Consultas</span>
+      <h1>Historial</h1>
+      <p>Consulta las operaciones y movimientos realizados en Pintarte.</p>
+    </div>
+  </div>
+
+
+  <!-- FILTROS -->
+  <section class="filters-card">
+
+    <div class="filter-group search-group">
+      <label for="producto">Producto</label>
+
+      <div class="search-box">
+        <span class="search-icon">⌕</span>
+
+        <input
+          id="producto"
+          type="text"
+          [(ngModel)]="productoBuscado"
+          placeholder="Buscar producto..."
+        >
+      </div>
+    </div>
+
+
+    <div class="filter-group">
+      <label for="tipo">Tipo de movimiento</label>
+
+      <select id="tipo" [(ngModel)]="tipoSeleccionado">
+        <option value="">Todos los movimientos</option>
+        <option value="Venta / Salida">Venta / Salida</option>
+        <option value="Traslado">Traslado</option>
+        <option value="Pedido a proveedor">Pedido a proveedor</option>
+      </select>
+    </div>
+
+
+    <div class="filter-group">
+      <label for="fechaDesde">Desde</label>
+
+      <input
+        id="fechaDesde"
+        type="date"
+        [(ngModel)]="fechaDesde"
+      >
+    </div>
+
+
+    <div class="filter-group">
+      <label for="fechaHasta">Hasta</label>
+
+      <input
+        id="fechaHasta"
+        type="date"
+        [(ngModel)]="fechaHasta"
+      >
+    </div>
+
+
+    <button
+      *ngIf="tipoSeleccionado || productoBuscado || fechaDesde || fechaHasta"
+      type="button"
+      class="clear-button"
+      (click)="limpiarFiltros()">
+
+      Limpiar filtros
+
+    </button>
+
+  </section>
+
+
+  <!-- RESULTADOS -->
+  <div class="results-header">
+
+    <div>
+      <strong>{{ movimientosFiltrados.length }}</strong>
+      <span>movimientos encontrados</span>
+    </div>
+
+  </div>
+
+
+  <!-- TABLA -->
+  <section class="history-card">
+
+    <div class="table-wrapper">
+
+      <table>
+
+        <thead>
+          <tr>
+            <th>Tipo</th>
+            <th>Referencia</th>
+            <th>Producto</th>
+            <th>Cantidad</th>
+            <th>Origen</th>
+            <th>Destino</th>
+            <th>Fecha</th>
+            <th>Estado</th>
+          </tr>
+        </thead>
+
+        <tbody>
+
+          <tr *ngFor="let movimiento of movimientosFiltrados">
+
+            <td>
+              <span
+                class="type-badge"
+                [ngClass]="obtenerClaseTipo(movimiento.tipo)">
+                {{ movimiento.tipo }}
+              </span>
+            </td>
+
+            <td>
+              <strong class="reference">
+                {{ movimiento.codigo }}
+              </strong>
+            </td>
+
+            <td>
+              <span class="product-name">
+                {{ movimiento.producto }}
+              </span>
+            </td>
+
+            <td>
+              <strong>{{ movimiento.cantidad }}</strong>
+              <span class="units">unid.</span>
+            </td>
+
+            <td>
+              {{ movimiento.origen }}
+            </td>
+
+            <td>
+              {{ movimiento.destino }}
+            </td>
+
+            <td>
+              {{ movimiento.fecha | date:'dd/MM/yyyy' }}
+            </td>
+
+            <td>
+              <span
+                class="status-badge"
+                [ngClass]="obtenerClaseEstado(movimiento.estado)">
+                {{ movimiento.estado }}
+              </span>
+            </td>
+
+          </tr>
+
+        </tbody>
+
+      </table>
+
+
+      <!-- SIN RESULTADOS -->
+      <div
+        class="empty-state"
+        *ngIf="movimientosFiltrados.length === 0">
+
+        <div class="empty-icon">⌕</div>
+
+        <h2>No encontramos movimientos</h2>
+
+        <p>
+          Intenta cambiar los filtros para encontrar lo que buscas.
+        </p>
+
+        <button
+          type="button"
+          class="btn-secondary"
+          (click)="limpiarFiltros()">
+
+          Limpiar filtros
+
+        </button>
+
+      </div>
+
+    </div>
+
+  </section>
+
+</div>

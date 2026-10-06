@@ -1,0 +1,110 @@
+<div class="page-container">
+
+  <section class="page-heading">
+
+    <div>
+      <h2>Editar proveedor</h2>
+      <p>
+        Actualiza la información del proveedor seleccionado.
+      </p>
+    </div>
+
+  </section>
+
+  <section class="form-card">
+
+    <div class="form-section">
+
+      <div class="section-title">
+        <h3>Información del proveedor</h3>
+        <p>Los campos marcados con * son obligatorios.</p>
+      </div>
+
+      <div class="form-grid">
+
+        <div class="form-group">
+          <label for="nombre">
+            Nombre del proveedor <span>*</span>
+          </label>
+
+          <input
+            id="nombre"
+            type="text"
+            [(ngModel)]="proveedor.nombre"
+            placeholder="Ej. Freddy Bogotá">
+        </div>
+
+        <div class="form-group">
+          <label for="telefono">
+            Teléfono <span>*</span>
+          </label>
+
+          <input
+            id="telefono"
+            type="tel"
+            [(ngModel)]="proveedor.telefono"
+            placeholder="Ej. 300 123 4567">
+        </div>
+
+        <div class="form-group">
+          <label for="direccion">
+            Dirección
+          </label>
+
+          <input
+            id="direccion"
+            type="text"
+            [(ngModel)]="proveedor.direccion"
+            placeholder="Ej. Cra. 15 # 80-20">
+        </div>
+
+        <div class="form-group">
+          <label for="ciudad">
+            Ciudad <span>*</span>
+          </label>
+
+          <input
+            id="ciudad"
+            type="text"
+            [(ngModel)]="proveedor.ciudad"
+            placeholder="Ej. Bogotá">
+        </div>
+
+        <div class="form-group full-width">
+          <label for="descripcion">
+            Descripción
+          </label>
+
+          <textarea
+            id="descripcion"
+            rows="4"
+            [(ngModel)]="proveedor.descripcion"
+            placeholder="Escribe una descripción del proveedor...">
+          </textarea>
+        </div>
+
+      </div>
+
+    </div>
+
+    <div class="form-actions">
+
+      <button
+        type="button"
+        class="secondary-button"
+        (click)="cancelar()">
+        Cancelar
+      </button>
+
+      <button
+        type="button"
+        class="primary-button"
+        (click)="guardarCambios()">
+        Guardar cambios
+      </button>
+
+    </div>
+
+  </section>
+
+</div>

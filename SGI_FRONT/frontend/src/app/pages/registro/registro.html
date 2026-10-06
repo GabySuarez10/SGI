@@ -1,0 +1,149 @@
+<div class="registro-page">
+
+  <div class="registro-container">
+
+    <div class="brand">
+
+      <div class="brand-icon">
+        SGI
+      </div>
+
+      <div>
+        <h1>SGI</h1>
+        <span>Sistema de Gestión de Inventario</span>
+      </div>
+
+    </div>
+
+    <div class="registro-card">
+
+      <div class="card-header">
+
+        <h2>Crear cuenta</h2>
+
+        <p>
+          Registra tus datos para acceder al sistema.
+        </p>
+
+      </div>
+
+      <div class="form-group">
+
+        <label for="nombre">
+          Nombre completo
+        </label>
+
+        <input
+          id="nombre"
+          type="text"
+          [(ngModel)]="nombre"
+          placeholder="Ingresa tu nombre completo"
+          autocomplete="name"
+        >
+
+      </div>
+
+      <div class="form-group">
+
+        <label for="usuario">
+          Usuario o correo
+        </label>
+
+        <input
+          id="usuario"
+          type="text"
+          [(ngModel)]="usuario"
+          placeholder="Ingresa tu usuario o correo"
+          autocomplete="username"
+        >
+
+      </div>
+
+      <div class="form-group">
+
+        <label for="contrasena">
+          Contraseña
+        </label>
+
+        <div class="password-wrapper">
+
+          <input
+            id="contrasena"
+            [type]="mostrarContrasena ? 'text' : 'password'"
+            [(ngModel)]="contrasena"
+            placeholder="Crea una contraseña"
+            autocomplete="new-password"
+          >
+
+          <button
+            type="button"
+            class="password-button"
+            (click)="alternarContrasena()"
+            [attr.aria-label]="mostrarContrasena ? 'Ocultar contraseña' : 'Mostrar contraseña'">
+
+            {{ mostrarContrasena ? 'Ocultar' : 'Mostrar' }}
+
+          </button>
+
+        </div>
+
+      </div>
+
+      <div class="form-group">
+
+        <label for="confirmarContrasena">
+          Confirmar contraseña
+        </label>
+
+        <div class="password-wrapper">
+
+          <input
+            id="confirmarContrasena"
+            [type]="mostrarConfirmacion ? 'text' : 'password'"
+            [(ngModel)]="confirmarContrasena"
+            placeholder="Repite tu contraseña"
+            autocomplete="new-password"
+          >
+
+          <button
+            type="button"
+            class="password-button"
+            (click)="alternarConfirmacion()"
+            [attr.aria-label]="mostrarConfirmacion ? 'Ocultar contraseña' : 'Mostrar contraseña'">
+
+            {{ mostrarConfirmacion ? 'Ocultar' : 'Mostrar' }}
+
+          </button>
+
+        </div>
+
+      </div>
+
+      <button
+        type="button"
+        class="registro-button"
+        (click)="crearCuenta()">
+
+        Crear cuenta
+
+      </button>
+
+      <div class="login-link">
+
+        <span>¿Ya tienes una cuenta?</span>
+
+        <a routerLink="/login">
+          Iniciar sesión
+        </a>
+
+      </div>
+
+    </div>
+
+    <p class="registro-footer">
+      SGI · Sistema de Gestión de Inventario
+    </p>
+
+  </div>
+
+</div>

@@ -189,6 +189,189 @@
 
   margin-left: 3px;
 }
+/* MENÚ DEL USUARIO */
+
+.user-menu {
+  position: relative;
+}
+
+.user-button {
+  display: flex;
+  align-items: center;
+
+  gap: 10px;
+
+  padding: 5px 8px;
+
+  border: none;
+  border-radius: 10px;
+
+  background: transparent;
+
+  font-family: inherit;
+
+  cursor: pointer;
+
+  transition: background-color 0.2s ease;
+}
+
+.user-button:hover {
+  background: #F8FAFC;
+}
+
+.user-avatar {
+  width: 38px;
+  height: 38px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 50%;
+
+  background: #DBEAFE;
+  color: #1D4ED8;
+
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.user-info {
+  display: flex;
+  flex-direction: column;
+
+  align-items: flex-start;
+
+  gap: 2px;
+}
+
+.user-info strong {
+  color: #1E293B;
+
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.user-info span {
+  color: #64748B;
+
+  font-size: 11px;
+}
+
+.user-arrow {
+  margin-left: 4px;
+
+  color: #64748B;
+
+  font-size: 16px;
+}
+
+
+/* MENÚ DESPLEGABLE */
+
+.user-dropdown {
+  position: absolute;
+
+  top: calc(100% + 8px);
+  right: 0;
+
+  width: 190px;
+
+  padding: 6px;
+
+  background: #FFFFFF;
+
+  border: 1px solid #E2E8F0;
+  border-radius: 12px;
+
+  box-shadow:
+    0 10px 25px rgba(15, 23, 42, 0.10);
+
+  z-index: 100;
+}
+
+.dropdown-item {
+  width: 100%;
+
+  display: flex;
+  align-items: center;
+
+  gap: 10px;
+
+  padding: 10px 11px;
+
+  border: none;
+  border-radius: 8px;
+
+  background: transparent;
+  color: #334155;
+
+  font-family: inherit;
+
+  font-size: 13px;
+  font-weight: 600;
+
+  text-align: left;
+
+  cursor: pointer;
+
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease;
+}
+
+.dropdown-item:hover {
+  background: #F8FAFC;
+}
+
+.dropdown-item span:first-child {
+  width: 18px;
+
+  color: #64748B;
+
+  text-align: center;
+}
+
+.dropdown-item.logout {
+  color: #DC2626;
+}
+
+.dropdown-item.logout span:first-child {
+  color: #DC2626;
+}
+
+.dropdown-item.logout:hover {
+  background: #FEF2F2;
+}
+
+.dropdown-divider {
+  height: 1px;
+
+  margin: 4px 6px;
+
+  background: #E2E8F0;
+}
+
+
+/* RESPONSIVE */
+
+@media (max-width: 600px) {
+
+  .user-info,
+  .user-arrow {
+    display: none;
+  }
+
+  .user-button {
+    padding: 4px;
+  }
+
+  .user-avatar {
+    width: 36px;
+    height: 36px;
+  }
+
+}
 
 
 /* =========================

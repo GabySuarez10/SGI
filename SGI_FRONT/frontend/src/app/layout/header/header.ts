@@ -1,17 +1,33 @@
-import { Component, EventEmitter, Output } from '@angular/core';
+import { Component } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-header',
-  imports: [],
+  standalone: true,
+  imports: [CommonModule],
   templateUrl: './header.html',
-  styleUrl: './header.css',
+  styleUrl: './header.css'
 })
 export class Header {
 
-  @Output() menuToggle = new EventEmitter<void>();
+  menuUsuarioAbierto = false;
 
-  toggleMenu() {
-    this.menuToggle.emit();
+  constructor(private router: Router) {}
+
+  alternarMenuUsuario(): void {
+    this.menuUsuarioAbierto = !this.menuUsuarioAbierto;
   }
 
+  cerrarSesion(): void {
+    this.menuUsuarioAbierto = false;
+
+    this.router.navigate(['/login']);
+  }
+
+  irAConfiguracion(): void {
+    this.menuUsuarioAbierto = false;
+
+    this.router.navigate(['/configuracion']);
+  }
 }

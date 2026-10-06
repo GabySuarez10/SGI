@@ -1,0 +1,209 @@
+<div class="configuracion-page">
+
+  <div class="page-header">
+    <div>
+      <span class="page-label">Sistema</span>
+      <h1>Configuración</h1>
+      <p>Administra la información de tu cuenta y de la empresa.</p>
+    </div>
+  </div>
+
+  <!-- MI CUENTA -->
+
+  <section class="config-card">
+
+    <div class="section-heading">
+
+      <div class="section-icon account-icon">
+        👤
+      </div>
+
+      <div>
+        <h2>Mi cuenta</h2>
+        <p>Información del usuario que está utilizando el sistema.</p>
+      </div>
+
+    </div>
+
+    <div class="form-grid">
+
+      <div class="form-group">
+
+        <label for="nombre">
+          Nombre completo
+        </label>
+
+        <input
+          id="nombre"
+          type="text"
+          [(ngModel)]="nombre"
+        >
+
+      </div>
+
+      <div class="form-group">
+
+        <label for="usuario">
+          Usuario
+        </label>
+
+        <input
+          id="usuario"
+          type="text"
+          [(ngModel)]="usuario"
+        >
+
+      </div>
+
+      <div class="form-group">
+
+        <label for="correo">
+          Correo electrónico
+        </label>
+
+        <input
+          id="correo"
+          type="email"
+          [(ngModel)]="correo"
+        >
+
+      </div>
+
+    </div>
+
+    <div class="card-actions">
+
+      <button
+        type="button"
+        class="btn-primary"
+        (click)="guardarCuenta()">
+
+        Guardar cambios
+
+      </button>
+
+    </div>
+
+  </section>
+
+
+  <!-- EMPRESA -->
+
+  <section class="config-card">
+
+    <div class="section-heading">
+
+      <div class="section-icon company-icon">
+        🏢
+      </div>
+
+      <div>
+        <h2>Empresa</h2>
+        <p>Información de la empresa asociada a esta cuenta.</p>
+      </div>
+
+    </div>
+
+    <div class="form-grid">
+
+      <div class="form-group">
+
+        <label for="empresa">
+          Nombre de la empresa
+        </label>
+
+        <input
+          id="empresa"
+          type="text"
+          [(ngModel)]="empresa"
+        >
+
+      </div>
+
+      <div class="form-group">
+
+        <label for="ciudad">
+          Ciudad
+        </label>
+
+        <input
+          id="ciudad"
+          type="text"
+          [(ngModel)]="ciudad"
+        >
+
+      </div>
+
+      <div class="form-group">
+
+        <label>
+          Estado
+        </label>
+
+        <div class="status-box">
+
+          <span class="status-dot"></span>
+
+          {{ estadoEmpresa }}
+
+        </div>
+
+      </div>
+
+    </div>
+
+    <div class="card-actions">
+
+      <button
+        type="button"
+        class="btn-primary"
+        (click)="guardarEmpresa()">
+
+        Guardar cambios
+
+      </button>
+
+    </div>
+
+  </section>
+
+
+  <!-- INFORMACIÓN DEL SISTEMA -->
+
+  <section class="config-card system-card">
+
+    <div class="section-heading">
+
+      <div class="section-icon system-icon">
+        ℹ
+      </div>
+
+      <div>
+        <h2>Información del sistema</h2>
+        <p>Información general de la aplicación.</p>
+      </div>
+
+    </div>
+
+    <div class="system-info">
+
+      <div class="system-item">
+        <span>Nombre</span>
+        <strong>SGI · Sistema de Gestión de Inventario</strong>
+      </div>
+
+      <div class="system-item">
+        <span>Versión</span>
+        <strong>1.0</strong>
+      </div>
+
+      <div class="system-item">
+        <span>Empresa</span>
+        <strong>Pintarte</strong>
+      </div>
+
+    </div>
+
+  </section>
+
+</div>

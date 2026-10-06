@@ -1,0 +1,365 @@
+.configuracion-page {
+  width: 100%;
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.page-header {
+  margin-bottom: 28px;
+}
+
+.page-label {
+  display: block;
+  margin-bottom: 5px;
+
+  color: #2563EB;
+
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.page-header h1 {
+  margin: 0;
+
+  color: #1E293B;
+
+  font-size: 26px;
+  font-weight: 750;
+}
+
+.page-header p {
+  margin: 7px 0 0;
+
+  color: #64748B;
+
+  font-size: 14px;
+}
+
+
+/* TARJETAS */
+
+.config-card {
+  margin-bottom: 20px;
+  padding: 26px;
+
+  background: #FFFFFF;
+
+  border: 1px solid #E2E8F0;
+  border-radius: 16px;
+
+  box-shadow:
+    0 4px 16px rgba(15, 23, 42, 0.03);
+}
+
+
+/* ENCABEZADO DE SECCIÓN */
+
+.section-heading {
+  display: flex;
+  align-items: flex-start;
+
+  gap: 14px;
+
+  margin-bottom: 24px;
+}
+
+.section-icon {
+  width: 42px;
+  height: 42px;
+
+  flex-shrink: 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 11px;
+
+  font-size: 18px;
+}
+
+.account-icon {
+  background: #EFF6FF;
+}
+
+.company-icon {
+  background: #F0FDF4;
+}
+
+.system-icon {
+  background: #F8FAFC;
+  color: #475569;
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.section-heading h2 {
+  margin: 1px 0 0;
+
+  color: #1E293B;
+
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.section-heading p {
+  margin: 5px 0 0;
+
+  color: #64748B;
+
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+
+/* FORMULARIOS */
+
+.form-grid {
+  display: grid;
+
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+
+  gap: 20px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.form-group label {
+  margin-bottom: 8px;
+
+  color: #334155;
+
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.form-group input {
+  width: 100%;
+  height: 46px;
+
+  padding: 0 13px;
+
+  box-sizing: border-box;
+
+  border: 1px solid #CBD5E1;
+  border-radius: 9px;
+
+  background: #FFFFFF;
+  color: #1E293B;
+
+  font-family: inherit;
+  font-size: 14px;
+
+  outline: none;
+
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.form-group input:hover {
+  border-color: #94A3B8;
+}
+
+.form-group input:focus {
+  border-color: #2563EB;
+
+  box-shadow:
+    0 0 0 3px rgba(37, 99, 235, 0.10);
+}
+
+
+/* ESTADO */
+
+.status-box {
+  height: 46px;
+
+  display: flex;
+  align-items: center;
+
+  gap: 8px;
+
+  padding: 0 13px;
+
+  box-sizing: border-box;
+
+  border: 1px solid #E2E8F0;
+  border-radius: 9px;
+
+  background: #F8FAFC;
+
+  color: #166534;
+
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.status-dot {
+  width: 8px;
+  height: 8px;
+
+  border-radius: 50%;
+
+  background: #22C55E;
+}
+
+
+/* BOTONES */
+
+.card-actions {
+  display: flex;
+  justify-content: flex-end;
+
+  margin-top: 24px;
+  padding-top: 20px;
+
+  border-top: 1px solid #F1F5F9;
+}
+
+.btn-primary {
+  height: 42px;
+
+  padding: 0 18px;
+
+  border: 1px solid #2563EB;
+  border-radius: 9px;
+
+  background: #2563EB;
+  color: #FFFFFF;
+
+  font-family: inherit;
+
+  font-size: 13px;
+  font-weight: 700;
+
+  cursor: pointer;
+
+  transition:
+    background-color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.btn-primary:hover {
+  background: #1D4ED8;
+
+  box-shadow:
+    0 4px 12px rgba(37, 99, 235, 0.18);
+}
+
+
+/* INFORMACIÓN DEL SISTEMA */
+
+.system-info {
+  display: grid;
+
+  grid-template-columns: repeat(3, 1fr);
+
+  border: 1px solid #E2E8F0;
+  border-radius: 10px;
+
+  overflow: hidden;
+}
+
+.system-item {
+  display: flex;
+  flex-direction: column;
+
+  gap: 7px;
+
+  padding: 16px;
+
+  background: #F8FAFC;
+
+  border-right: 1px solid #E2E8F0;
+}
+
+.system-item:last-child {
+  border-right: none;
+}
+
+.system-item span {
+  color: #64748B;
+
+  font-size: 12px;
+}
+
+.system-item strong {
+  color: #1E293B;
+
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+
+/* RESPONSIVE */
+
+@media (max-width: 760px) {
+
+  .configuracion-page {
+    max-width: 100%;
+  }
+
+  .page-header h1 {
+    font-size: 22px;
+  }
+
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .system-info {
+    grid-template-columns: 1fr;
+  }
+
+  .system-item {
+    border-right: none;
+    border-bottom: 1px solid #E2E8F0;
+  }
+
+  .system-item:last-child {
+    border-bottom: none;
+  }
+
+}
+
+@media (max-width: 520px) {
+
+  .config-card {
+    padding: 20px;
+
+    border-radius: 13px;
+  }
+
+  .section-heading {
+    gap: 11px;
+  }
+
+  .section-icon {
+    width: 38px;
+    height: 38px;
+
+    font-size: 16px;
+  }
+
+  .section-heading h2 {
+    font-size: 16px;
+  }
+
+  .section-heading p {
+    font-size: 12px;
+  }
+
+  .card-actions {
+    justify-content: stretch;
+  }
+
+  .btn-primary {
+    width: 100%;
+  }
+
+}

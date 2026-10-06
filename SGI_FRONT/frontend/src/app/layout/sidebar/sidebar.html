@@ -21,10 +21,16 @@
 
       <span class="section-title">PRINCIPAL</span>
 
-      <a class="nav-item active">
-        <span class="nav-icon">⌂</span>
-        <span>Inicio</span>
-      </a>
+      <a
+  class="nav-item"
+  routerLink="/"
+  routerLinkActive="active"
+  [routerLinkActiveOptions]="{ exact: true }">
+
+  <span class="nav-icon">⌂</span>
+  <span>Inicio</span>
+
+</a>
 
     </div>
 
@@ -135,10 +141,10 @@
 
       <span class="section-title">CONSULTAS</span>
 
-      <a class="nav-item">
-        <span class="nav-icon">☷</span>
-        <span>Historial</span>
-      </a>
+      <a class="nav-item" routerLink="/historial" routerLinkActive="active">
+  <span class="nav-icon">◷</span>
+  <span>Historial</span>
+</a>
 
     </div>
 
@@ -148,11 +154,15 @@
   <!-- Configuración -->
   <div class="sidebar-bottom">
 
-    <a class="nav-item">
-      <span class="nav-icon">⚙</span>
-      <span>Configuración</span>
-    </a>
+    <a
+  class="nav-item"
+  routerLink="/configuracion"
+  routerLinkActive="active">
 
+  <span class="nav-icon">⚙</span>
+  <span>Configuración</span>
+
+</a>
   </div>
 
 </aside>

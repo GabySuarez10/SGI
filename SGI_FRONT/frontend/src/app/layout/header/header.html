@@ -7,9 +7,10 @@
     <button
       class="menu-button"
       type="button"
-      aria-label="Abrir menú"
-      (click)="toggleMenu()">
-      ☰
+      aria-label="Menú">
+
+      <span>☰</span>
+
     </button>
 
     <div class="header-title">
@@ -42,12 +43,58 @@
         G
       </div>
 
-      <div class="user-info">
-        <span class="user-name">Gabriela</span>
-        <span class="user-role">Administrador</span>
-      </div>
+      <div class="user-menu">
 
-      <span class="arrow">⌄</span>
+  <button
+    type="button"
+    class="user-button"
+    (click)="alternarMenuUsuario()">
+
+    <div class="user-avatar">
+      GS
+    </div>
+
+    <div class="user-info">
+      <strong>Gabriela Suárez</strong>
+      <span>Administrador</span>
+    </div>
+
+    <span class="user-arrow">
+      {{ menuUsuarioAbierto ? '⌃' : '⌄' }}
+    </span>
+
+  </button>
+
+
+  <div
+    class="user-dropdown"
+    *ngIf="menuUsuarioAbierto">
+
+    <button
+      type="button"
+      class="dropdown-item"
+      (click)="irAConfiguracion()">
+
+      <span>⚙</span>
+      <span>Mi cuenta</span>
+
+    </button>
+
+    <div class="dropdown-divider"></div>
+
+    <button
+      type="button"
+      class="dropdown-item logout"
+      (click)="cerrarSesion()">
+
+      <span>↪</span>
+      <span>Cerrar sesión</span>
+
+    </button>
+
+  </div>
+
+</div>
 
     </div>
 
