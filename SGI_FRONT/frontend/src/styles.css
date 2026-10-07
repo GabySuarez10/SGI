@@ -1,1 +1,56 @@
 /* You can add global styles to this file, and also import other style files */
+
+/* =========================================================
+   Mensajes compartidos de carga y error (datos desde la API)
+   ========================================================= */
+
+.estado-carga,
+.mensaje-error,
+.mensaje-exito {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0 0 20px;
+  padding: 14px 18px;
+  border-radius: 12px;
+  font-size: 14px;
+}
+
+.estado-carga {
+  color: #64748b;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+}
+
+.estado-carga::before {
+  content: '';
+  width: 16px;
+  height: 16px;
+  border: 2px solid #cbd5e1;
+  border-top-color: #2563eb;
+  border-radius: 50%;
+  animation: girar-carga 0.8s linear infinite;
+}
+
+.mensaje-error {
+  color: #b91c1c;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+}
+
+.mensaje-exito {
+  color: #15803d;
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+}
+
+@keyframes girar-carga {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}

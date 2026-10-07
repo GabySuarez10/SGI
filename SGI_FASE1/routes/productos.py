@@ -1,70 +1,38 @@
 from flask import Blueprint, jsonify, request
-from database import db
-from models import Producto
+
+from queries import producto_queries as q
 
 productos_bp = Blueprint("productos", __name__, url_prefix="/api/productos")
 
 
-@productos_bp.route("", methods=["GET"])
-def get_productos():
-    productos = Producto.query.all()
-    return jsonify([p.to_dict() for p in productos]), 200
+@productos_bp.get("")
+def listar():
+    """Catálogo con existencias de bodega, local y precios de venta."""
+    return jsonify(q.listar_productos())
 
 
-@productos_bp.route("/<int:codigo>", methods=["GET"])
-def get_producto(codigo):
-    producto = Producto.query.get_or_404(codigo, description="Producto no encontrado")
-    return jsonify(producto.to_dict()), 200
+@productos_bp.get("/<int:codigo>")
+def obtener(codigo):
+    return jsonify(q.obtener_producto_detallado(codigo))
 
 
-@productos_bp.route("", methods=["POST"])
-def create_producto():
-    data = request.get_json() or {}
-
-    nuevo_producto = Producto(
-        referencia=data.get("referencia"),
-        nombre=data.get("nombre"),
-        imagen=data.get("imagen"),
-        proveedor=data.get("proveedor"),
-        tamano=data.get("tamano"),
-        descripcion=data.get("descripcion"),
-        costo=data.get("costo", 0)
-    )
-
-    db.session.add(nuevo_producto)
-    db.session.commit()
-    db.session.refresh(nuevo_producto)
-    return jsonify(nuevo_producto.to_dict()), 201
+@productos_bp.post("")
+def crear():
+    """
+    Uno o varios productos del mismo proveedor:
+    { proveedor, productos: [ {nombre, tamano, descripcion, imagen, ...} ] }
+    """
+    creados = q.crear_productos(request.get_json() or {})
+    return jsonify([p.to_dict() for p in creados]), 201
 
 
-@productos_bp.route("/<int:codigo>", methods=["PUT"])
-def update_producto(codigo):
-    producto = Producto.query.get_or_404(codigo, description="Producto no encontrado")
-    data = request.get_json() or {}
-
-    if "referencia" in data:
-        producto.referencia = data["referencia"]
-    if "nombre" in data:
-        producto.nombre = data["nombre"]
-    if "imagen" in data:
-        producto.imagen = data["imagen"]
-    if "proveedor" in data:
-        producto.proveedor = data["proveedor"]
-    if "tamano" in data:
-        producto.tamano = data["tamano"]
-    if "descripcion" in data:
-        producto.descripcion = data["descripcion"]
-    if "costo" in data:
-        producto.costo = data["costo"]
-
-    db.session.commit()
-    db.session.refresh(producto)
-    return jsonify(producto.to_dict()), 200
+@productos_bp.put("/<int:codigo>")
+def actualizar(codigo):
+    producto = q.actualizar_producto(codigo, request.get_json() or {})
+    return jsonify(q.obtener_producto_detallado(producto.codigo))
 
 
-@productos_bp.route("/<int:codigo>", methods=["DELETE"])
-def delete_producto(codigo):
-    producto = Producto.query.get_or_404(codigo, description="Producto no encontrado")
-    db.session.delete(producto)
-    db.session.commit()
-    return jsonify({"message": f"Producto con código {codigo} eliminado exitosamente"}), 200
+@productos_bp.delete("/<int:codigo>")
+def eliminar(codigo):
+    q.eliminar_producto(codigo)
+    return jsonify({"message": f"Producto {codigo} eliminado"})

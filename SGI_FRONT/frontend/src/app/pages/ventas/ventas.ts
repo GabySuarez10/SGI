@@ -1,6 +1,12 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { InventarioService } from '../../services/inventario.service';
+import { VentaService } from '../../services/venta.service';
+import { AuthService } from '../../services/auth.service';
+import { mensajeDeError } from '../../utils/http-error';
+import { IMAGEN_POR_DEFECTO, imagenNoCarga } from '../../utils/imagen';
+import { hoyISO } from '../../utils/fecha';
 
 type TipoVenta = 'Distribución / Institucional' | 'Venta normal' | 'Mayorista';
 
@@ -15,8 +21,8 @@ interface ProductoVenta {
   imagen: string;
   existencias: number;
 
-  // Precios propios del producto.
-  // Los valores definitivos y sus fórmulas los ajustaremos después.
+  // Precios del producto según la modalidad.
+  // Crudo = precios del Inventario_local; kit y pintada = crudo + recargo.
   precioCrudo: number;
   precioMayoristaCrudo: number;
 
@@ -36,11 +42,11 @@ interface ProductoVenta {
   templateUrl: './ventas.html',
   styleUrl: './ventas.css'
 })
-export class Ventas {
+export class Ventas implements OnInit {
 
   cliente = '';
 
-  fecha = new Date().toISOString().split('T')[0];
+  fecha = hoyISO();
 
   observacion = '';
 
@@ -61,117 +67,62 @@ export class Ventas {
   busqueda = '';
 
 
-  productos: ProductoVenta[] = [
+  // Recargo que se suma al precio de la figura cruda según la modalidad.
+  // Ajusta estos valores a los precios reales de Pintarte.
+  recargoKit = 2300;
+  recargoPintada = 4300;
 
-    {
-      codigo: 'FB0001',
-      nombre: 'Muñeco de nieve',
-      imagen: 'https://images.unsplash.com/photo-1548013146-72479768bada?w=500',
-      existencias: 18,
+  // Productos del local (vienen de GET /api/inventario-local)
+  productos: ProductoVenta[] = [];
 
-      precioCrudo: 8200,
-      precioMayoristaCrudo: 4200,
+  cargando = false;
+  guardando = false;
+  error = '';
 
-      precioKit: 10500,
-      precioMayoristaKit: 6500,
+  imagenPorDefecto = IMAGEN_POR_DEFECTO;
+  imagenNoCarga = imagenNoCarga;
 
-      precioPintada: 12500,
-      precioMayoristaPintada: 8000,
+  constructor(
+    private inventarioService: InventarioService,
+    private ventaService: VentaService,
+    private authService: AuthService
+  ) {}
 
-      cantidad: 0
-    },
+  ngOnInit(): void {
+    this.cargarProductos();
+  }
 
-    {
-      codigo: 'FB0002',
-      nombre: 'Princesa Sofía',
-      imagen: 'https://images.unsplash.com/photo-1594736797933-d0b22f8e8d35?w=500',
-      existencias: 7,
+  cargarProductos(): void {
+    this.cargando = true;
+    this.error = '';
 
-      precioCrudo: 14200,
-      precioMayoristaCrudo: 7200,
+    this.inventarioService.getLocal().subscribe({
+      next: inventario => {
+        this.productos = inventario.map(item => ({
+          codigo: String(item.codigo),
+          nombre: item.nombre,
+          imagen: item.imagen,
+          existencias: item.existencias,
 
-      precioKit: 16500,
-      precioMayoristaKit: 9500,
+          precioCrudo: item.precio_venta,
+          precioMayoristaCrudo: item.precio_mayorista,
 
-      precioPintada: 19500,
-      precioMayoristaPintada: 12000,
+          precioKit: item.precio_venta + this.recargoKit,
+          precioMayoristaKit: item.precio_mayorista + this.recargoKit,
 
-      cantidad: 0
-    },
+          precioPintada: item.precio_venta + this.recargoPintada,
+          precioMayoristaPintada: item.precio_mayorista + this.recargoPintada,
 
-    {
-      codigo: 'FB0003',
-      nombre: 'Calabaza',
-      imagen: 'https://images.unsplash.com/photo-1508361001413-7a9c3e0e4b8d?w=500',
-      existencias: 24,
-
-      precioCrudo: 8200,
-      precioMayoristaCrudo: 4200,
-
-      precioKit: 10500,
-      precioMayoristaKit: 6500,
-
-      precioPintada: 12500,
-      precioMayoristaPintada: 8000,
-
-      cantidad: 0
-    },
-
-    {
-      codigo: 'DC0001',
-      nombre: 'Ángel navideño',
-      imagen: 'https://images.unsplash.com/photo-1512909006721-3d6018887383?w=500',
-      existencias: 4,
-
-      precioCrudo: 12200,
-      precioMayoristaCrudo: 6200,
-
-      precioKit: 14500,
-      precioMayoristaKit: 8500,
-
-      precioPintada: 17500,
-      precioMayoristaPintada: 11000,
-
-      cantidad: 0
-    },
-
-    {
-      codigo: 'DC0002',
-      nombre: 'Casita navideña',
-      imagen: 'https://images.unsplash.com/photo-1512389142860-9c449e58a543?w=500',
-      existencias: 12,
-
-      precioCrudo: 18200,
-      precioMayoristaCrudo: 10200,
-
-      precioKit: 20500,
-      precioMayoristaKit: 12500,
-
-      precioPintada: 23500,
-      precioMayoristaPintada: 15000,
-
-      cantidad: 0
-    },
-
-    {
-      codigo: 'DC0003',
-      nombre: 'Reno',
-      imagen: 'https://images.unsplash.com/photo-1482517967863-00e15c9b44be?w=500',
-      existencias: 2,
-
-      precioCrudo: 11400,
-      precioMayoristaCrudo: 5800,
-
-      precioKit: 13700,
-      precioMayoristaKit: 8100,
-
-      precioPintada: 16700,
-      precioMayoristaPintada: 10600,
-
-      cantidad: 0
-    }
-
-  ];
+          cantidad: 0
+        }));
+        this.cargando = false;
+      },
+      error: err => {
+        this.error = mensajeDeError(err);
+        this.cargando = false;
+      }
+    });
+  }
 
 
   // ================================
@@ -404,14 +355,21 @@ export class Ventas {
     }
 
 
-    const detalle = this.productosSeleccionados
+    const seleccionados = this.productosSeleccionados;
+
+    const detalle = seleccionados
       .map(producto =>
         `${producto.cantidad} × ${producto.nombre}`
       )
       .join('\n');
 
+    // La tabla Venta no tiene columnas de tipo ni modalidad:
+    // se guardan al inicio de la observación.
+    const observacion =
+      `[${this.tipoVenta} · ${this.modalidad}]` +
+      (this.observacion.trim() ? ` ${this.observacion.trim()}` : '');
 
-    const mensaje =
+    const resumen =
       `Salida registrada correctamente.\n\n` +
 
       `Cliente / destino:\n${this.cliente}\n\n` +
@@ -432,10 +390,35 @@ export class Ventas {
 
       `Total: $${this.totalVenta.toLocaleString('es-CO')}`;
 
+    this.guardando = true;
+    this.error = '';
 
-    alert(mensaje);
+    // Listas paralelas: producto[i] -> cantidad[i] -> precio_unitario[i]
+    this.ventaService.registrarVenta({
+      producto: seleccionados.map(producto => producto.nombre),
+      cantidad: seleccionados.map(producto => producto.cantidad),
+      precio_unitario: seleccionados.map(producto => this.getPrecio(producto)),
+      cliente: this.cliente.trim(),
+      observacion,
+      usuario: this.authService.usuarioActual?.nombre ?? '',
+      fecha: this.fecha
+    }).subscribe({
+      next: () => {
+        this.guardando = false;
+        alert(resumen);
 
-    // Más adelante aquí conectaremos con el backend.
+        // Limpiar el formulario y recargar existencias actualizadas
+        this.cliente = '';
+        this.observacion = '';
+        this.busqueda = '';
+        this.cargarProductos();
+      },
+      error: err => {
+        this.guardando = false;
+        this.error = mensajeDeError(err);
+        alert(this.error);
+      }
+    });
   }
 
 }

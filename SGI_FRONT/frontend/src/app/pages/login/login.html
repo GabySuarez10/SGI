@@ -29,11 +29,17 @@
       </div>
 
 
+      <!-- ERROR DE LA API -->
+      <div class="mensaje-error" *ngIf="error">
+        {{ error }}
+      </div>
+
+
       <!-- USUARIO -->
       <div class="form-group">
 
         <label for="usuario">
-          Usuario o correo
+          Usuario
         </label>
 
         <input
@@ -61,6 +67,7 @@
       [(ngModel)]="contrasena"
       placeholder="Ingresa tu contraseña"
       autocomplete="current-password"
+      (keyup.enter)="iniciarSesion()"
     >
 
     <button
@@ -82,9 +89,10 @@
       <button
         type="button"
         class="login-button"
+        [disabled]="cargando"
         (click)="iniciarSesion()">
 
-        Iniciar sesión
+        {{ cargando ? 'Ingresando...' : 'Iniciar sesión' }}
 
       </button>
 

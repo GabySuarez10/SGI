@@ -531,3 +531,7 @@
   }
 
 }
+/* Los pedidos del resumen abren su detalle */
+.order-item {
+  cursor: pointer;
+}

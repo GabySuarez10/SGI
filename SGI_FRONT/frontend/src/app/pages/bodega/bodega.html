@@ -101,6 +101,17 @@
   </div>
 
 
+  <!-- Carga / error -->
+
+  <div class="estado-carga" *ngIf="cargando">
+    Cargando inventario...
+  </div>
+
+  <div class="mensaje-error" *ngIf="error">
+    {{ error }}
+  </div>
+
+
   <!-- Productos -->
 
   <div class="products-header">
@@ -124,7 +135,8 @@
       <div class="product-image">
 
         <img
-          [src]="producto.imagen"
+          [src]="producto.imagen || imagenPorDefecto"
+          (error)="imagenNoCarga($event)"
           [alt]="producto.nombre">
 
       </div>
@@ -160,7 +172,7 @@
 
           <div>
             <span>Tamaño</span>
-            <strong>{{ producto['tamaño'] }}</strong>
+            <strong>{{ producto.tamano }}</strong>
           </div>
 
           <div>
@@ -192,7 +204,7 @@
 
   <div
     class="empty-state"
-    *ngIf="productosFiltrados.length === 0">
+    *ngIf="!cargando && productosFiltrados.length === 0">
 
     <div class="empty-icon">
       ▦

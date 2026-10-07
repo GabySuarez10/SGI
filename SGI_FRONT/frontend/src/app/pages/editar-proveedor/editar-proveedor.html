@@ -20,6 +20,14 @@
         <p>Los campos marcados con * son obligatorios.</p>
       </div>
 
+      <div class="estado-carga" *ngIf="cargando">
+        Cargando proveedor...
+      </div>
+
+      <div class="mensaje-error" *ngIf="error">
+        {{ error }}
+      </div>
+
       <div class="form-grid">
 
         <div class="form-group">
@@ -99,8 +107,9 @@
       <button
         type="button"
         class="primary-button"
+        [disabled]="cargando || guardando"
         (click)="guardarCambios()">
-        Guardar cambios
+        {{ guardando ? 'Guardando...' : 'Guardar cambios' }}
       </button>
 
     </div>

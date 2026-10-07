@@ -18,6 +18,8 @@ import { Login } from './pages/login/login';
 import { Registro } from './pages/registro/registro';
 import { Configuracion } from './pages/configuracion/configuracion';
 import { EditarProveedor } from './pages/editar-proveedor/editar-proveedor';
+import { authGuard } from './guards/auth.guard';
+
 export const routes: Routes = [
 
   { path: 'login', component: Login },
@@ -27,6 +29,7 @@ export const routes: Routes = [
   {
     path: '',
     component: Layout,
+    canActivate: [authGuard],
     children: [
       { path: '', component: Dashboard },
       { path: 'productos', component: Productos },
@@ -38,15 +41,14 @@ export const routes: Routes = [
       { path: 'ventas', component: Ventas },
       { path: 'pedidos-proveedor', component: PedidosProveedor },
       { path: 'nuevo-pedido', component: NuevoPedido },
-      { path: 'detalle-pedido', component: DetallePedido },
+      { path: 'detalle-pedido/:codigo', component: DetallePedido },
       { path: 'historial', component: Historial },
       { path: 'configuracion', component: Configuracion },
       { path: 'nuevo-proveedor', component: NuevoProveedor },
       { path: 'editar-proveedor/:nombre', component: EditarProveedor },
       { path: 'bodega', component: Bodega },
-
-
     ]
-  }
+  },
 
+  { path: '**', redirectTo: '' }
 ];

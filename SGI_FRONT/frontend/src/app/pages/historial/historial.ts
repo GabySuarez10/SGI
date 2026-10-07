@@ -1,22 +1,9 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-
-type TipoMovimiento =
-  | 'Venta / Salida'
-  | 'Traslado'
-  | 'Pedido a proveedor';
-
-interface Movimiento {
-  tipo: TipoMovimiento;
-  codigo: string;
-  producto: string;
-  cantidad: number;
-  origen: string;
-  destino: string;
-  fecha: string;
-  estado: string;
-}
+import { IMovimiento, TipoMovimiento } from '../../interfaces/movimiento.interface';
+import { HistorialService } from '../../services/historial.service';
+import { mensajeDeError } from '../../utils/http-error';
 
 @Component({
   selector: 'app-historial',
@@ -25,78 +12,40 @@ interface Movimiento {
   templateUrl: './historial.html',
   styleUrl: './historial.css'
 })
-export class Historial {
+export class Historial implements OnInit {
 
   tipoSeleccionado = '';
   productoBuscado = '';
   fechaDesde = '';
   fechaHasta = '';
 
-  movimientos: Movimiento[] = [
-    {
-      tipo: 'Venta / Salida',
-      codigo: 'V0012',
-      producto: 'Muñeco de nieve',
-      cantidad: 5,
-      origen: 'Local',
-      destino: 'Cliente',
-      fecha: '2026-10-03',
-      estado: 'Completado'
-    },
-    {
-      tipo: 'Traslado',
-      codigo: 'T0008',
-      producto: 'Princesa Sofía',
-      cantidad: 10,
-      origen: 'Bodega',
-      destino: 'Local',
-      fecha: '2026-10-02',
-      estado: 'Completado'
-    },
-    {
-      tipo: 'Pedido a proveedor',
-      codigo: 'PP0006',
-      producto: 'Calabaza',
-      cantidad: 20,
-      origen: 'Freddy Bogotá',
-      destino: 'Bodega',
-      fecha: '2026-10-01',
-      estado: 'Recibido'
-    },
-    {
-      tipo: 'Venta / Salida',
-      codigo: 'V0011',
-      producto: 'Ángel navideño',
-      cantidad: 3,
-      origen: 'Local',
-      destino: 'Cliente',
-      fecha: '2026-09-30',
-      estado: 'Completado'
-    },
-    {
-      tipo: 'Traslado',
-      codigo: 'T0007',
-      producto: 'Reno',
-      cantidad: 6,
-      origen: 'Bodega',
-      destino: 'Local',
-      fecha: '2026-09-29',
-      estado: 'Completado'
-    },
-    {
-      tipo: 'Pedido a proveedor',
-      codigo: 'PP0005',
-      producto: 'Casita navideña',
-      cantidad: 15,
-      origen: 'Diego Cali',
-      destino: 'Bodega',
-      fecha: '2026-09-28',
-      estado: 'Pendiente'
-    }
-  ];
+  // Cada venta, traslado o pedido llega desplegado en un movimiento por producto
+  movimientos: IMovimiento[] = [];
+  cargando = false;
+  error = '';
 
-  get movimientosFiltrados(): Movimiento[] {
+  constructor(private historialService: HistorialService) {}
+
+  ngOnInit(): void {
+    this.cargando = true;
+
+    this.historialService.getMovimientos().subscribe({
+      next: movimientos => {
+        this.movimientos = movimientos;
+        this.cargando = false;
+      },
+      error: err => {
+        this.error = mensajeDeError(err);
+        this.cargando = false;
+      }
+    });
+  }
+
+  get movimientosFiltrados(): IMovimiento[] {
     return this.movimientos.filter(movimiento => {
+
+      // '2026-09-02T08:00:00' -> '2026-09-02' para comparar con los filtros
+      const dia = (movimiento.fecha ?? '').slice(0, 10);
 
       const coincideTipo =
         !this.tipoSeleccionado ||
@@ -110,11 +59,11 @@ export class Historial {
 
       const coincideDesde =
         !this.fechaDesde ||
-        movimiento.fecha >= this.fechaDesde;
+        dia >= this.fechaDesde;
 
       const coincideHasta =
         !this.fechaHasta ||
-        movimiento.fecha <= this.fechaHasta;
+        dia <= this.fechaHasta;
 
       return (
         coincideTipo &&

@@ -1,10 +1,13 @@
 import { Component } from '@angular/core';
+import { NgIf } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
+import { ProveedorService } from '../../services/proveedor.service';
+import { mensajeDeError } from '../../utils/http-error';
 
 @Component({
   selector: 'app-nuevo-proveedor',
-  imports: [FormsModule],
+  imports: [FormsModule, NgIf],
   templateUrl: './nuevo-proveedor.html',
   styleUrl: './nuevo-proveedor.css',
 })
@@ -16,21 +19,44 @@ export class NuevoProveedor {
   ciudad = '';
   descripcion = '';
 
-  constructor(private router: Router) {}
+  guardando = false;
+  error = '';
 
-  guardarProveedor() {
+  constructor(
+    private proveedorService: ProveedorService,
+    private router: Router
+  ) {}
 
-    if (!this.nombre || !this.telefono || !this.ciudad) {
-      alert('Completa los campos obligatorios.');
+  guardarProveedor(): void {
+
+    if (!this.nombre.trim() || !this.telefono.trim() || !this.ciudad.trim()) {
+      this.error = 'Completa los campos obligatorios.';
       return;
     }
 
-    alert('Proveedor registrado correctamente.');
+    this.guardando = true;
+    this.error = '';
 
-    this.router.navigate(['/proveedores']);
+    this.proveedorService.crearProveedor({
+      nombre: this.nombre.trim(),
+      telefono: this.telefono.trim(),
+      direccion: this.direccion.trim(),
+      ciudad: this.ciudad.trim(),
+      descripcion: this.descripcion.trim()
+    }).subscribe({
+      next: () => {
+        this.guardando = false;
+        alert('Proveedor registrado correctamente.');
+        this.router.navigate(['/proveedores']);
+      },
+      error: err => {
+        this.guardando = false;
+        this.error = mensajeDeError(err);
+      }
+    });
   }
 
-  cancelar() {
+  cancelar(): void {
     this.router.navigate(['/proveedores']);
   }
 

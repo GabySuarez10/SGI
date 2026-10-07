@@ -1,15 +1,10 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-
-interface Proveedor {
-  nombre: string;
-  telefono: string;
-  direccion: string;
-  ciudad: string;
-  descripcion: string;
-}
+import { IProveedor } from '../../interfaces/proveedor.interface';
+import { ProveedorService } from '../../services/proveedor.service';
+import { mensajeDeError } from '../../utils/http-error';
 
 @Component({
   selector: 'app-editar-proveedor',
@@ -18,9 +13,9 @@ interface Proveedor {
   templateUrl: './editar-proveedor.html',
   styleUrl: './editar-proveedor.css'
 })
-export class EditarProveedor {
+export class EditarProveedor implements OnInit {
 
-  proveedor: Proveedor = {
+  proveedor: IProveedor = {
     nombre: '',
     telefono: '',
     direccion: '',
@@ -28,33 +23,17 @@ export class EditarProveedor {
     descripcion: ''
   };
 
-  proveedores: Proveedor[] = [
-    {
-      nombre: 'Freddy Bogotá',
-      telefono: '300 123 4567',
-      direccion: 'Cra. 15 # 80-20',
-      ciudad: 'Bogotá',
-      descripcion: 'Proveedor de figuras decorativas.'
-    },
-    {
-      nombre: 'Diego Cali',
-      telefono: '310 987 6543',
-      direccion: 'Cl. 12 # 5-30',
-      ciudad: 'Cali',
-      descripcion: 'Proveedor de figuras y artículos decorativos.'
-    },
-    {
-      nombre: 'Proveedor X',
-      telefono: '315 555 7890',
-      direccion: 'Cra. 8 # 10-25',
-      ciudad: 'Cali',
-      descripcion: 'Proveedor general de productos.'
-    }
-  ];
+  // Nombre con el que está guardado (es la llave del proveedor)
+  nombreOriginal = '';
+
+  cargando = false;
+  guardando = false;
+  error = '';
 
   constructor(
     private route: ActivatedRoute,
-    private router: Router
+    private router: Router,
+    private proveedorService: ProveedorService
   ) {}
 
   ngOnInit(): void {
@@ -65,16 +44,25 @@ export class EditarProveedor {
       return;
     }
 
-    const proveedorEncontrado = this.proveedores.find(
-      proveedor => proveedor.nombre === nombreProveedor
-    );
+    this.nombreOriginal = nombreProveedor;
+    this.cargando = true;
 
-    if (!proveedorEncontrado) {
-      this.router.navigate(['/proveedores']);
-      return;
-    }
-
-    this.proveedor = { ...proveedorEncontrado };
+    this.proveedorService.getProveedor(nombreProveedor).subscribe({
+      next: proveedor => {
+        this.proveedor = {
+          nombre: proveedor.nombre,
+          telefono: proveedor.telefono ?? '',
+          direccion: proveedor.direccion ?? '',
+          ciudad: proveedor.ciudad ?? '',
+          descripcion: proveedor.descripcion ?? ''
+        };
+        this.cargando = false;
+      },
+      error: err => {
+        this.error = mensajeDeError(err);
+        this.cargando = false;
+      }
+    });
   }
 
   guardarCambios(): void {
@@ -83,12 +71,29 @@ export class EditarProveedor {
       !this.proveedor.telefono.trim() ||
       !this.proveedor.ciudad.trim()
     ) {
-      alert('Completa los campos obligatorios.');
+      this.error = 'Completa los campos obligatorios.';
       return;
     }
 
-    alert('Proveedor actualizado correctamente.');
-    this.router.navigate(['/proveedores']);
+    this.guardando = true;
+    this.error = '';
+
+    this.proveedorService
+      .actualizarProveedor(this.nombreOriginal, {
+        ...this.proveedor,
+        nombre: this.proveedor.nombre.trim()
+      })
+      .subscribe({
+        next: () => {
+          this.guardando = false;
+          alert('Proveedor actualizado correctamente.');
+          this.router.navigate(['/proveedores']);
+        },
+        error: err => {
+          this.guardando = false;
+          this.error = mensajeDeError(err);
+        }
+      });
   }
 
   cancelar(): void {

@@ -41,6 +41,14 @@
 
       </div>
 
+      <div class="estado-carga" *ngIf="cargando">
+        Cargando proveedores y productos...
+      </div>
+
+      <div class="mensaje-error" *ngIf="error">
+        {{ error }}
+      </div>
+
 
       <div class="form-grid">
 
@@ -100,16 +108,12 @@
               Seleccionar destino
             </option>
 
-            <option value="Centro Recreacional X">
-              Centro Recreacional X
+            <option value="bodega">
+              Bodega
             </option>
 
-            <option value="Centro Recreacional Y">
-              Centro Recreacional Y
-            </option>
-
-            <option value="Inventario general">
-              Inventario general
+            <option value="local">
+              Local
             </option>
 
           </select>
@@ -178,8 +182,9 @@
           <div class="product-image">
 
             <img
-              [src]="producto.imagen"
-              [alt]="producto.nombre">
+              [src]="producto.imagen || imagenPorDefecto"
+              [alt]="producto.nombre"
+              (error)="imagenNoCarga($event)">
 
           </div>
 
@@ -235,7 +240,7 @@
           <h3>No encontramos productos</h3>
 
           <p>
-            Prueba con otro nombre o referencia.
+            {{ proveedor ? 'Este proveedor no tiene productos con ese nombre o referencia.' : 'Selecciona un proveedor para ver sus productos.' }}
           </p>
 
         </div>
@@ -312,7 +317,7 @@
 
         <div>
           <span>Destino</span>
-          <strong>{{ destino }}</strong>
+          <strong>{{ destino === 'bodega' ? 'Bodega' : 'Local' }}</strong>
         </div>
 
       </div>
@@ -328,8 +333,9 @@
           <div class="review-product">
 
             <img
-              [src]="producto.imagen"
-              [alt]="producto.nombre">
+              [src]="producto.imagen || imagenPorDefecto"
+              [alt]="producto.nombre"
+              (error)="imagenNoCarga($event)">
 
             <div>
 
@@ -479,9 +485,10 @@
         <button
           type="button"
           class="btn-primary"
+          [disabled]="guardando"
           (click)="guardarPedido()">
 
-          Guardar pedido
+          {{ guardando ? 'Guardando...' : 'Guardar pedido' }}
 
         </button>
 

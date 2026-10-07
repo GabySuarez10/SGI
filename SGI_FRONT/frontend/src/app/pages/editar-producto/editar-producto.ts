@@ -1,16 +1,12 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-
-interface Producto {
-  codigo: string;
-  nombre: string;
-  proveedor: string;
-  tamaño: string;
-  descripcion: string;
-  imagen: string;
-}
+import { IProducto } from '../../interfaces/producto.interface';
+import { ProductoService } from '../../services/producto.service';
+import { ProveedorService } from '../../services/proveedor.service';
+import { mensajeDeError } from '../../utils/http-error';
+import { IMAGEN_POR_DEFECTO, esUrlImagen, imagenNoCarga } from '../../utils/imagen';
 
 @Component({
   selector: 'app-editar-producto',
@@ -19,81 +15,71 @@ interface Producto {
   templateUrl: './editar-producto.html',
   styleUrl: './editar-producto.css'
 })
-export class EditarProducto {
+export class EditarProducto implements OnInit {
 
-  producto: Producto = {
-    codigo: '',
+  producto: IProducto = {
+    codigo: 0,
+    referencia: '',
     nombre: '',
+    imagen: '',
     proveedor: '',
-    tamaño: '',
+    tamano: '',
     descripcion: '',
-    imagen: ''
+    costo: 0,
+    existencias: 0,
+    existencias_bodega: 0,
+    existencias_local: 0,
+    precio_venta: 0,
+    precio_mayorista: 0
   };
 
-  productos: Producto[] = [
-    {
-      codigo: 'FB0001',
-      nombre: 'Muñeco de nieve',
-      proveedor: 'Freddy Bogotá',
-      tamaño: '15 cm',
-      descripcion: 'Figura decorativa de yeso.',
-      imagen: 'https://images.unsplash.com/photo-1548013146-72479768bada?w=500'
-    },
-    {
-      codigo: 'FB0002',
-      nombre: 'Princesa Sofía',
-      proveedor: 'Freddy Bogotá',
-      tamaño: '20 cm',
-      descripcion: 'Figura decorativa de princesa.',
-      imagen: 'https://images.unsplash.com/photo-1594736797933-d0b22f8e8d35?w=500'
-    },
-    {
-      codigo: 'FB0003',
-      nombre: 'Calabaza',
-      proveedor: 'Freddy Bogotá',
-      tamaño: '12 cm',
-      descripcion: 'Figura decorativa de calabaza.',
-      imagen: 'https://images.unsplash.com/photo-1508361001413-7a9c3e0e4b8d?w=500'
-    },
-    {
-      codigo: 'DC0001',
-      nombre: 'Ángel navideño',
-      proveedor: 'Diego Cali',
-      tamaño: '18 cm',
-      descripcion: 'Figura decorativa de ángel.',
-      imagen: 'https://images.unsplash.com/photo-1512909006721-3d6018887383?w=500'
-    },
-    {
-      codigo: 'DC0002',
-      nombre: 'Casita navideña',
-      proveedor: 'Diego Cali',
-      tamaño: '16 cm',
-      descripcion: 'Figura decorativa de casita.',
-      imagen: 'https://images.unsplash.com/photo-1512389142860-9c449e58a543?w=500'
-    },
-    {
-      codigo: 'DC0003',
-      nombre: 'Reno',
-      proveedor: 'Diego Cali',
-      tamaño: '14 cm',
-      descripcion: 'Figura decorativa de reno.',
-      imagen: 'https://images.unsplash.com/photo-1482517967863-00e15c9b44be?w=500'
-    }
-  ];
+  proveedores: string[] = [];
+
+  cargando = false;
+  guardando = false;
+  error = '';
+
+  imagenPorDefecto = IMAGEN_POR_DEFECTO;
+  imagenNoCarga = imagenNoCarga;
 
   constructor(
     private route: ActivatedRoute,
-    private router: Router
-  ) {
-    const codigo = this.route.snapshot.paramMap.get('codigo');
+    private router: Router,
+    private productoService: ProductoService,
+    private proveedorService: ProveedorService
+  ) {}
 
-    const productoEncontrado = this.productos.find(
-      producto => producto.codigo === codigo
-    );
+  ngOnInit(): void {
+    const codigo = Number(this.route.snapshot.paramMap.get('codigo'));
 
-    if (productoEncontrado) {
-      this.producto = { ...productoEncontrado };
+    if (!codigo) {
+      this.router.navigate(['/productos']);
+      return;
     }
+
+    this.cargando = true;
+
+    this.productoService.getProducto(codigo).subscribe({
+      next: producto => {
+        this.producto = {
+          ...producto,
+          imagen: producto.imagen ?? '',
+          descripcion: producto.descripcion ?? '',
+          tamano: producto.tamano ?? ''
+        };
+        this.cargando = false;
+      },
+      error: err => {
+        this.error = mensajeDeError(err);
+        this.cargando = false;
+      }
+    });
+
+    this.proveedorService.getProveedores().subscribe({
+      next: proveedores => {
+        this.proveedores = proveedores.map(proveedor => proveedor.nombre);
+      }
+    });
   }
 
   guardarCambios(): void {
@@ -101,40 +87,51 @@ export class EditarProducto {
     if (
       !this.producto.nombre.trim() ||
       !this.producto.proveedor.trim() ||
-      !this.producto['tamaño'].trim()
+      !this.producto.tamano.trim()
     ) {
-      alert('Por favor, completa los campos obligatorios.');
+      this.error = 'Por favor, completa los campos obligatorios.';
       return;
     }
 
-    alert(
-      `El producto ${this.producto.nombre} (${this.producto.codigo}) ` +
-      `ha sido actualizado correctamente.`
-    );
+    if (this.producto.nombre.includes(',')) {
+      this.error = 'El nombre del producto no puede contener comas (,).';
+      return;
+    }
 
-    this.router.navigate(['/productos']);
+    if (this.producto.imagen.trim() && !esUrlImagen(this.producto.imagen)) {
+      this.error = 'La imagen debe ser una URL que empiece por http:// o https://';
+      return;
+    }
+
+    this.guardando = true;
+    this.error = '';
+
+    this.productoService.actualizarProducto(this.producto.codigo, {
+      nombre: this.producto.nombre.trim(),
+      proveedor: this.producto.proveedor,
+      tamano: this.producto.tamano.trim(),
+      descripcion: this.producto.descripcion,
+      imagen: this.producto.imagen.trim(),
+      costo: Number(this.producto.costo) || 0,
+      precio_venta: Number(this.producto.precio_venta) || 0,
+      precio_mayorista: Number(this.producto.precio_mayorista) || 0
+    }).subscribe({
+      next: producto => {
+        this.guardando = false;
+        alert(
+          `El producto ${producto.nombre} (${producto.referencia}) ` +
+          `ha sido actualizado correctamente.`
+        );
+        this.router.navigate(['/productos']);
+      },
+      error: err => {
+        this.guardando = false;
+        this.error = mensajeDeError(err);
+      }
+    });
   }
 
   cancelar(): void {
     this.router.navigate(['/productos']);
-  }
-
-  cambiarImagen(event: Event): void {
-
-    const input = event.target as HTMLInputElement;
-
-    if (!input.files || input.files.length === 0) {
-      return;
-    }
-
-    const archivo = input.files[0];
-
-    const lector = new FileReader();
-
-    lector.onload = () => {
-      this.producto.imagen = lector.result as string;
-    };
-
-    lector.readAsDataURL(archivo);
   }
 }

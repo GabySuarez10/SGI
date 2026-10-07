@@ -48,6 +48,15 @@
 
   <!-- Productos -->
 
+  <div class="estado-carga" *ngIf="cargando">
+    Cargando productos de bodega...
+  </div>
+
+  <div class="mensaje-error" *ngIf="error">
+    {{ error }}
+  </div>
+
+
   <div class="section-header">
 
     <div>
@@ -72,8 +81,9 @@
       <div class="product-image">
 
         <img
-          [src]="producto.imagen"
-          [alt]="producto.nombre">
+          [src]="producto.imagen || imagenPorDefecto"
+          [alt]="producto.nombre"
+          (error)="imagenNoCarga($event)">
 
       </div>
 
@@ -137,7 +147,7 @@
 
   <div
     class="empty-state"
-    *ngIf="productosFiltrados.length === 0">
+    *ngIf="!cargando && productosFiltrados.length === 0">
 
     <div class="empty-icon">
       ⌕
@@ -191,9 +201,10 @@
       <button
         type="button"
         class="btn-primary"
+        [disabled]="guardando"
         (click)="registrarTraslado()">
 
-        Registrar traslado
+        {{ guardando ? 'Registrando...' : 'Registrar traslado' }}
 
       </button>
 

@@ -1,14 +1,12 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { NgFor, NgIf } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-
-interface ProductoNuevo {
-  nombre: string;
-  tamano: string;
-  descripcion: string;
-  imagen: string;
-}
+import { IProductoNuevo } from '../../interfaces/producto.interface';
+import { ProductoService } from '../../services/producto.service';
+import { ProveedorService } from '../../services/proveedor.service';
+import { mensajeDeError } from '../../utils/http-error';
+import { esUrlImagen, imagenNoCarga } from '../../utils/imagen';
 
 @Component({
   selector: 'app-nuevo-producto',
@@ -16,41 +14,55 @@ interface ProductoNuevo {
   templateUrl: './nuevo-producto.html',
   styleUrl: './nuevo-producto.css',
 })
-export class NuevoProducto {
+export class NuevoProducto implements OnInit {
 
   proveedor = '';
 
-  // Proveedores registrados actualmente.
-  // Más adelante estos datos vendrán del backend.
-  proveedores = [
-    'Freddy Bogotá',
-    'Diego Cali',
-    'Proveedor X'
-  ];
+  // Nombres de los proveedores registrados (vienen del backend)
+  proveedores: string[] = [];
 
   // Lista de productos que se van a registrar
-  productos: ProductoNuevo[] = [
-    {
+  productos: IProductoNuevo[] = [this.productoVacio()];
+
+  guardando = false;
+  error = '';
+
+  imagenNoCarga = imagenNoCarga;
+
+  constructor(
+    private productoService: ProductoService,
+    private proveedorService: ProveedorService,
+    private router: Router
+  ) {}
+
+  ngOnInit(): void {
+    this.proveedorService.getProveedores().subscribe({
+      next: proveedores => {
+        this.proveedores = proveedores.map(proveedor => proveedor.nombre);
+      },
+      error: err => {
+        this.error = mensajeDeError(err);
+      }
+    });
+  }
+
+  private productoVacio(): IProductoNuevo {
+    return {
+      referencia: '',
       nombre: '',
       tamano: '',
       descripcion: '',
-      imagen: ''
-    }
-  ];
-
-  constructor(private router: Router) {}
+      imagen: '',
+      costo: 0,
+      precio_venta: 0,
+      precio_mayorista: 0
+    };
+  }
 
 
   // Agregar otro producto a la lista
   agregarProducto(): void {
-
-    this.productos.push({
-      nombre: '',
-      tamano: '',
-      descripcion: '',
-      imagen: ''
-    });
-
+    this.productos.push(this.productoVacio());
   }
 
 
@@ -66,53 +78,67 @@ export class NuevoProducto {
   }
 
 
-  // Seleccionar imagen para un producto específico
-  seleccionarImagen(event: Event, index: number): void {
-
-    const input = event.target as HTMLInputElement;
-
-    if (!input.files || input.files.length === 0) {
-      return;
-    }
-
-    const archivo = input.files[0];
-
-    this.productos[index].imagen = URL.createObjectURL(archivo);
-
-  }
-
-
   // Guardar todos los productos
   guardarProductos(): void {
 
     if (!this.proveedor) {
-      alert('Selecciona un proveedor.');
+      this.error = 'Selecciona un proveedor.';
       return;
     }
 
 
-    // Revisar que todos los productos tengan
-    // los campos obligatorios.
+    // Revisar que todos los productos tengan los campos obligatorios.
     const productoIncompleto = this.productos.some(producto =>
       !producto.nombre.trim() ||
       !producto.tamano.trim()
     );
 
-
     if (productoIncompleto) {
-      alert(
-        'Completa el nombre y tamaño de todos los productos.'
-      );
-
+      this.error = 'Completa el nombre y tamaño de todos los productos.';
       return;
     }
 
+    // Los nombres se usan en listas separadas por comas (ventas, pedidos, traslados)
+    if (this.productos.some(producto => producto.nombre.includes(','))) {
+      this.error = 'El nombre de un producto no puede contener comas (,).';
+      return;
+    }
 
-    alert(
-      `${this.productos.length} producto(s) registrado(s) correctamente.`
+    const imagenInvalida = this.productos.some(producto =>
+      producto.imagen.trim() !== '' && !esUrlImagen(producto.imagen)
     );
 
-    this.router.navigate(['/productos']);
+    if (imagenInvalida) {
+      this.error = 'La imagen debe ser una URL que empiece por http:// o https://';
+      return;
+    }
+
+    this.guardando = true;
+    this.error = '';
+
+    this.productoService.crearProductos({
+      proveedor: this.proveedor,
+      productos: this.productos.map(producto => ({
+        ...producto,
+        nombre: producto.nombre.trim(),
+        tamano: producto.tamano.trim(),
+        imagen: producto.imagen.trim(),
+        costo: Number(producto.costo) || 0,
+        precio_venta: Number(producto.precio_venta) || 0,
+        precio_mayorista: Number(producto.precio_mayorista) || 0
+      }))
+    }).subscribe({
+      next: creados => {
+        this.guardando = false;
+        alert(`${creados.length} producto(s) registrado(s) correctamente.`);
+        this.router.navigate(['/productos']);
+      },
+      error: err => {
+        this.guardando = false;
+        this.error = mensajeDeError(err);
+        alert(this.error);
+      }
+    });
 
   }
 

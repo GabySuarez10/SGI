@@ -28,6 +28,10 @@
       <p>Completa los datos principales para registrar el proveedor.</p>
     </div>
 
+    <div class="mensaje-error" *ngIf="error">
+      {{ error }}
+    </div>
+
 
     <div class="form-grid">
 
@@ -123,8 +127,9 @@
     <button
       class="btn-primary"
       type="button"
+      [disabled]="guardando"
       (click)="guardarProveedor()">
-      Guardar proveedor
+      {{ guardando ? 'Guardando...' : 'Guardar proveedor' }}
     </button>
 
   </div>

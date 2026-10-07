@@ -24,23 +24,33 @@
 
     </div>
 
-    <div class="order-status">
+    <div class="order-status" *ngIf="pedido">
       <span class="status-dot"></span>
-      Pendiente de recepción
+      {{ pedido.estado ? 'Recibido' : 'Pendiente de recepción' }}
     </div>
 
   </div>
 
 
  
+<!-- CARGA / ERROR -->
+<div class="estado-carga" *ngIf="cargando">
+  Cargando pedido...
+</div>
+
+<div class="mensaje-error" *ngIf="error">
+  {{ error }}
+</div>
+
+
 <!-- INFORMACIÓN DEL PEDIDO -->
-<section class="order-info-card">
+<section class="order-info-card" *ngIf="pedido">
 
   <div class="order-info-item">
 
     <span>Pedido</span>
 
-    <strong>#001</strong>
+    <strong>#{{ numeroPedido }}</strong>
 
   </div>
 
@@ -49,7 +59,7 @@
 
     <span>Proveedor</span>
 
-    <strong>Freddy Bogotá</strong>
+    <strong>{{ pedido.proveedor }}</strong>
 
   </div>
 
@@ -58,16 +68,17 @@
 
     <span>Fecha del pedido</span>
 
-    <strong>28 Sep 2026</strong>
+    <strong>{{ pedido.fecha_pedido | date:'d MMM y' }}</strong>
 
   </div>
 
 
   <div class="order-info-item">
 
-    <span>Destino del pedido</span>
+    <span>{{ pedido.estado ? 'Fecha de llegada' : 'Destino del pedido' }}</span>
 
-    <strong>Centro Recreacional X</strong>
+    <strong *ngIf="!pedido.estado">{{ pedido.zona_entrega ? 'Bodega' : 'Local' }}</strong>
+    <strong *ngIf="pedido.estado">{{ pedido.fecha_llegada | date:'d MMM y, h:mm a' }} · {{ pedido.zona_entrega ? 'Bodega' : 'Local' }}</strong>
 
   </div>
 
@@ -127,28 +138,16 @@
                 <div class="product-thumbnail">
 
                   <img
-                    *ngIf="producto.nombre === 'Muñeco de nieve'"
-                    src="https://images.unsplash.com/photo-1482517967863-00e15c9b44be?auto=format&fit=crop&w=200&q=80"
-                    [alt]="producto.nombre">
-
-                  <img
-                    *ngIf="producto.nombre === 'Princesa Sofía'"
-                    src="https://images.unsplash.com/photo-1518837695005-2083093ee35b?auto=format&fit=crop&w=200&q=80"
-                    [alt]="producto.nombre">
-
-                  <img
-                    *ngIf="producto.nombre === 'Calabaza'"
-                    src="https://images.unsplash.com/photo-1508361001413-7a9c0b5b4f0f?auto=format&fit=crop&w=200&q=80"
-                    [alt]="producto.nombre">
+                    [src]="producto.imagen || imagenPorDefecto"
+                    [alt]="producto.nombre"
+                    (error)="imagenNoCarga($event)">
 
                 </div>
 
                 <div class="product-details">
 
                   <span class="product-reference">
-                    {{ producto.nombre === 'Muñeco de nieve' ? 'FB0001' :
-                       producto.nombre === 'Princesa Sofía' ? 'FB0002' :
-                       'FB0003' }}
+                    {{ producto.referencia }}
                   </span>
 
                   <strong>
@@ -179,6 +178,7 @@
                 class="quantity-input"
                 type="number"
                 min="0"
+                [disabled]="soloLectura"
                 [(ngModel)]="producto.recibido">
 
             </td>
@@ -212,6 +212,7 @@
                 type="number"
                 min="0"
                 [max]="producto.recibido"
+                [disabled]="soloLectura"
                 [(ngModel)]="producto.danado">
 
             </td>
@@ -413,8 +414,8 @@
   </section>
 
 
-  <!-- OBSERVACIONES -->
-  <section class="observations-card">
+  <!-- OBSERVACIONES (aún no se guardan: la tabla Pedido_proveedor no tiene esa columna) -->
+  <section class="observations-card" *ngIf="!soloLectura">
 
     <div class="observations-header">
 
@@ -440,7 +441,7 @@
 
 
   <!-- ACCIONES -->
-  <div class="page-actions">
+  <div class="page-actions" *ngIf="!soloLectura">
 
     <button
       type="button"
@@ -455,9 +456,10 @@
     <button
       type="button"
       class="btn-primary"
+      [disabled]="guardando || !pedido"
       (click)="registrarRecepcion()">
 
-      Registrar recepción
+      {{ guardando ? 'Registrando...' : 'Registrar recepción' }}
 
     </button>
 

@@ -42,41 +42,53 @@
   </button>
 
 </section>
+  <!-- Carga / error -->
+  <div class="estado-carga" *ngIf="cargando">
+    Cargando pedidos...
+  </div>
+
+  <div class="mensaje-error" *ngIf="error">
+    {{ error }}
+  </div>
+
+
   <!-- Lista de pedidos -->
   <section class="orders-list">
 
-
-    <!-- Pedido 001 -->
     <article
-  class="order-card"
-  *ngIf="filtroActual === 'todos' || filtroActual === 'pendientes'">
+      class="order-card"
+      *ngFor="let pedido of pedidosFiltrados">
 
       <div class="order-main">
 
         <div class="order-number">
-          <span>Pedido #001</span>
-          <strong>Freddy Bogotá</strong>
+          <span>Pedido #{{ numeroPedido(pedido.codigo) }}</span>
+          <strong>{{ pedido.proveedor }}</strong>
         </div>
 
         <div class="order-details">
-          <span>12 productos</span>
-          <span>35 unidades</span>
-          <span>28 de septiembre de 2026</span>
+          <span>{{ pedido.productos.length }} productos</span>
+          <span>{{ totalUnidades(pedido) }} unidades</span>
+          <span>{{ pedido.fecha_pedido | date:"d 'de' MMMM 'de' y" }}</span>
+          <span>Destino: {{ pedido.zona_entrega ? 'Bodega' : 'Local' }}</span>
         </div>
 
       </div>
 
       <div class="order-right">
 
-        <span class="status pending">
-          Pendiente
+        <span
+          class="status"
+          [class.pending]="!pedido.estado"
+          [class.received]="pedido.estado">
+          {{ pedido.estado ? 'Recibido' : 'Pendiente' }}
         </span>
 
-       <button
+        <button
           class="view-button"
-          routerLink="/detalle-pedido">
+          [routerLink]="['/detalle-pedido', pedido.codigo]">
 
-           Ver pedido →
+          Ver pedido →
 
         </button>
 
@@ -85,83 +97,9 @@
     </article>
 
 
-    <!-- Pedido 002 -->
-   <article
-  class="order-card"
-  *ngIf="filtroActual === 'todos' || filtroActual === 'pendientes'">
-
-      <div class="order-main">
-
-        <div class="order-number">
-          <span>Pedido #002</span>
-          <strong>Diego Cali</strong>
-        </div>
-
-        <div class="order-details">
-          <span>8 productos</span>
-          <span>20 unidades</span>
-          <span>25 de septiembre de 2026</span>
-        </div>
-
-      </div>
-
-      <div class="order-right">
-
-        <span class="status pending">
-          Pendiente
-        </span>
-
-       <button
-          class="view-button"
-          routerLink="/detalle-pedido">
-
-           Ver pedido →
-
-        </button>
-
-      </div>
-
-    </article>
-
-
-    <!-- Pedido 003 -->
-   <article
-  class="order-card"
-  *ngIf="filtroActual === 'todos' || filtroActual === 'recibidos'">
-
-      <div class="order-main">
-
-        <div class="order-number">
-          <span>Pedido #003</span>
-          <strong>Freddy Bogotá</strong>
-        </div>
-
-        <div class="order-details">
-          <span>10 productos</span>
-          <span>28 unidades</span>
-          <span>20 de septiembre de 2026</span>
-        </div>
-
-      </div>
-
-      <div class="order-right">
-
-        <span class="status received">
-          Recibido
-        </span>
-
-       <button
-          class="view-button"
-          routerLink="/detalle-pedido">
-
-           Ver pedido →
-
-        </button>
-
-      </div>
-
-    </article>
-
+    <p *ngIf="!cargando && !error && pedidosFiltrados.length === 0">
+      No hay pedidos {{ filtroActual === 'todos' ? 'registrados' : filtroActual }}.
+    </p>
 
   </section>
 

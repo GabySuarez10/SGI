@@ -76,6 +76,16 @@
   </section>
 
 
+  <!-- CARGA / ERROR -->
+  <div class="estado-carga" *ngIf="cargando">
+    Cargando movimientos...
+  </div>
+
+  <div class="mensaje-error" *ngIf="error">
+    {{ error }}
+  </div>
+
+
   <!-- RESULTADOS -->
   <div class="results-header">
 
@@ -166,7 +176,7 @@
       <!-- SIN RESULTADOS -->
       <div
         class="empty-state"
-        *ngIf="movimientosFiltrados.length === 0">
+        *ngIf="!cargando && movimientosFiltrados.length === 0">
 
         <div class="empty-icon">⌕</div>
 

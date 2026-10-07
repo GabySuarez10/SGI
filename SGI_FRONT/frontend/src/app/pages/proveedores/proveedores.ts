@@ -1,15 +1,10 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { NgFor, NgIf } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
-
-interface Proveedor {
-  nombre: string;
-  telefono: string;
-  direccion: string;
-  ciudad: string;
-  descripcion: string;
-}
+import { IProveedor } from '../../interfaces/proveedor.interface';
+import { ProveedorService } from '../../services/proveedor.service';
+import { mensajeDeError } from '../../utils/http-error';
 
 @Component({
   selector: 'app-proveedores',
@@ -17,37 +12,40 @@ interface Proveedor {
   templateUrl: './proveedores.html',
   styleUrl: './proveedores.css',
 })
-export class Proveedores {
+export class Proveedores implements OnInit {
 
   busqueda = '';
 
-  proveedores: Proveedor[] = [
-    {
-      nombre: 'Freddy Bogotá',
-      telefono: '300 123 4567',
-      direccion: 'Calle 80 # 20-15',
-      ciudad: 'Bogotá',
-      descripcion: 'Proveedor de figuras decorativas y productos de temporada.'
-    },
-    {
-      nombre: 'Diego Cali',
-      telefono: '310 987 6543',
-      direccion: 'Carrera 5 # 12-30',
-      ciudad: 'Cali',
-      descripcion: 'Proveedor de figuras de yeso y artículos para pintar.'
-    },
-    {
-      nombre: 'Arte y Figura',
-      telefono: '315 456 7890',
-      direccion: 'Carrera 10 # 25-40',
-      ciudad: 'Medellín',
-      descripcion: 'Proveedor de figuras decorativas para diferentes temporadas.'
-    }
-  ];
+  proveedores: IProveedor[] = [];
+  cargando = false;
+  error = '';
 
-  constructor(private router: Router) {}
+  constructor(
+    private proveedorService: ProveedorService,
+    private router: Router
+  ) {}
 
-  get proveedoresFiltrados(): Proveedor[] {
+  ngOnInit(): void {
+    this.cargarProveedores();
+  }
+
+  cargarProveedores(): void {
+    this.cargando = true;
+    this.error = '';
+
+    this.proveedorService.getProveedores().subscribe({
+      next: proveedores => {
+        this.proveedores = proveedores;
+        this.cargando = false;
+      },
+      error: err => {
+        this.error = mensajeDeError(err);
+        this.cargando = false;
+      }
+    });
+  }
+
+  get proveedoresFiltrados(): IProveedor[] {
 
     const texto = this.busqueda.trim().toLowerCase();
 
@@ -57,20 +55,16 @@ export class Proveedores {
 
     return this.proveedores.filter(proveedor =>
       proveedor.nombre.toLowerCase().includes(texto) ||
-      proveedor.ciudad.toLowerCase().includes(texto) ||
-      proveedor.telefono.toLowerCase().includes(texto)
+      (proveedor.ciudad ?? '').toLowerCase().includes(texto) ||
+      (proveedor.telefono ?? '').toLowerCase().includes(texto)
     );
   }
 
-  nuevoProveedor() {
-    alert('Aquí crearemos el formulario para registrar un proveedor.');
+  editarProveedor(proveedor: IProveedor): void {
+    this.router.navigate(['/editar-proveedor', proveedor.nombre]);
   }
-editarProveedor(proveedor: Proveedor): void {
-  console.log('Proveedor seleccionado:', proveedor);
-  this.router.navigate(['/editar-proveedor', proveedor.nombre]);
-}
 
-  limpiarBusqueda() {
+  limpiarBusqueda(): void {
     this.busqueda = '';
   }
 

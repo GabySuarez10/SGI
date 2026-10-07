@@ -1,9 +1,17 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { NgFor, NgIf, DecimalPipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
+import { forkJoin } from 'rxjs';
+import { ProductoService } from '../../services/producto.service';
+import { ProveedorService } from '../../services/proveedor.service';
+import { PedidoProveedorService } from '../../services/pedido-proveedor.service';
+import { mensajeDeError } from '../../utils/http-error';
+import { IMAGEN_POR_DEFECTO, imagenNoCarga } from '../../utils/imagen';
+import { hoyISO } from '../../utils/fecha';
 
-interface Producto {
+// Producto del catálogo con la cantidad y el precio que se van a pedir
+interface ProductoPedido {
   referencia: string;
   nombre: string;
   proveedor: string;
@@ -12,98 +20,89 @@ interface Producto {
   precioEsperado: number;
 }
 
+type Destino = '' | 'bodega' | 'local';
+
 @Component({
   selector: 'app-nuevo-pedido',
   imports: [FormsModule, NgFor, NgIf, DecimalPipe],
   templateUrl: './nuevo-pedido.html',
   styleUrl: './nuevo-pedido.css',
 })
-export class NuevoPedido {
+export class NuevoPedido implements OnInit {
 
   pasoActual = 1;
 
   proveedor = '';
-  fecha = '';
-  destino = '';
+  fecha = hoyISO();
+  destino: Destino = 'bodega';
   busqueda = '';
 
-  productos: Producto[] = [
-    {
-      referencia: 'FB0001',
-      nombre: 'Muñeco de nieve',
-      proveedor: 'Freddy Bogotá',
-      imagen: 'https://images.unsplash.com/photo-1482517967863-00e15c9b44be?auto=format&fit=crop&w=500&q=80',
-      cantidad: 0,
-      precioEsperado: 3500
-    },
-    {
-      referencia: 'FB0002',
-      nombre: 'Princesa Sofía',
-      proveedor: 'Freddy Bogotá',
-      imagen: 'https://images.unsplash.com/photo-1518837695005-2083093ee35b?auto=format&fit=crop&w=500&q=80',
-      cantidad: 0,
-      precioEsperado: 4000
-    },
-    {
-      referencia: 'FB0003',
-      nombre: 'Calabaza',
-      proveedor: 'Freddy Bogotá',
-      imagen: 'https://images.unsplash.com/photo-1508361001413-7a9c0b5b4f0f?auto=format&fit=crop&w=500&q=80',
-      cantidad: 0,
-      precioEsperado: 2000
-    },
-    {
-      referencia: 'DC0001',
-      nombre: 'Ángel navideño',
-      proveedor: 'Diego Cali',
-      imagen: 'https://images.unsplash.com/photo-1512909006721-3d6018887383?auto=format&fit=crop&w=500&q=80',
-      cantidad: 0,
-      precioEsperado: 3000
-    },
-    {
-      referencia: 'DC0002',
-      nombre: 'Casita navideña',
-      proveedor: 'Diego Cali',
-      imagen: 'https://images.unsplash.com/photo-1544273677-3c0b9d5d6f54?auto=format&fit=crop&w=500&q=80',
-      cantidad: 0,
-      precioEsperado: 4500
-    },
-    {
-      referencia: 'DC0003',
-      nombre: 'Reno',
-      proveedor: 'Diego Cali',
-      imagen: 'https://images.unsplash.com/photo-1482632629475-4f6f4d4e4b5d?auto=format&fit=crop&w=500&q=80',
-      cantidad: 0,
-      precioEsperado: 2800
-    }
-  ];
+  proveedores: string[] = [];
+  productos: ProductoPedido[] = [];
 
-  constructor(private router: Router) {}
+  cargando = false;
+  guardando = false;
+  error = '';
 
-  get proveedores(): string[] {
-    return [...new Set(this.productos.map(producto => producto.proveedor))];
+  imagenPorDefecto = IMAGEN_POR_DEFECTO;
+  imagenNoCarga = imagenNoCarga;
+
+  constructor(
+    private productoService: ProductoService,
+    private proveedorService: ProveedorService,
+    private pedidoService: PedidoProveedorService,
+    private router: Router
+  ) {}
+
+  ngOnInit(): void {
+    this.cargando = true;
+
+    forkJoin({
+      proveedores: this.proveedorService.getProveedores(),
+      productos: this.productoService.getProductos()
+    }).subscribe({
+      next: ({ proveedores, productos }) => {
+        this.proveedores = proveedores.map(proveedor => proveedor.nombre);
+        this.productos = productos.map(producto => ({
+          referencia: producto.referencia,
+          nombre: producto.nombre,
+          proveedor: producto.proveedor,
+          imagen: producto.imagen,
+          cantidad: 0,
+          precioEsperado: producto.costo ?? 0   // el costo del catálogo como precio sugerido
+        }));
+        this.cargando = false;
+      },
+      error: err => {
+        this.error = mensajeDeError(err);
+        this.cargando = false;
+      }
+    });
   }
 
-  get productosFiltrados(): Producto[] {
+  // Cada pedido es de un solo proveedor: solo se muestran sus productos
+  get productosFiltrados(): ProductoPedido[] {
     const texto = this.busqueda.trim().toLowerCase();
 
     return this.productos.filter(producto => {
 
       const coincideProveedor =
-        !this.proveedor ||
+        !!this.proveedor &&
         producto.proveedor === this.proveedor;
 
       const coincideBusqueda =
         !texto ||
         producto.nombre.toLowerCase().includes(texto) ||
-        producto.referencia.toLowerCase().includes(texto);
+        (producto.referencia ?? '').toLowerCase().includes(texto);
 
       return coincideProveedor && coincideBusqueda;
     });
   }
 
-  get productosSeleccionados(): Producto[] {
-    return this.productos.filter(producto => producto.cantidad > 0);
+  get productosSeleccionados(): ProductoPedido[] {
+    return this.productos.filter(
+      producto => producto.proveedor === this.proveedor && producto.cantidad > 0
+    );
   }
 
   get totalProductos(): number {
@@ -125,58 +124,82 @@ export class NuevoPedido {
     );
   }
 
-  aumentarCantidad(producto: Producto) {
+  aumentarCantidad(producto: ProductoPedido): void {
     producto.cantidad++;
   }
 
-  disminuirCantidad(producto: Producto) {
+  disminuirCantidad(producto: ProductoPedido): void {
     if (producto.cantidad > 0) {
       producto.cantidad--;
     }
   }
 
-  actualizarProveedor() {
+  // Al cambiar de proveedor se limpian las cantidades del anterior
+  actualizarProveedor(): void {
     this.busqueda = '';
 
     this.productos.forEach(producto => {
       if (producto.proveedor !== this.proveedor) {
-        producto.cantidad = producto.cantidad;
+        producto.cantidad = 0;
       }
     });
   }
 
-  continuar() {
+  continuar(): void {
 
     if (!this.proveedor || !this.fecha || !this.destino) {
-      alert('Completa la información del pedido antes de continuar.');
+      this.error = 'Completa la información del pedido antes de continuar.';
       return;
     }
 
     if (this.totalUnidades === 0) {
-      alert('Selecciona al menos un producto para continuar.');
+      this.error = 'Selecciona al menos un producto para continuar.';
       return;
     }
 
+    this.error = '';
     this.pasoActual = 2;
   }
 
-  volverAProductos() {
+  volverAProductos(): void {
     this.pasoActual = 1;
   }
 
-  guardarPedido() {
+  guardarPedido(): void {
 
-    if (this.productosSeleccionados.length === 0) {
+    const seleccionados = this.productosSeleccionados;
+
+    if (seleccionados.length === 0) {
       alert('Agrega al menos un producto al pedido.');
       return;
     }
 
-    alert('Pedido registrado correctamente.');
+    this.guardando = true;
+    this.error = '';
 
-    this.router.navigate(['/pedidos-proveedor']);
+    // Listas paralelas: productos[i] -> cantidad[i] -> precio_esperado[i]
+    this.pedidoService.crearPedido({
+      proveedor: this.proveedor,
+      productos: seleccionados.map(producto => producto.nombre),
+      cantidad: seleccionados.map(producto => Number(producto.cantidad)),
+      precio_esperado: seleccionados.map(producto => Number(producto.precioEsperado) || 0),
+      fecha_pedido: this.fecha,
+      zona_entrega: this.destino === 'bodega'
+    }).subscribe({
+      next: pedido => {
+        this.guardando = false;
+        alert(`Pedido #${String(pedido.codigo).padStart(3, '0')} registrado correctamente.`);
+        this.router.navigate(['/pedidos-proveedor']);
+      },
+      error: err => {
+        this.guardando = false;
+        this.error = mensajeDeError(err);
+        alert(this.error);
+      }
+    });
   }
 
-  cancelar() {
+  cancelar(): void {
     this.router.navigate(['/pedidos-proveedor']);
   }
 

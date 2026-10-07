@@ -1,54 +1,40 @@
 from flask import Blueprint, jsonify, request
-from database import db
-from models import Usuario
+
+from queries import usuario_queries as q
 
 usuarios_bp = Blueprint("usuarios", __name__, url_prefix="/api/usuarios")
 
 
-@usuarios_bp.route("", methods=["GET"])
-def get_usuarios():
-    usuarios = Usuario.query.all()
-    return jsonify([u.to_dict() for u in usuarios]), 200
+@usuarios_bp.get("")
+def listar():
+    return jsonify([u.to_dict() for u in q.listar_usuarios()])
 
 
-@usuarios_bp.route("/<int:id>", methods=["GET"])
-def get_usuario(id):
-    usuario = Usuario.query.get_or_404(id, description="Usuario no encontrado")
-    return jsonify(usuario.to_dict()), 200
+@usuarios_bp.get("/<int:id_usuario>")
+def obtener(id_usuario):
+    return jsonify(q.obtener_usuario(id_usuario).to_dict())
 
 
-@usuarios_bp.route("", methods=["POST"])
-def create_usuario():
+@usuarios_bp.post("")
+def crear():
+    """Registro de un usuario nuevo: { nombre, contrasena }"""
+    return jsonify(q.crear_usuario(request.get_json() or {}).to_dict()), 201
+
+
+@usuarios_bp.post("/login")
+def login():
+    """Inicio de sesión: { nombre, contrasena } -> datos del usuario"""
     data = request.get_json() or {}
-    if not data.get("nombre") or not data.get("contrasena"):
-        return jsonify({"error": "Nombre y contraseña son obligatorios"}), 400
-
-    nuevo_usuario = Usuario(
-        nombre=data.get("nombre"),
-        contrasena=data.get("contrasena")
-    )
-    db.session.add(nuevo_usuario)
-    db.session.commit()
-    return jsonify(nuevo_usuario.to_dict()), 201
+    usuario = q.iniciar_sesion(data.get("nombre"), data.get("contrasena"))
+    return jsonify(usuario.to_dict())
 
 
-@usuarios_bp.route("/<int:id>", methods=["PUT"])
-def update_usuario(id):
-    usuario = Usuario.query.get_or_404(id, description="Usuario no encontrado")
-    data = request.get_json() or {}
-
-    if "nombre" in data:
-        usuario.nombre = data["nombre"]
-    if "contrasena" in data:
-        usuario.contrasena = data["contrasena"]
-
-    db.session.commit()
-    return jsonify(usuario.to_dict()), 200
+@usuarios_bp.put("/<int:id_usuario>")
+def actualizar(id_usuario):
+    return jsonify(q.actualizar_usuario(id_usuario, request.get_json() or {}).to_dict())
 
 
-@usuarios_bp.route("/<int:id>", methods=["DELETE"])
-def delete_usuario(id):
-    usuario = Usuario.query.get_or_404(id, description="Usuario no encontrado")
-    db.session.delete(usuario)
-    db.session.commit()
-    return jsonify({"message": f"Usuario con ID {id} eliminado exitosamente"}), 200
+@usuarios_bp.delete("/<int:id_usuario>")
+def eliminar(id_usuario):
+    q.eliminar_usuario(id_usuario)
+    return jsonify({"message": f"Usuario {id_usuario} eliminado"})

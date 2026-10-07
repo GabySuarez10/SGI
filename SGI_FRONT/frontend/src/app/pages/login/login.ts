@@ -1,11 +1,14 @@
 import { Component } from '@angular/core';
+import { NgIf } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
+import { AuthService } from '../../services/auth.service';
+import { mensajeDeError } from '../../utils/http-error';
 
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [FormsModule, RouterLink],
+  imports: [FormsModule, RouterLink, NgIf],
   templateUrl: './login.html',
   styleUrl: './login.css'
 })
@@ -15,16 +18,33 @@ export class Login {
   contrasena = '';
   mostrarContrasena = false;
 
-  constructor(private router: Router) {}
+  cargando = false;
+  error = '';
+
+  constructor(
+    private authService: AuthService,
+    private router: Router
+  ) {}
 
   iniciarSesion(): void {
     if (!this.usuario.trim() || !this.contrasena.trim()) {
-      alert('Completa el usuario y la contraseña.');
+      this.error = 'Completa el usuario y la contraseña.';
       return;
     }
 
-    // Por ahora simulamos el inicio de sesión.
-    this.router.navigate(['/']);
+    this.cargando = true;
+    this.error = '';
+
+    this.authService.iniciarSesion(this.usuario.trim(), this.contrasena).subscribe({
+      next: () => {
+        this.cargando = false;
+        this.router.navigate(['/']);
+      },
+      error: err => {
+        this.cargando = false;
+        this.error = mensajeDeError(err);
+      }
+    });
   }
 
   alternarContrasena(): void {

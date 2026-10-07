@@ -32,11 +32,19 @@
       </div>
 
       <span class="product-code">
-        {{ producto.codigo }}
+        {{ producto.referencia }}
       </span>
 
     </div>
 
+
+    <div class="estado-carga" *ngIf="cargando">
+      Cargando producto...
+    </div>
+
+    <div class="mensaje-error" *ngIf="error">
+      {{ error }}
+    </div>
 
     <div class="form-content">
 
@@ -45,26 +53,27 @@
         <div class="image-preview">
 
           <img
-            [src]="producto.imagen"
+            [src]="producto.imagen || imagenPorDefecto"
             [alt]="producto.nombre"
+            (error)="imagenNoCarga($event)"
           />
 
         </div>
 
-        <label
-          for="imagen"
-          class="image-button"
-        >
-          Cambiar imagen
-        </label>
+        <div class="form-group">
 
-        <input
-          id="imagen"
-          type="file"
-          accept="image/*"
-          (change)="cambiarImagen($event)"
-          hidden
-        />
+          <label for="imagen">
+            URL de la imagen
+          </label>
+
+          <input
+            id="imagen"
+            type="url"
+            [(ngModel)]="producto.imagen"
+            placeholder="https://..."
+          />
+
+        </div>
 
         <p>
           Imagen representativa del producto.
@@ -101,16 +110,11 @@
             id="proveedor"
             [(ngModel)]="producto.proveedor"
           >
-            <option value="Freddy Bogotá">
-              Freddy Bogotá
-            </option>
-
-            <option value="Diego Cali">
-              Diego Cali
-            </option>
-
-            <option value="Proveedor X">
-              Proveedor X
+            <option
+              *ngFor="let nombreProveedor of proveedores"
+              [value]="nombreProveedor"
+            >
+              {{ nombreProveedor }}
             </option>
           </select>
 
@@ -119,15 +123,63 @@
 
         <div class="form-group">
 
-          <label for="tamaño">
+          <label for="tamano">
             Tamaño *
           </label>
 
           <input
-            id="tamaño"
+            id="tamano"
             type="text"
-            [(ngModel)]="producto['tamaño']"
+            [(ngModel)]="producto.tamano"
             placeholder="Ej. 15 cm"
+          />
+
+        </div>
+
+
+        <div class="form-group">
+
+          <label for="costo">
+            Costo (COP)
+          </label>
+
+          <input
+            id="costo"
+            type="number"
+            min="0"
+            [(ngModel)]="producto.costo"
+          />
+
+        </div>
+
+
+        <div class="form-group">
+
+          <label for="precioVenta">
+            Precio de venta en local (COP)
+          </label>
+
+          <input
+            id="precioVenta"
+            type="number"
+            min="0"
+            [(ngModel)]="producto.precio_venta"
+          />
+
+        </div>
+
+
+        <div class="form-group">
+
+          <label for="precioMayorista">
+            Precio mayorista (COP)
+          </label>
+
+          <input
+            id="precioMayorista"
+            type="number"
+            min="0"
+            [(ngModel)]="producto.precio_mayorista"
           />
 
         </div>
@@ -166,9 +218,10 @@
       <button
         type="button"
         class="save-button"
+        [disabled]="cargando || guardando"
         (click)="guardarCambios()"
       >
-        Guardar cambios
+        {{ guardando ? 'Guardando...' : 'Guardar cambios' }}
       </button>
 
     </div>

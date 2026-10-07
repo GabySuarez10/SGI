@@ -22,6 +22,11 @@
   </section>
 
 
+  <div class="mensaje-error" *ngIf="error">
+    {{ error }}
+  </div>
+
+
   <!-- Tarjetas principales -->
   <section class="stats-grid">
 
@@ -33,7 +38,7 @@
 
       <div class="stat-content">
         <span class="stat-label">Productos</span>
-        <strong>128</strong>
+        <strong>{{ resumen?.total_productos ?? '—' }}</strong>
         <small>registrados</small>
       </div>
 
@@ -48,7 +53,7 @@
 
       <div class="stat-content">
         <span class="stat-label">En bodega</span>
-        <strong>350</strong>
+        <strong>{{ resumen?.unidades_bodega ?? '—' }}</strong>
         <small>unidades disponibles</small>
       </div>
 
@@ -63,7 +68,7 @@
 
       <div class="stat-content">
         <span class="stat-label">En local</span>
-        <strong>86</strong>
+        <strong>{{ resumen?.unidades_local ?? '—' }}</strong>
         <small>unidades disponibles</small>
       </div>
 
@@ -78,7 +83,7 @@
 
       <div class="stat-content">
         <span class="stat-label">Pedidos pendientes</span>
-        <strong>4</strong>
+        <strong>{{ resumen?.pedidos_pendientes ?? '—' }}</strong>
         <small>por recibir</small>
       </div>
 
@@ -115,46 +120,28 @@
 
       <div class="orders-list">
 
-        <div class="order-item">
+        <div
+          class="order-item"
+          *ngFor="let pedido of resumen?.pedidos_recientes ?? []"
+          [routerLink]="['/detalle-pedido', pedido.codigo]">
 
           <div class="order-info">
-            <strong>Pedido #001</strong>
-            <span>Proveedor: Freddy Bogotá</span>
+            <strong>Pedido #{{ numeroPedido(pedido.codigo) }}</strong>
+            <span>Proveedor: {{ pedido.proveedor }}</span>
           </div>
 
-          <div class="order-status pending">
-            Pendiente
+          <div
+            class="order-status"
+            [class.pending]="!pedido.estado"
+            [class.received]="pedido.estado">
+            {{ pedido.estado ? 'Recibido' : 'Pendiente' }}
           </div>
 
         </div>
 
-
-        <div class="order-item">
-
-          <div class="order-info">
-            <strong>Pedido #002</strong>
-            <span>Proveedor: Diego Cali</span>
-          </div>
-
-          <div class="order-status pending">
-            Pendiente
-          </div>
-
-        </div>
-
-
-        <div class="order-item">
-
-          <div class="order-info">
-            <strong>Pedido #003</strong>
-            <span>Proveedor: Freddy Bogotá</span>
-          </div>
-
-          <div class="order-status received">
-            Recibido
-          </div>
-
-        </div>
+        <p *ngIf="resumen && resumen.pedidos_recientes.length === 0">
+          No hay pedidos registrados.
+        </p>
 
       </div>
 
@@ -176,28 +163,24 @@
 
       <div class="alerts-list">
 
-        <div class="alert-item warning">
+        <div
+          class="alert-item"
+          *ngFor="let alerta of resumen?.alertas ?? []"
+          [class.warning]="alerta.nivel === 'warning'"
+          [class.danger]="alerta.nivel === 'danger'">
 
           <span class="alert-icon">!</span>
 
           <div>
-            <strong>Productos faltantes</strong>
-            <p>3 productos no llegaron en el último pedido.</p>
+            <strong>{{ alerta.titulo }}</strong>
+            <p>{{ alerta.mensaje }}</p>
           </div>
 
         </div>
 
-
-        <div class="alert-item danger">
-
-          <span class="alert-icon">!</span>
-
-          <div>
-            <strong>Productos dañados</strong>
-            <p>2 unidades fueron registradas como dañadas.</p>
-          </div>
-
-        </div>
+        <p *ngIf="resumen && resumen.alertas.length === 0">
+          Todo en orden: no hay alertas por revisar.
+        </p>
 
       </div>
 
@@ -229,52 +212,30 @@
 
     <div class="activity-list">
 
-      <div class="activity-item">
+      <div
+        class="activity-item"
+        *ngFor="let movimiento of resumen?.actividad_reciente ?? []">
 
-        <div class="activity-icon transfer">
-          ⇄
+        <div
+          class="activity-icon"
+          [class.transfer]="movimiento.tipo === 'Traslado'"
+          [class.sale]="movimiento.tipo === 'Venta / Salida'"
+          [class.order]="movimiento.tipo === 'Pedido a proveedor'">
+          {{ iconoMovimiento(movimiento.tipo) }}
         </div>
 
         <div class="activity-info">
-          <strong>Traslado de mercancía</strong>
-          <span>Mario bros · 10 unidades</span>
+          <strong>{{ movimiento.tipo }}</strong>
+          <span>{{ movimiento.producto }} · {{ movimiento.cantidad }} unidades</span>
         </div>
 
-        <time>Hoy, 9:20 a. m.</time>
+        <time>{{ movimiento.fecha | date:'d MMM, h:mm a' }}</time>
 
       </div>
 
-
-      <div class="activity-item">
-
-        <div class="activity-icon sale">
-          $
-        </div>
-
-        <div class="activity-info">
-          <strong>Venta / salida</strong>
-          <span>Muñeco de nieve · 5 unidades</span>
-        </div>
-
-        <time>Hoy, 8:45 a. m.</time>
-
-      </div>
-
-
-      <div class="activity-item">
-
-        <div class="activity-icon order">
-          ▣
-        </div>
-
-        <div class="activity-info">
-          <strong>Pedido registrado</strong>
-          <span>Calabazas · 20 unidades</span>
-        </div>
-
-        <time>Ayer, 4:30 p. m.</time>
-
-      </div>
+      <p *ngIf="resumen && resumen.actividad_reciente.length === 0">
+        Aún no hay movimientos registrados.
+      </p>
 
     </div>
 

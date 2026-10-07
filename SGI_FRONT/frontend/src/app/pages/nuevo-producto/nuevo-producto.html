@@ -34,6 +34,12 @@
   </div>
 
 
+  <!-- ERROR DE LA API -->
+  <div class="mensaje-error" *ngIf="error">
+    {{ error }}
+  </div>
+
+
   <!-- PROVEEDOR -->
   <section class="form-card">
 
@@ -185,6 +191,86 @@
         </div>
 
 
+        <!-- REFERENCIA (opcional) -->
+        <div class="form-group">
+
+          <label [for]="'referencia-' + i">
+
+            Referencia
+
+          </label>
+
+          <input
+            [id]="'referencia-' + i"
+            type="text"
+            maxlength="15"
+            [(ngModel)]="producto.referencia"
+            [name]="'referencia-' + i"
+            placeholder="Vacía = se genera automáticamente">
+
+        </div>
+
+
+        <!-- COSTO -->
+        <div class="form-group">
+
+          <label [for]="'costo-' + i">
+
+            Costo (COP)
+
+          </label>
+
+          <input
+            [id]="'costo-' + i"
+            type="number"
+            min="0"
+            [(ngModel)]="producto.costo"
+            [name]="'costo-' + i"
+            placeholder="Ej. 3000">
+
+        </div>
+
+
+        <!-- PRECIO DE VENTA -->
+        <div class="form-group">
+
+          <label [for]="'precio-venta-' + i">
+
+            Precio de venta (COP)
+
+          </label>
+
+          <input
+            [id]="'precio-venta-' + i"
+            type="number"
+            min="0"
+            [(ngModel)]="producto.precio_venta"
+            [name]="'precio-venta-' + i"
+            placeholder="Ej. 4500">
+
+        </div>
+
+
+        <!-- PRECIO MAYORISTA -->
+        <div class="form-group">
+
+          <label [for]="'precio-mayorista-' + i">
+
+            Precio mayorista (COP)
+
+          </label>
+
+          <input
+            [id]="'precio-mayorista-' + i"
+            type="number"
+            min="0"
+            [(ngModel)]="producto.precio_mayorista"
+            [name]="'precio-mayorista-' + i"
+            placeholder="Ej. 4000">
+
+        </div>
+
+
         <!-- DESCRIPCIÓN -->
         <div class="form-group form-group-full">
 
@@ -225,7 +311,8 @@
               <img
                 *ngIf="producto.imagen"
                 [src]="producto.imagen"
-                [alt]="producto.nombre || 'Vista previa del producto'">
+                [alt]="producto.nombre || 'Vista previa del producto'"
+                (error)="imagenNoCarga($event)">
 
 
               <div
@@ -257,20 +344,21 @@
               </h3>
 
               <p>
-                Utiliza una imagen clara para reconocer fácilmente la figura.
+                Pega la URL de la imagen alojada en la nube
+                (por ejemplo Cloudinary, Imgur o Google Drive público).
               </p>
 
 
-              <label class="upload-button">
-
-                Seleccionar imagen
+              <div class="form-group">
 
                 <input
-                  type="file"
-                  accept="image/*"
-                  (change)="seleccionarImagen($event, i)">
+                  [id]="'imagen-' + i"
+                  type="url"
+                  [(ngModel)]="producto.imagen"
+                  [name]="'imagen-' + i"
+                  placeholder="https://...">
 
-              </label>
+              </div>
 
             </div>
 
@@ -314,8 +402,8 @@
       </strong>
 
       <p>
-        El código de referencia podrá asignarse automáticamente
-        según el proveedor cuando guardemos los productos.
+        Si dejas la referencia vacía, se asigna automáticamente con las
+        iniciales del proveedor (ej. Arte y Color → AC0001).
       </p>
 
     </div>
@@ -339,9 +427,10 @@
     <button
       type="button"
       class="btn-primary"
+      [disabled]="guardando"
       (click)="guardarProductos()">
 
-      Guardar productos
+      {{ guardando ? 'Guardando...' : 'Guardar productos' }}
 
     </button>
 

@@ -1,14 +1,15 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { NgFor, NgIf } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
+import { IInventarioBodega } from '../../interfaces/inventario.interface';
+import { InventarioService } from '../../services/inventario.service';
+import { TrasladoService } from '../../services/traslado.service';
+import { mensajeDeError } from '../../utils/http-error';
+import { IMAGEN_POR_DEFECTO, imagenNoCarga } from '../../utils/imagen';
 
-interface ProductoTraslado {
-  codigo: string;
-  nombre: string;
-  proveedor: string;
-  imagen: string;
-  existencias: number;
+// Producto de bodega + la cantidad que el usuario elige trasladar
+interface ProductoTraslado extends IInventarioBodega {
   cantidadTraslado: number;
 }
 
@@ -18,62 +19,41 @@ interface ProductoTraslado {
   templateUrl: './traslados.html',
   styleUrl: './traslados.css',
 })
-export class Traslados {
+export class Traslados implements OnInit {
 
   busqueda = '';
 
-  productos: ProductoTraslado[] = [
-    {
-      codigo: 'FB0001',
-      nombre: 'Muñeco de nieve',
-      proveedor: 'Freddy Bogotá',
-      imagen: 'https://images.unsplash.com/photo-1482517967863-00e15c9b44be?auto=format&fit=crop&w=500&q=80',
-      existencias: 18,
-      cantidadTraslado: 0
-    },
-    {
-      codigo: 'FB0002',
-      nombre: 'Princesa Sofía',
-      proveedor: 'Freddy Bogotá',
-      imagen: 'https://images.unsplash.com/photo-1518837695005-2083093ee35b?auto=format&fit=crop&w=500&q=80',
-      existencias: 7,
-      cantidadTraslado: 0
-    },
-    {
-      codigo: 'FB0003',
-      nombre: 'Calabaza',
-      proveedor: 'Freddy Bogotá',
-      imagen: 'https://images.unsplash.com/photo-1508361001413-7a9c0b5b4f0f?auto=format&fit=crop&w=500&q=80',
-      existencias: 24,
-      cantidadTraslado: 0
-    },
-    {
-      codigo: 'DC0001',
-      nombre: 'Ángel navideño',
-      proveedor: 'Diego Cali',
-      imagen: 'https://images.unsplash.com/photo-1512909006721-3d6018887383?auto=format&fit=crop&w=500&q=80',
-      existencias: 4,
-      cantidadTraslado: 0
-    },
-    {
-      codigo: 'DC0002',
-      nombre: 'Casita navideña',
-      proveedor: 'Diego Cali',
-      imagen: 'https://images.unsplash.com/photo-1544273677-3c0b9d5d6f54?auto=format&fit=crop&w=500&q=80',
-      existencias: 12,
-      cantidadTraslado: 0
-    },
-    {
-      codigo: 'DC0003',
-      nombre: 'Reno',
-      proveedor: 'Diego Cali',
-      imagen: 'https://images.unsplash.com/photo-1482632629475-4f6f4d4e4b5d?auto=format&fit=crop&w=500&q=80',
-      existencias: 2,
-      cantidadTraslado: 0
-    }
-  ];
+  productos: ProductoTraslado[] = [];
+  cargando = false;
+  guardando = false;
+  error = '';
 
-  constructor(private router: Router) {}
+  imagenPorDefecto = IMAGEN_POR_DEFECTO;
+  imagenNoCarga = imagenNoCarga;
+
+  constructor(
+    private inventarioService: InventarioService,
+    private trasladoService: TrasladoService,
+    private router: Router
+  ) {}
+
+  ngOnInit(): void {
+    this.cargando = true;
+
+    this.inventarioService.getBodega().subscribe({
+      next: productos => {
+        this.productos = productos.map(producto => ({
+          ...producto,
+          cantidadTraslado: 0
+        }));
+        this.cargando = false;
+      },
+      error: err => {
+        this.error = mensajeDeError(err);
+        this.cargando = false;
+      }
+    });
+  }
 
   get productosFiltrados(): ProductoTraslado[] {
 
@@ -82,7 +62,7 @@ export class Traslados {
     return this.productos.filter(producto =>
       !texto ||
       producto.nombre.toLowerCase().includes(texto) ||
-      producto.codigo.toLowerCase().includes(texto)
+      String(producto.codigo).includes(texto)
     );
   }
 
@@ -100,7 +80,7 @@ export class Traslados {
     );
   }
 
-  aumentar(producto: ProductoTraslado) {
+  aumentar(producto: ProductoTraslado): void {
 
     if (producto.cantidadTraslado < producto.existencias) {
       producto.cantidadTraslado++;
@@ -108,7 +88,7 @@ export class Traslados {
 
   }
 
-  disminuir(producto: ProductoTraslado) {
+  disminuir(producto: ProductoTraslado): void {
 
     if (producto.cantidadTraslado > 0) {
       producto.cantidadTraslado--;
@@ -116,7 +96,7 @@ export class Traslados {
 
   }
 
-  limpiar() {
+  limpiar(): void {
     this.busqueda = '';
 
     this.productos.forEach(producto => {
@@ -124,27 +104,45 @@ export class Traslados {
     });
   }
 
-  registrarTraslado() {
+  registrarTraslado(): void {
 
     if (this.productosSeleccionados.length === 0) {
-      alert('Selecciona al menos un producto para trasladar.');
+      this.error = 'Selecciona al menos un producto para trasladar.';
       return;
     }
 
-    const productosTexto = this.productosSeleccionados
-      .map(producto =>
-        `${producto.nombre}: ${producto.cantidadTraslado} unidades`
-      )
-      .join('\n');
+    const seleccionados = this.productosSeleccionados;
+    this.guardando = true;
+    this.error = '';
 
-    const mensaje =
-      'Traslado registrado correctamente.\n\n' +
-      `Unidades trasladadas al local: ${this.totalUnidades}\n\n` +
-      productosTexto;
+    // Se envían como listas paralelas: producto[i] -> cantidad[i]
+    this.trasladoService.registrarTraslado({
+      producto: seleccionados.map(producto => producto.nombre),
+      cantidad: seleccionados.map(producto => producto.cantidadTraslado)
+    }).subscribe({
+      next: () => {
+        this.guardando = false;
 
-    alert(mensaje);
+        const productosTexto = seleccionados
+          .map(producto =>
+            `${producto.nombre}: ${producto.cantidadTraslado} unidades`
+          )
+          .join('\n');
 
-    this.router.navigate(['/local']);
+        alert(
+          'Traslado registrado correctamente.\n\n' +
+          `Unidades trasladadas al local: ${this.totalUnidades}\n\n` +
+          productosTexto
+        );
+
+        this.router.navigate(['/local']);
+      },
+      error: err => {
+        this.guardando = false;
+        this.error = mensajeDeError(err);
+        alert(this.error);
+      }
+    });
   }
 
 }
