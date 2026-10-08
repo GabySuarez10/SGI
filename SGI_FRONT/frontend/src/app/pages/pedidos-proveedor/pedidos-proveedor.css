@@ -20,13 +20,13 @@
   margin: 0;
   font-size: 26px;
   font-weight: 650;
-  color: #1e293b;
+  color: #1f2433;
 }
 
 .page-heading p {
   margin: 6px 0 0;
   font-size: 14px;
-  color: #64748b;
+  color: #5b6275;
 }
 
 .primary-button {
@@ -34,7 +34,7 @@
   padding: 11px 18px;
   border-radius: 9px;
 
-  background: #2563eb;
+  background: #2f3a8f;
   color: #ffffff;
 
   font-size: 14px;
@@ -46,7 +46,7 @@
 }
 
 .primary-button:hover {
-  background: #1e40af;
+  background: #252e73;
 }
 
 
@@ -66,7 +66,7 @@
   border: 1px solid #e2e8f0;
   background: #ffffff;
 
-  color: #64748b;
+  color: #5b6275;
 
   padding: 8px 16px;
   border-radius: 8px;
@@ -80,14 +80,14 @@
 }
 
 .filter-button:hover {
-  border-color: #bfdbfe;
-  color: #2563eb;
+  border-color: #c9cff0;
+  color: #2f3a8f;
 }
 
 .filter-button.active {
-  background: #eff6ff;
-  border-color: #bfdbfe;
-  color: #2563eb;
+  background: #eef0fb;
+  border-color: #c9cff0;
+  color: #2f3a8f;
   font-weight: 600;
 }
 
@@ -150,13 +150,13 @@
 .order-number span {
   font-size: 14px;
   font-weight: 600;
-  color: #1e293b;
+  color: #1f2433;
 }
 
 .order-number strong {
   font-size: 14px;
   font-weight: 500;
-  color: #64748b;
+  color: #5b6275;
 }
 
 .order-details {
@@ -220,7 +220,7 @@
   border: none;
   background: transparent;
 
-  color: #2563eb;
+  color: #2f3a8f;
 
   font-size: 13px;
   font-weight: 600;
@@ -231,7 +231,7 @@
 }
 
 .view-button:hover {
-  color: #1e40af;
+  color: #252e73;
 }
 
 

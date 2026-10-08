@@ -1,20 +1,23 @@
 import { Component, OnInit } from '@angular/core';
-import { NgFor, NgIf } from '@angular/common';
+import { DecimalPipe, NgFor, NgIf } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { IProveedor } from '../../interfaces/proveedor.interface';
 import { ProveedorService } from '../../services/proveedor.service';
 import { mensajeDeError } from '../../utils/http-error';
+import { nombreTipoProveedor } from '../../utils/tipos';
 
 @Component({
   selector: 'app-proveedores',
-  imports: [NgFor, NgIf, FormsModule, RouterLink],
+  imports: [NgFor, NgIf, DecimalPipe, FormsModule, RouterLink],
   templateUrl: './proveedores.html',
   styleUrl: './proveedores.css',
 })
 export class Proveedores implements OnInit {
 
   busqueda = '';
+
+  nombreTipoProveedor = nombreTipoProveedor;
 
   proveedores: IProveedor[] = [];
   cargando = false;

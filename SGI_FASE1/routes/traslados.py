@@ -17,12 +17,12 @@ def obtener(codigo):
 
 @traslados_bp.post("")
 def crear():
-    """{ producto: [nombres], cantidad: [unidades] } -> mueve stock de bodega al local"""
+    """{ producto: [nombres], cantidad: [unidades], sentido: bodega_local | local_bodega }"""
     return jsonify(q.crear_traslado(request.get_json() or {}).to_dict()), 201
 
 
 @traslados_bp.delete("/<int:codigo>")
 def eliminar(codigo):
-    """Anula el traslado y devuelve las unidades a la bodega."""
+    """Anula el traslado y devuelve las unidades al inventario de origen."""
     q.eliminar_traslado(codigo)
     return jsonify({"message": f"Traslado {codigo} anulado"})

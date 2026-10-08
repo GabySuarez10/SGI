@@ -33,6 +33,13 @@ export class PedidoProveedorService {
     return this.httpClient.put<IPedidoProveedor>(`${this.apiUrl}/${codigo}/recepcion`, recepcion);
   }
 
+  // true = Bodega, false = Local. Si ya se recibió, mueve las unidades
+  cambiarDestino(codigo: number, zonaEntrega: boolean): Observable<IPedidoProveedor> {
+    return this.httpClient.put<IPedidoProveedor>(`${this.apiUrl}/${codigo}/destino`, {
+      zona_entrega: zonaEntrega
+    });
+  }
+
   eliminarPedido(codigo: number): Observable<unknown> {
     return this.httpClient.delete(`${this.apiUrl}/${codigo}`);
   }

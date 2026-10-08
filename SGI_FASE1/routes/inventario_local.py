@@ -7,7 +7,8 @@ inventario_local_bp = Blueprint("inventario_local", __name__, url_prefix="/api/i
 
 @inventario_local_bp.get("")
 def listar():
-    return jsonify([i.to_dict() for i in q.listar_local()])
+    """Incluye tipo (figura, pintura, pincel, otro), colección y referencia."""
+    return jsonify(q.con_tipo(q.listar_local()))
 
 
 @inventario_local_bp.get("/<int:codigo>")

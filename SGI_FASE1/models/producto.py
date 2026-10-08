@@ -16,9 +16,16 @@ class Producto(db.Model):
     nombre = db.Column("nombre", db.Text)
     imagen = db.Column("imagen", db.Text)
     proveedor = db.Column("proveedor", db.String(100))
-    tamano = db.Column("tamano", db.String(20))
+    tamano = db.Column("tamano", db.String(60))
     descripcion = db.Column("descripcion", db.Text)
-    costo = db.Column("costo", db.Integer)
+    costo = db.Column("costo", db.Integer)              # precio de fábrica
+    envio_categoria = db.Column("envio_categoria", db.String(40))
+    envio = db.Column("envio", db.Integer, default=0)
+    precio_venta = db.Column("precio_venta", db.Integer, default=0)          # crudo + envío
+    precio_mayorista = db.Column("precio_mayorista", db.Integer, default=0)  # por mayor + envío
+    tipo = db.Column("tipo", db.String(20), default="figura")      # figura | pintura | pincel | otro
+    coleccion = db.Column("coleccion", db.String(60))               # solo pinturas
+    categoria = db.Column("categoria", db.String(40))               # solo figuras: Navidad, Materas...
 
     def to_dict(self):
         return {
@@ -29,5 +36,12 @@ class Producto(db.Model):
             "proveedor": self.proveedor,
             "tamano": self.tamano,
             "descripcion": self.descripcion,
-            "costo": self.costo,
+            "costo": self.costo or 0,
+            "envio_categoria": self.envio_categoria or "",
+            "envio": self.envio or 0,
+            "precio_venta": self.precio_venta or 0,
+            "precio_mayorista": self.precio_mayorista or 0,
+            "tipo": self.tipo or "figura",
+            "coleccion": self.coleccion or "",
+            "categoria": self.categoria or "",
         }

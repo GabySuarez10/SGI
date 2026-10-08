@@ -6,6 +6,7 @@ from config import Config
 from database import db
 from routes import register_blueprints, BLUEPRINTS
 from utils.errores import ErrorAPI
+from utils.migraciones import aplicar_migraciones
 
 
 def crear_app():
@@ -20,6 +21,17 @@ def crear_app():
     CORS(app, resources={r"/api/*": {"origins": Config.CORS_ORIGINS}})
 
     db.init_app(app)
+
+    # Crea/actualiza tablas y columnas nuevas (migraciones/*.sql, idempotentes)
+    with app.app_context():
+        try:
+            aplicar_migraciones(app.logger)
+        except Exception:  # noqa: BLE001
+            app.logger.exception(
+                "No se pudieron aplicar las migraciones. Revisa DATABASE_URL o ejecuta "
+                "migraciones/*.sql manualmente en el SQL Editor de Neon."
+            )
+
     register_blueprints(app)
     registrar_manejo_de_errores(app)
 

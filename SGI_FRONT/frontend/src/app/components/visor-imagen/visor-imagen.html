@@ -1,0 +1,25 @@
+<div
+  class="visor"
+  *ngIf="visor.imagen as imagen"
+  role="dialog"
+  aria-modal="true"
+  [attr.aria-label]="imagen.titulo || 'Foto del producto'"
+  (click)="visor.cerrar()">
+
+  <figure (click)="$event.stopPropagation()">
+
+    <img [src]="imagen.src" [alt]="imagen.titulo">
+
+    <figcaption *ngIf="imagen.titulo">{{ imagen.titulo }}</figcaption>
+
+  </figure>
+
+  <button
+    type="button"
+    class="cerrar"
+    aria-label="Cerrar foto"
+    (click)="visor.cerrar()">
+    <app-icono nombre="cerrar" [tamano]="22"></app-icono>
+  </button>
+
+</div>

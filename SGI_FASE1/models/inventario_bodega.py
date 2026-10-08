@@ -13,7 +13,7 @@ class InventarioBodega(db.Model):
     nombre = db.Column("nombre", db.Text)
     imagen = db.Column("imagen", db.Text)
     proveedor = db.Column("proveedor", db.String(100))
-    tamano = db.Column("tamano", db.String(20))
+    tamano = db.Column("tamano", db.String(60))
     descripcion = db.Column("descripcion", db.Text)
     costo = db.Column("costo", db.Integer)
     existencias = db.Column("existencias", db.Integer)

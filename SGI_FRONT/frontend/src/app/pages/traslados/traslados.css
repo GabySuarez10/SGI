@@ -14,13 +14,13 @@
   margin: 0 0 6px;
   font-size: 26px;
   font-weight: 700;
-  color: #1e293b;
+  color: #1f2433;
 }
 
 .page-header p {
   margin: 0;
   font-size: 14px;
-  color: #64748b;
+  color: #5b6275;
 }
 
 
@@ -32,9 +32,9 @@
   gap: 14px;
   padding: 18px 20px;
   margin-bottom: 22px;
-  border: 1px solid #dbeafe;
+  border: 1px solid #dfe3f7;
   border-radius: 14px;
-  background: #eff6ff;
+  background: #eef0fb;
 }
 
 .info-icon {
@@ -46,7 +46,7 @@
   justify-content: center;
   border-radius: 10px;
   background: #ffffff;
-  color: #2563eb;
+  color: #2f3a8f;
   font-size: 22px;
   font-weight: 700;
 }
@@ -54,7 +54,7 @@
 .info-card strong {
   display: block;
   margin-bottom: 4px;
-  color: #1e40af;
+  color: #252e73;
   font-size: 15px;
 }
 
@@ -100,8 +100,8 @@
 }
 
 .search-box input:focus {
-  border-color: #2563eb;
-  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+  border-color: #2f3a8f;
+  box-shadow: 0 0 0 3px rgba(47, 58, 143, 0.1);
 }
 
 
@@ -113,13 +113,13 @@
 
 .section-header h2 {
   margin: 0 0 4px;
-  color: #1e293b;
+  color: #1f2433;
   font-size: 18px;
 }
 
 .section-header p {
   margin: 0;
-  color: #64748b;
+  color: #5b6275;
   font-size: 13px;
 }
 
@@ -146,12 +146,12 @@
 }
 
 .product-card.selected {
-  border-color: #2563eb;
-  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.1);
+  border-color: #2f3a8f;
+  box-shadow: 0 0 0 2px rgba(47, 58, 143, 0.1);
 }
 
 .product-image {
-  height: 185px;
+  height: 200px;
   overflow: hidden;
   background: #f1f5f9;
 }
@@ -175,7 +175,7 @@
 }
 
 .product-code {
-  color: #2563eb;
+  color: #2f3a8f;
   font-size: 12px;
   font-weight: 700;
 }
@@ -184,20 +184,20 @@
   padding: 5px 8px;
   border-radius: 20px;
   background: #f1f5f9;
-  color: #64748b;
+  color: #5b6275;
   font-size: 11px;
   font-weight: 600;
 }
 
 .product-content h3 {
   margin: 0 0 5px;
-  color: #1e293b;
+  color: #1f2433;
   font-size: 17px;
 }
 
 .provider {
   margin: 0 0 18px;
-  color: #64748b;
+  color: #5b6275;
   font-size: 13px;
 }
 
@@ -214,7 +214,7 @@
 }
 
 .quantity-section > span {
-  color: #64748b;
+  color: #5b6275;
   font-size: 12px;
 }
 
@@ -231,21 +231,21 @@
   width: 32px;
   height: 34px;
   border: 0;
-  background: #f8fafc;
+  background: #f6f7f9;
   color: #334155;
   font-size: 20px;
   cursor: pointer;
 }
 
 .quantity-control button:hover {
-  background: #eff6ff;
-  color: #2563eb;
+  background: #eef0fb;
+  color: #2f3a8f;
 }
 
 .quantity-control strong {
   width: 34px;
   text-align: center;
-  color: #1e293b;
+  color: #1f2433;
   font-size: 14px;
 }
 
@@ -268,19 +268,19 @@
   align-items: center;
   justify-content: center;
   border-radius: 14px;
-  background: #eff6ff;
-  color: #2563eb;
+  background: #eef0fb;
+  color: #2f3a8f;
   font-size: 25px;
 }
 
 .empty-state h3 {
   margin: 0 0 6px;
-  color: #1e293b;
+  color: #1f2433;
 }
 
 .empty-state p {
   margin: 0;
-  color: #64748b;
+  color: #5b6275;
   font-size: 14px;
 }
 
@@ -300,7 +300,7 @@
   margin-top: 24px;
   padding: 16px 18px;
 
-  border: 1px solid #bfdbfe;
+  border: 1px solid #c9cff0;
   border-radius: 14px;
 
   background: rgba(255, 255, 255, 0.96);
@@ -331,12 +331,12 @@
 .selection-info strong {
   display: block;
   margin-bottom: 3px;
-  color: #1e293b;
+  color: #1f2433;
   font-size: 14px;
 }
 
 .selection-info span {
-  color: #64748b;
+  color: #5b6275;
   font-size: 12px;
 }
 
@@ -362,18 +362,18 @@
 }
 
 .btn-secondary:hover {
-  background: #f8fafc;
+  background: #f6f7f9;
 }
 
 .btn-primary {
-  border: 1px solid #2563eb;
-  background: #2563eb;
+  border: 1px solid #2f3a8f;
+  background: #2f3a8f;
   color: #ffffff;
 }
 
 .btn-primary:hover {
-  border-color: #1e40af;
-  background: #1e40af;
+  border-color: #252e73;
+  background: #252e73;
 }
 
 
@@ -448,4 +448,56 @@
     width: 100%;
   }
 
+}
+
+/* Sentido del traslado */
+.info-card {
+  flex-wrap: wrap;
+}
+
+.sentido {
+  display: inline-flex;
+  margin-left: auto;
+  padding: 4px;
+  border-radius: 12px;
+  background: #f1f5f9;
+}
+
+.sentido button {
+  padding: 8px 14px;
+  border: none;
+  border-radius: 9px;
+  background: transparent;
+  color: #475569;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.sentido button.active {
+  background: #ffffff;
+  color: #252e73;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.15);
+}
+
+.search-card {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.search-card .search-box {
+  flex: 1;
+  min-width: 220px;
+}
+
+.vista-select {
+  height: 46px;
+  padding: 0 12px;
+  border: 1px solid #cbd5e1;
+  border-radius: 10px;
+  background: #ffffff;
+  font-family: inherit;
+  font-size: 14px;
 }

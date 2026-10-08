@@ -15,6 +15,8 @@ class PedidoProveedor(db.Model):
         sobran           recibidas por encima de lo solicitado
         faltan           solicitadas que no llegaron
         danados          dañadas (subconjunto de las que llegaron)
+        facturado        unidades que dice la factura del proveedor
+        precio_factura   precio unitario cobrado en la factura
 
     estado        False = pendiente, True = recibido
     zona_entrega  True = se recibe en la BODEGA, False = se recibe en el LOCAL
@@ -31,6 +33,9 @@ class PedidoProveedor(db.Model):
     sobran = db.Column("sobran", db.Text)
     faltan = db.Column("faltan", db.Text)
     danados = db.Column("dañados", db.Text)
+    facturado = db.Column("facturado", db.Text)
+    precio_factura = db.Column("precio_factura", db.Text)
+    observaciones = db.Column("observaciones", db.Text)
     precio_total = db.Column("precio_total", db.Integer)
     fecha_pedido = db.Column("fecha_pedido", db.DateTime, server_default=db.func.now())
     fecha_llegada = db.Column("fecha_llegada", db.DateTime, nullable=True)
@@ -48,6 +53,9 @@ class PedidoProveedor(db.Model):
             "sobran": texto_a_lista_numeros(self.sobran),
             "faltan": texto_a_lista_numeros(self.faltan),
             "danados": texto_a_lista_numeros(self.danados),
+            "facturado": texto_a_lista_numeros(self.facturado),
+            "precio_factura": texto_a_lista_numeros(self.precio_factura),
+            "observaciones": self.observaciones or "",
             "precio_total": self.precio_total or 0,
             "fecha_pedido": a_texto(self.fecha_pedido),
             "fecha_llegada": a_texto(self.fecha_llegada),

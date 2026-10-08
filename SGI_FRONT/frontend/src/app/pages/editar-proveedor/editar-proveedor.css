@@ -15,13 +15,13 @@
   margin: 0 0 6px;
   font-size: 26px;
   font-weight: 700;
-  color: #1e293b;
+  color: #1f2433;
 }
 
 .page-heading p {
   margin: 0;
   font-size: 14px;
-  color: #64748b;
+  color: #5b6275;
 }
 
 .form-card {
@@ -44,13 +44,13 @@
   margin: 0 0 5px;
   font-size: 18px;
   font-weight: 700;
-  color: #1e293b;
+  color: #1f2433;
 }
 
 .section-title p {
   margin: 0;
   font-size: 14px;
-  color: #64748b;
+  color: #5b6275;
 }
 
 .form-grid {
@@ -87,7 +87,7 @@
   border: 1px solid #cbd5e1;
   border-radius: 8px;
   background: #ffffff;
-  color: #1e293b;
+  color: #1f2433;
   font-family: inherit;
   font-size: 14px;
   outline: none;
@@ -110,8 +110,8 @@
 
 .form-group input:focus,
 .form-group textarea:focus {
-  border-color: #2563eb;
-  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+  border-color: #2f3a8f;
+  box-shadow: 0 0 0 3px rgba(47, 58, 143, 0.1);
 }
 
 .form-actions {
@@ -120,7 +120,7 @@
   gap: 12px;
   padding: 20px 28px;
   border-top: 1px solid #e2e8f0;
-  background: #f8fafc;
+  background: #f6f7f9;
 }
 
 .primary-button,
@@ -136,14 +136,14 @@
 }
 
 .primary-button {
-  border: 1px solid #2563eb;
-  background: #2563eb;
+  border: 1px solid #2f3a8f;
+  background: #2f3a8f;
   color: #ffffff;
 }
 
 .primary-button:hover {
-  background: #1d4ed8;
-  border-color: #1d4ed8;
+  background: #252e73;
+  border-color: #252e73;
 }
 
 .secondary-button {
@@ -210,4 +210,11 @@
   .page-heading p {
     font-size: 13px;
   }
+}
+
+.ayuda {
+  display: block;
+  margin-top: 6px;
+  color: #5b6275;
+  font-size: 12px;
 }

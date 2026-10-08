@@ -1,4 +1,99 @@
-/* You can add global styles to this file, and also import other style files */
+/* =========================================================
+   SGI · Pintarte — estilos globales
+   Paleta: ultramar (acciones), yeso (fondo), tinta (texto).
+   ========================================================= */
+
+:root {
+  --ultramar: #2f3a8f;
+  --ultramar-oscuro: #252e73;
+  --ultramar-suave: #eef0fb;
+  --yeso: #f4f5f7;
+  --superficie: #ffffff;
+  --tinta: #1f2433;
+  --tinta-suave: #5b6275;
+  --borde: #e2e5ec;
+  --peligro: #b91c1c;
+  --exito: #15803d;
+  --ambar: #c2410c;
+
+  --radio: 12px;
+  --fuente: 'Figtree', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--yeso);
+  color: var(--tinta);
+  font-family: var(--fuente);
+  font-size: 15px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  font-feature-settings: 'tnum' 1;   /* números del mismo ancho: precios y cantidades alineados */
+}
+
+button,
+input,
+select,
+textarea {
+  font-family: inherit;
+  font-size: inherit;
+  color: inherit;
+}
+
+h1,
+h2,
+h3 {
+  letter-spacing: -0.01em;
+  line-height: 1.2;
+}
+
+img {
+  max-width: 100%;
+}
+
+a {
+  color: var(--ultramar);
+}
+
+/* Enfoque visible para quien navega con teclado */
+:focus-visible {
+  outline: 3px solid rgba(47, 58, 143, 0.35);
+  outline-offset: 2px;
+}
+
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: none;
+}
+
+/* Inputs: tamaño cómodo para tocar y sin zoom automático en iPhone */
+input,
+select,
+textarea {
+  font-size: 15px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
 
 /* =========================================================
    Mensajes compartidos de carga y error (datos desde la API)
@@ -17,8 +112,8 @@
 }
 
 .estado-carga {
-  color: #64748b;
-  background: #f8fafc;
+  color: #5b6275;
+  background: #f6f7f9;
   border: 1px solid #e2e8f0;
 }
 
@@ -27,7 +122,7 @@
   width: 16px;
   height: 16px;
   border: 2px solid #cbd5e1;
-  border-top-color: #2563eb;
+  border-top-color: #2f3a8f;
   border-radius: 50%;
   animation: girar-carga 0.8s linear infinite;
 }
@@ -53,4 +148,487 @@
 button:disabled {
   opacity: 0.6;
   cursor: not-allowed;
+}
+
+
+/* =========================================================
+   Encabezado fijo con acciones (siempre visible al hacer scroll)
+   Se agrega la clase "encabezado-fijo" al .page-header de los formularios.
+   ========================================================= */
+
+.encabezado-fijo {
+  position: sticky;
+  top: -20px;                 /* al quedar fijo deja 12px de aire arriba */
+  z-index: 30;
+  margin-top: -32px;
+  padding-top: 32px;
+  padding-bottom: 16px;
+  background: #f6f7f9;
+  box-shadow: 0 10px 12px -12px rgba(15, 23, 42, 0.25);
+
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+@media (max-width: 900px) {
+  .encabezado-fijo {
+    top: -12px;
+    margin-top: -20px;
+    padding-top: 20px;
+  }
+}
+
+.acciones-encabezado {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+}
+
+.acciones-encabezado .resumen-rapido {
+  color: #475569;
+  font-size: 14px;
+  margin-right: 6px;
+}
+
+.acciones-encabezado .resumen-rapido strong {
+  color: #1f2433;
+}
+
+
+/* =========================================================
+   Botones y campos compartidos (componentes reutilizables)
+   ========================================================= */
+
+.sgi-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  height: 42px;
+  padding: 0 18px;
+  border-radius: 10px;
+  border: 1px solid transparent;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.sgi-btn-primario {
+  background: #2f3a8f;
+  color: #ffffff;
+}
+
+.sgi-btn-primario:hover:not(:disabled) {
+  background: #252e73;
+}
+
+.sgi-btn-secundario {
+  background: #ffffff;
+  color: #334155;
+  border-color: #cbd5e1;
+}
+
+.sgi-btn-secundario:hover:not(:disabled) {
+  border-color: #94a3b8;
+  background: #f6f7f9;
+}
+
+.sgi-btn-pequeno {
+  height: 34px;
+  padding: 0 12px;
+  font-size: 13px;
+}
+
+.sgi-btn-enlace {
+  height: auto;
+  padding: 0;
+  border: none;
+  background: none;
+  color: #2f3a8f;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.sgi-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+}
+
+@media (max-width: 700px) {
+  .sgi-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.sgi-campo {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+
+.sgi-campo label {
+  color: #334155;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.sgi-campo label span {
+  color: #dc2626;
+}
+
+.sgi-campo input,
+.sgi-campo select,
+.sgi-campo textarea {
+  width: 100%;
+  box-sizing: border-box;
+  height: 46px;
+  padding: 0 14px;
+  border: 1px solid #cbd5e1;
+  border-radius: 10px;
+  background: #ffffff;
+  color: #1f2433;
+  font-family: inherit;
+  font-size: 14px;
+  outline: none;
+}
+
+.sgi-campo textarea {
+  height: auto;
+  min-height: 90px;
+  padding: 12px 14px;
+  resize: vertical;
+}
+
+.sgi-campo input:focus,
+.sgi-campo select:focus,
+.sgi-campo textarea:focus {
+  border-color: #2f3a8f;
+  box-shadow: 0 0 0 3px rgba(47, 58, 143, 0.1);
+}
+
+.sgi-campo input:disabled,
+.sgi-campo select:disabled {
+  background: #f1f5f9;
+  color: #5b6275;
+}
+
+.sgi-campo small {
+  color: #5b6275;
+  font-size: 12px;
+}
+
+.sgi-campo.calculado input {
+  border-color: #c9cff0;
+  background: #f7f8fd;
+}
+
+.sgi-campo.editado input {
+  border-color: #fcd34d;
+  background: #fffbeb;
+}
+
+.sgi-aviso {
+  padding: 10px 14px;
+  border-radius: 10px;
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.sgi-aviso.info {
+  color: #252e73;
+  background: #eef0fb;
+  border: 1px solid #c9cff0;
+}
+
+.sgi-aviso.alerta {
+  color: #92400e;
+  background: #fffbeb;
+  border: 1px solid #fde68a;
+}
+
+.sgi-aviso.peligro {
+  color: #b91c1c;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+}
+
+.sgi-chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+  background: #f1f5f9;
+  color: #475569;
+}
+
+.sgi-chip.bodega {
+  background: #ecfdf5;
+  color: #047857;
+}
+
+.sgi-chip.local {
+  background: #f5f3ff;
+  color: #6d28d9;
+}
+
+.sgi-chip.ok {
+  background: #f0fdf4;
+  color: #15803d;
+}
+
+.sgi-chip.mal {
+  background: #fef2f2;
+  color: #b91c1c;
+}
+
+.sgi-chip.medio {
+  background: #fffbeb;
+  color: #b45309;
+}
+
+/* Chip de categoría de figura (Navidad, Materas...) */
+.sgi-chip.categoria-chip {
+  background: #fff7ed;
+  color: #c2410c;
+}
+
+
+/* =========================================================
+   RESPONSIVE COMÚN (tablet y celular)
+   Reglas compartidas por todas las páginas.
+   ========================================================= */
+
+/* Las tablas se desplazan de lado en lugar de romper la página */
+.table-wrapper,
+.tabla {
+  max-width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+@media (max-width: 900px) {
+  /* Encabezados de página: título arriba, acciones abajo */
+  .page-header,
+  .page-heading,
+  .section-header,
+  .dashboard-heading {
+    flex-wrap: wrap;
+  }
+
+  .encabezado-fijo .acciones-encabezado {
+    width: 100%;
+  }
+}
+
+@media (max-width: 600px) {
+  body {
+    font-size: 15px;
+  }
+
+  .page-header h1,
+  .page-heading h2,
+  .dashboard-heading h2 {
+    font-size: 22px !important;
+  }
+
+  .page-header,
+  .page-heading,
+  .dashboard-heading {
+    flex-direction: column;
+    align-items: stretch !important;
+    gap: 12px !important;
+  }
+
+  /* Formularios en una sola columna */
+  .form-grid,
+  .sgi-grid,
+  .fields-section,
+  .form-content {
+    grid-template-columns: 1fr !important;
+  }
+
+  .form-group.full-width,
+  .form-group-full {
+    grid-column: auto !important;
+  }
+
+  /* Barra fija: el botón principal ocupa el ancho y es fácil de tocar */
+  .acciones-encabezado {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .acciones-encabezado .resumen-rapido,
+  .acciones-encabezado .order-status,
+  .acciones-encabezado .sgi-chip {
+    grid-column: 1 / -1;
+  }
+
+  .acciones-encabezado .sgi-btn-primario:only-of-type,
+  .acciones-encabezado .sgi-btn:only-child {
+    grid-column: 1 / -1;
+  }
+
+  .sgi-btn {
+    height: 44px;
+  }
+
+  /* Filtros apilados */
+  .filters-card,
+  .filters,
+  .search-card,
+  .barra {
+    flex-direction: column;
+    align-items: stretch !important;
+  }
+
+  .filters-card > *,
+  .search-card > *,
+  .barra > * {
+    width: 100%;
+    max-width: none !important;
+  }
+
+  /* Grillas de tarjetas: una columna */
+  .products-grid,
+  .providers-grid,
+  .stats-grid,
+  .orders-list,
+  .financial-grid,
+  .quantity-summary,
+  .resumen,
+  .order-info-card,
+  .summary-values,
+  .dashboard-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .mensaje-error,
+  .estado-carga,
+  .mensaje-exito {
+    font-size: 14px;
+  }
+}
+
+
+/* =========================================================
+   ANCHO Y MÁRGENES DE LAS PÁGINAS
+   El espacio exterior lo da .content (32px escritorio, 16px celular);
+   las páginas no suman margen propio, así todas se alinean igual.
+   ========================================================= */
+
+.bodega-page,
+.local-page,
+.configuracion-page,
+.dashboard,
+.detalle-page,
+.editar-producto-page,
+.page-container,
+.historial-page,
+.materiales-page,
+.nuevo-pedido-page,
+.nuevo-producto-page,
+.nuevo-proveedor-page,
+.pedidos-page,
+.productos-page,
+.proveedores-page,
+.traslados-page,
+.ventas-page {
+  width: 100%;
+  max-width: 1320px;
+  margin-left: auto;
+  margin-right: auto;
+  padding: 0 0 32px !important;
+  background: transparent !important;
+  min-height: 0 !important;
+}
+
+/* Tarjetas: un poco menos de relleno en celular para ganar espacio */
+@media (max-width: 600px) {
+  .form-card,
+  .section-card,
+  .config-card,
+  .info-card,
+  .filters-card,
+  .products-card,
+  .summary-card,
+  .financial-card,
+  .observations-card,
+  .history-card,
+  .order-info-card,
+  .tarjeta,
+  .dashboard-card {
+    padding: 16px !important;
+    border-radius: 14px !important;
+  }
+}
+
+/* Fotos que se pueden ver en grande (directiva appAmpliar) */
+img.imagen-ampliable {
+  cursor: zoom-in;
+}
+
+img.imagen-ampliable:focus-visible {
+  outline: 3px solid rgba(47, 58, 143, 0.5);
+  outline-offset: -3px;
+}
+
+/* =========================================================
+   Zona para eliminar (al final de las pantallas de edición)
+   ========================================================= */
+
+.sgi-btn-peligro {
+  background: #ffffff;
+  color: var(--peligro, #b91c1c);
+  border-color: #f3c4c4;
+}
+
+.sgi-btn-peligro:hover:not(:disabled) {
+  background: #fef2f2;
+  border-color: #e9a3a3;
+}
+
+.zona-eliminar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px 20px;
+
+  margin-top: 24px;
+  padding: 16px 20px;
+
+  border: 1px solid #f3d6d6;
+  border-radius: var(--radio, 12px);
+  background: #fffafa;
+}
+
+.zona-eliminar strong {
+  display: block;
+  color: var(--tinta, #1f2433);
+  font-size: 15px;
+}
+
+.zona-eliminar p {
+  margin: 2px 0 0;
+  max-width: 60ch;
+  color: var(--tinta-suave, #5b6275);
+  font-size: 13.5px;
+}
+
+@media (max-width: 600px) {
+  .zona-eliminar .sgi-btn {
+    width: 100%;
+  }
 }

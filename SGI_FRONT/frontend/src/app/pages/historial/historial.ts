@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { IMovimiento, TipoMovimiento } from '../../interfaces/movimiento.interface';
 import { HistorialService } from '../../services/historial.service';
 import { mensajeDeError } from '../../utils/http-error';
+import { categoriasDe, coincideCategoria } from '../../utils/tipos';
 
 @Component({
   selector: 'app-historial',
@@ -18,6 +19,9 @@ export class Historial implements OnInit {
   productoBuscado = '';
   fechaDesde = '';
   fechaHasta = '';
+
+  // Categoría de figura ('' = todas, 'sin' = sin categoría)
+  categoriaSeleccionada = '';
 
   // Cada venta, traslado o pedido llega desplegado en un movimiento por producto
   movimientos: IMovimiento[] = [];
@@ -65,7 +69,13 @@ export class Historial implements OnInit {
         !this.fechaHasta ||
         dia <= this.fechaHasta;
 
+      const coincideCat =
+        !this.categoriaSeleccionada ||
+        (movimiento.tipo_producto === 'figura' &&
+          coincideCategoria(movimiento.categoria, this.categoriaSeleccionada));
+
       return (
+        coincideCat &&
         coincideTipo &&
         coincideProducto &&
         coincideDesde &&
@@ -74,7 +84,12 @@ export class Historial implements OnInit {
     });
   }
 
+  get categorias(): string[] {
+    return categoriasDe(this.movimientos);
+  }
+
   limpiarFiltros(): void {
+    this.categoriaSeleccionada = '';
     this.tipoSeleccionado = '';
     this.productoBuscado = '';
     this.fechaDesde = '';

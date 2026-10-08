@@ -27,6 +27,20 @@
   </div>
 
 
+  <!-- VISTAS: todos / figuras / materiales -->
+  <div class="vistas">
+    <button
+      *ngFor="let opcion of vistas"
+      type="button"
+      class="vista"
+      [class.active]="vista === opcion.valor"
+      (click)="vista = opcion.valor">
+      {{ opcion.nombre }}
+      <span>{{ contarVista(opcion.valor) }}</span>
+    </button>
+  </div>
+
+
   <!-- FILTROS -->
   <section class="filters-card">
 
@@ -63,8 +77,31 @@
     </div>
 
 
+    <div class="filter-select">
+
+      <select [(ngModel)]="ubicacionSeleccionada">
+
+        <option value="">Todas las ubicaciones</option>
+        <option value="bodega">En bodega</option>
+        <option value="local">En local</option>
+        <option value="sin">Sin ubicación</option>
+
+      </select>
+
+    </div>
+
+
+    <div class="filter-select" *ngIf="vista !== 'materiales'">
+      <select [(ngModel)]="categoriaSeleccionada" aria-label="Categoría">
+        <option value="">Todas las categorías</option>
+        <option *ngFor="let categoria of categorias" [value]="categoria">{{ categoria }}</option>
+        <option value="sin">Figuras sin categoría</option>
+      </select>
+    </div>
+
+
     <button
-      *ngIf="busqueda || proveedorSeleccionado"
+      *ngIf="busqueda || proveedorSeleccionado || ubicacionSeleccionada || categoriaSeleccionada"
       type="button"
       class="clear-button"
       (click)="limpiarFiltros()">
@@ -113,6 +150,7 @@
       <div class="product-image">
 
         <img
+            appAmpliar
           [src]="producto.imagen || imagenPorDefecto"
           [alt]="producto.nombre"
           (error)="imagenNoCarga($event)">
@@ -131,6 +169,14 @@
           {{ producto.proveedor }}
         </span>
 
+        <span class="sgi-chip categoria-chip" *ngIf="producto.categoria">
+          {{ producto.categoria }}
+        </span>
+
+        <span class="sgi-chip tipo-chip" *ngIf="producto.tipo !== 'figura'">
+          {{ nombreTipo(producto.tipo) }}{{ producto.coleccion ? ' · ' + producto.coleccion : '' }}
+        </span>
+
         <h2>
           {{ producto.nombre }}
         </h2>
@@ -139,17 +185,29 @@
           {{ producto.descripcion }}
         </p>
 
+        <div class="ubicaciones">
+          <span class="sgi-chip bodega" *ngIf="producto.en_bodega">
+            Bodega · {{ producto.existencias_bodega }} und.
+          </span>
+          <span class="sgi-chip local" *ngIf="producto.en_local">
+            Local · {{ producto.existencias_local }} und.
+          </span>
+          <span class="sgi-chip" *ngIf="!producto.en_bodega && !producto.en_local">
+            Sin ubicación
+          </span>
+        </div>
+
 
         <div class="product-meta">
 
           <div>
-            <span>Tamaño</span>
+            <span>{{ producto.tipo === 'figura' ? 'Tamaño' : 'Presentación' }}</span>
            <strong>{{ producto.tamano }}</strong>
           </div>
 
           <div>
-            <span>Existencias</span>
-            <strong>{{ producto.existencias_bodega }} bodega · {{ producto.existencias_local }} local</strong>
+            <span>{{ producto.tipo === 'figura' ? 'Crudo / Por mayor' : 'Detal / Por mayor' }}</span>
+            <strong>${{ producto.precio_venta | number }} / ${{ producto.precio_mayorista | number }}</strong>
           </div>
 
         </div>
@@ -164,15 +222,6 @@
             (click)="editarProducto(producto)">
 
             Editar
-
-          </button>
-
-          <button
-            type="button"
-            class="btn-more"
-            aria-label="Más opciones">
-
-            ⋮
 
           </button>
 

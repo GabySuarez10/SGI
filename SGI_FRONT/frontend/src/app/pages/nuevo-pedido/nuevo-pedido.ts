@@ -1,18 +1,23 @@
 import { Component, OnInit } from '@angular/core';
 import { NgFor, NgIf, DecimalPipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { forkJoin } from 'rxjs';
 import { ProductoService } from '../../services/producto.service';
 import { ProveedorService } from '../../services/proveedor.service';
 import { PedidoProveedorService } from '../../services/pedido-proveedor.service';
+import { IProveedor } from '../../interfaces/proveedor.interface';
 import { mensajeDeError } from '../../utils/http-error';
+import { Ampliar } from '../../components/visor-imagen/ampliar.directive';
 import { IMAGEN_POR_DEFECTO, imagenNoCarga } from '../../utils/imagen';
 import { hoyISO } from '../../utils/fecha';
+import { categoriasDe, coincideCategoria, esMaterial, nombreTipo } from '../../utils/tipos';
 
 // Producto del catálogo con la cantidad y el precio que se van a pedir
 interface ProductoPedido {
   referencia: string;
+  tipo: string;
+  categoria: string;
   nombre: string;
   proveedor: string;
   imagen: string;
@@ -24,7 +29,7 @@ type Destino = '' | 'bodega' | 'local';
 
 @Component({
   selector: 'app-nuevo-pedido',
-  imports: [FormsModule, NgFor, NgIf, DecimalPipe],
+  imports: [FormsModule, NgFor, NgIf, DecimalPipe, Ampliar],
   templateUrl: './nuevo-pedido.html',
   styleUrl: './nuevo-pedido.css',
 })
@@ -37,7 +42,10 @@ export class NuevoPedido implements OnInit {
   destino: Destino = 'bodega';
   busqueda = '';
 
-  proveedores: string[] = [];
+  // Categoría de figura ('' = todas, 'sin' = sin categoría)
+  categoriaSeleccionada = '';
+
+  proveedores: IProveedor[] = [];
   productos: ProductoPedido[] = [];
 
   cargando = false;
@@ -51,10 +59,28 @@ export class NuevoPedido implements OnInit {
     private productoService: ProductoService,
     private proveedorService: ProveedorService,
     private pedidoService: PedidoProveedorService,
+    private route: ActivatedRoute,
     private router: Router
   ) {}
 
+  // Pedido de pinturas, pinceles y otros (enlace "Pedir pinturas y materiales")
+  soloMateriales = false;
+  nombreTipo = nombreTipo;
+
   ngOnInit(): void {
+    // Se escucha el parámetro porque desde el menú se puede pasar de
+    // "Nuevo pedido" a "Pedir pinturas y materiales" sin salir de esta página
+    this.route.queryParamMap.subscribe(parametros => {
+      this.soloMateriales = parametros.get('tipo') === 'materiales';
+      this.destino = this.soloMateriales ? 'local' : 'bodega';
+      this.proveedor = '';
+      this.busqueda = '';
+      this.pasoActual = 1;
+      this.cargarDatos();
+    });
+  }
+
+  private cargarDatos(): void {
     this.cargando = true;
 
     forkJoin({
@@ -62,9 +88,16 @@ export class NuevoPedido implements OnInit {
       productos: this.productoService.getProductos()
     }).subscribe({
       next: ({ proveedores, productos }) => {
-        this.proveedores = proveedores.map(proveedor => proveedor.nombre);
-        this.productos = productos.map(producto => ({
+        // En pedidos de materiales solo aparecen proveedores de materiales o de ambos
+        this.proveedores = this.soloMateriales
+          ? proveedores.filter(item => item.tipo === 'materiales' || item.tipo === 'ambos')
+          : proveedores;
+        this.productos = productos
+          .filter(producto => !this.soloMateriales || esMaterial(producto.tipo))
+          .map(producto => ({
           referencia: producto.referencia,
+          tipo: producto.tipo ?? 'figura',
+          categoria: producto.categoria ?? '',
           nombre: producto.nombre,
           proveedor: producto.proveedor,
           imagen: producto.imagen,
@@ -78,6 +111,11 @@ export class NuevoPedido implements OnInit {
         this.cargando = false;
       }
     });
+  }
+
+  // Precio máximo por figura pactado con el proveedor elegido
+  get limiteProveedor(): number | null {
+    return this.proveedores.find(item => item.nombre === this.proveedor)?.limite_precio ?? null;
   }
 
   // Cada pedido es de un solo proveedor: solo se muestran sus productos
@@ -95,8 +133,14 @@ export class NuevoPedido implements OnInit {
         producto.nombre.toLowerCase().includes(texto) ||
         (producto.referencia ?? '').toLowerCase().includes(texto);
 
-      return coincideProveedor && coincideBusqueda;
+      return coincideProveedor && coincideBusqueda &&
+        coincideCategoria(producto.categoria, this.categoriaSeleccionada);
     });
+  }
+
+  // Categorías de las figuras del proveedor elegido
+  get categorias(): string[] {
+    return categoriasDe(this.productos.filter(producto => producto.proveedor === this.proveedor));
   }
 
   get productosSeleccionados(): ProductoPedido[] {
@@ -159,10 +203,17 @@ export class NuevoPedido implements OnInit {
 
     this.error = '';
     this.pasoActual = 2;
+    this.subirAlInicio();
   }
 
   volverAProductos(): void {
     this.pasoActual = 1;
+    this.subirAlInicio();
+  }
+
+  // Al cambiar de paso se vuelve arriba de la página
+  private subirAlInicio(): void {
+    document.querySelector('.content')?.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
   guardarPedido(): void {
@@ -171,6 +222,21 @@ export class NuevoPedido implements OnInit {
 
     if (seleccionados.length === 0) {
       alert('Agrega al menos un producto al pedido.');
+      return;
+    }
+
+    const limite = this.limiteProveedor;
+    const sobreLimite = limite
+      ? seleccionados.filter(producto => (Number(producto.precioEsperado) || 0) > limite)
+      : [];
+
+    if (
+      sobreLimite.length > 0 &&
+      !confirm(
+        `${sobreLimite.length} producto(s) tienen un precio esperado mayor al límite de ` +
+        `$${limite?.toLocaleString('es-CO')} pactado con ${this.proveedor}. ¿Guardar de todas formas?`
+      )
+    ) {
       return;
     }
 

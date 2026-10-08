@@ -1,0 +1,15 @@
+.precio-producto {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.envio {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 110px;
+  gap: 8px;
+}
+
+small .sgi-btn-enlace {
+  margin-left: 6px;
+}

@@ -4,11 +4,14 @@ Pedidos a proveedores.
 Flujo:
   1. crear_pedido      -> el pedido queda PENDIENTE (estado = False).
                           llegan/sobran/dañados en 0 y faltan = cantidad pedida.
-  2. registrar_recepcion -> se indica cuántas unidades llegaron y cuántas
-                          dañadas; se calculan sobran y faltan, el pedido pasa a
-                          RECIBIDO (estado = True) y las unidades en buen estado
+  2. registrar_recepcion -> se compara la FACTURA del proveedor (unidades y
+                          precio facturados) con lo que llegó y lo dañado; se
+                          calculan sobran y faltan, el pedido pasa a RECIBIDO
+                          (estado = True) y las unidades en buen estado
                           (llegan - dañados) se suman al inventario de destino:
                           zona_entrega = True -> Bodega, False -> Local.
+  3. cambiar_destino    -> cambia Bodega <-> Local. Si el pedido ya se recibió,
+                          mueve también las unidades de un inventario al otro.
 """
 
 from datetime import datetime
@@ -34,6 +37,18 @@ def listar_pedidos(estado=None):
 
 def obtener_pedido(codigo):
     return obtener_o_404(PedidoProveedor, codigo, f"Pedido #{codigo} no encontrado")
+
+
+def limite_del_proveedor(pedido):
+    """Precio máximo por figura pactado con el proveedor del pedido (o None)."""
+    proveedor = db.session.get(Proveedor, pedido.proveedor) if pedido.proveedor else None
+    return proveedor.limite_precio if proveedor else None
+
+
+def pedido_con_limite(pedido):
+    datos = pedido.to_dict()
+    datos["limite_precio"] = limite_del_proveedor(pedido)
+    return datos
 
 
 def _a_booleano(valor, por_defecto=True):
@@ -78,6 +93,8 @@ def _leer_productos(data, proveedor):
 
 def _asignar_productos(pedido, nombres, cantidades, precios):
     ceros = [0] * len(nombres)
+    pedido.facturado = lista_a_texto(ceros)
+    pedido.precio_factura = lista_a_texto(ceros)
     pedido.productos = lista_a_texto(nombres)
     pedido.cantidad = lista_a_texto(cantidades)
     pedido.precio_esperado = lista_a_texto(precios)
@@ -147,10 +164,29 @@ def actualizar_pedido(codigo, data):
     return pedido
 
 
+def _sumar_al_destino(nombre, unidades, en_bodega):
+    """Suma (o resta si unidades < 0) al inventario de bodega o del local."""
+    fila = fila_bodega(nombre, crear=True) if en_bodega else fila_local(nombre, crear=True)
+    nuevo = (fila.existencias or 0) + unidades
+    if nuevo < 0:
+        lugar = "la bodega" if en_bodega else "el local"
+        raise ErrorAPI(
+            f"No hay suficientes unidades de '{nombre}' en {lugar} para moverlas "
+            f"(hay {fila.existencias or 0}, se necesitan {-unidades})",
+            409,
+        )
+    fila.existencias = nuevo
+
+
 def registrar_recepcion(codigo, data):
     """
-    Body: { "llegan": [20, 18], "danados": [0, 1], "fecha_llegada": "..." (opcional) }
-    Las listas siguen el mismo orden que "productos" del pedido.
+    Body (listas en el mismo orden que "productos" del pedido):
+    { "llegan": [20, 18],             unidades que llegaron (incluye dañadas)
+      "danados": [0, 1],              unidades dañadas
+      "facturado": [20, 20],          unidades que dice la factura   (opcional)
+      "precio_factura": [3100, 3200], precio unitario de la factura  (opcional)
+      "observaciones": "...",         (opcional)
+      "fecha_llegada": "..." }        (opcional)
     """
     pedido = obtener_pedido(codigo)
     if pedido.estado:
@@ -160,12 +196,21 @@ def registrar_recepcion(codigo, data):
     nombres, solicitadas = datos["productos"], datos["cantidad"]
     llegan = lista_numeros(data.get("llegan"))
     danados = lista_numeros(data.get("danados")) or [0] * len(nombres)
-    validar_listas_mismo_largo(productos=nombres, llegan=llegan, danados=danados)
+    facturado = lista_numeros(data.get("facturado")) or list(solicitadas)
+    precio_factura = lista_numeros(data.get("precio_factura")) or list(datos["precio_esperado"])
+    validar_listas_mismo_largo(
+        productos=nombres, llegan=llegan, danados=danados,
+        facturado=facturado, precio_factura=precio_factura,
+    )
 
     sobran, faltan = [], []
-    for nombre, pedida, llego, danado in zip(nombres, solicitadas, llegan, danados):
+    for nombre, pedida, llego, danado, fact, precio in zip(
+        nombres, solicitadas, llegan, danados, facturado, precio_factura
+    ):
         llego = entero(llego, f"recibido de '{nombre}'", 0)
         danado = entero(danado, f"dañado de '{nombre}'", 0)
+        entero(fact, f"facturado de '{nombre}'", 0)
+        entero(precio, f"precio de factura de '{nombre}'", 0)
         if danado > llego:
             raise ErrorAPI(f"'{nombre}': las unidades dañadas no pueden superar las recibidas")
         sobran.append(max(llego - pedida, 0))
@@ -173,16 +218,15 @@ def registrar_recepcion(codigo, data):
 
         utilizables = llego - danado
         if utilizables > 0:
-            if pedido.zona_entrega:
-                fila = fila_bodega(nombre, crear=True)
-            else:
-                fila = fila_local(nombre, crear=True)
-            fila.existencias = (fila.existencias or 0) + utilizables
+            _sumar_al_destino(nombre, utilizables, pedido.zona_entrega)
 
     pedido.llegan = lista_a_texto(llegan)
     pedido.danados = lista_a_texto(danados)
     pedido.sobran = lista_a_texto(sobran)
     pedido.faltan = lista_a_texto(faltan)
+    pedido.facturado = lista_a_texto(facturado)
+    pedido.precio_factura = lista_a_texto(precio_factura)
+    pedido.observaciones = (data.get("observaciones") or "").strip()
     pedido.estado = True
     pedido.fecha_llegada = a_fecha(data.get("fecha_llegada"), "fecha_llegada") or datetime.now().replace(microsecond=0)
 
@@ -191,9 +235,41 @@ def registrar_recepcion(codigo, data):
     return pedido
 
 
+def cambiar_destino(codigo, data):
+    """
+    Body: { "zona_entrega": true }   true = Bodega, false = Local
+
+    Pendiente: solo cambia el destino.
+    Recibido:  además mueve las unidades en buen estado (llegan - dañados)
+               del inventario anterior al nuevo.
+    """
+    pedido = obtener_pedido(codigo)
+    if "zona_entrega" not in data:
+        raise ErrorAPI("Indica el nuevo destino (zona_entrega)")
+    nuevo = _a_booleano(data.get("zona_entrega"))
+    if nuevo == bool(pedido.zona_entrega):
+        return pedido
+
+    if pedido.estado:
+        datos = pedido.to_dict()
+        for nombre, llego, danado in zip(datos["productos"], datos["llegan"], datos["danados"]):
+            utilizables = max(llego - danado, 0)
+            if utilizables:
+                _sumar_al_destino(nombre, -utilizables, bool(pedido.zona_entrega))
+                _sumar_al_destino(nombre, utilizables, nuevo)
+
+    pedido.zona_entrega = nuevo
+    db.session.commit()
+    db.session.refresh(pedido)
+    return pedido
+
+
 def eliminar_pedido(codigo):
     pedido = obtener_pedido(codigo)
     if pedido.estado:
-        raise ErrorAPI("No se puede eliminar un pedido que ya fue recibido", 409)
+        raise ErrorAPI(
+            "No se puede eliminar un pedido que ya fue recibido: sus unidades ya entraron al inventario",
+            409,
+        )
     db.session.delete(pedido)
     db.session.commit()

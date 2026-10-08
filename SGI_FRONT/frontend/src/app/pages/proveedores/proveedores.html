@@ -99,15 +99,6 @@
           {{ proveedor.nombre.charAt(0) }}
         </div>
 
-        <button
-          type="button"
-          class="more-button"
-          aria-label="Más opciones">
-
-          ⋮
-
-        </button>
-
       </div>
 
 
@@ -116,6 +107,10 @@
         <h2>
           {{ proveedor.nombre }}
         </h2>
+
+        <span class="sgi-chip tipo-proveedor" [class.local]="proveedor.tipo !== 'figuras'">
+          {{ nombreTipoProveedor(proveedor.tipo) }}
+        </span>
 
         <p class="provider-description">
           {{ proveedor.descripcion }}
@@ -155,6 +150,18 @@
             <div>
               <span>Dirección</span>
               <strong>{{ proveedor.direccion }}</strong>
+            </div>
+
+          </div>
+
+
+          <div class="detail-item" *ngIf="proveedor.limite_precio">
+
+            <span class="detail-icon">$</span>
+
+            <div>
+              <span>Límite por figura</span>
+              <strong>${{ proveedor.limite_precio | number }}</strong>
             </div>
 
           </div>

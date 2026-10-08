@@ -1,15 +1,17 @@
 <div class="app-layout">
 
-  <!-- Sidebar -->
+  <!-- Menú lateral -->
   <app-sidebar
-    [open]="sidebarOpen">
+    [open]="sidebarOpen"
+    (cerrar)="closeSidebar()">
   </app-sidebar>
 
 
-  <!-- Fondo oscuro en móvil -->
+  <!-- Fondo oscuro detrás del menú en celular: al tocarlo se cierra -->
   <div
     class="sidebar-overlay"
     [class.visible]="sidebarOpen"
+    aria-hidden="true"
     (click)="closeSidebar()">
   </div>
 
@@ -26,5 +28,9 @@
     </main>
 
   </div>
+
+
+  <!-- Foto ampliada (se abre al tocar la imagen de un producto) -->
+  <app-visor-imagen></app-visor-imagen>
 
 </div>

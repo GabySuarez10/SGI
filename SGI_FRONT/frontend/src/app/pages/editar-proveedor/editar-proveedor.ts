@@ -5,6 +5,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { IProveedor } from '../../interfaces/proveedor.interface';
 import { ProveedorService } from '../../services/proveedor.service';
 import { mensajeDeError } from '../../utils/http-error';
+import { TIPOS_PROVEEDOR } from '../../utils/tipos';
 
 @Component({
   selector: 'app-editar-proveedor',
@@ -20,14 +21,19 @@ export class EditarProveedor implements OnInit {
     telefono: '',
     direccion: '',
     ciudad: '',
-    descripcion: ''
+    descripcion: '',
+    limite_precio: null,
+    tipo: 'figuras'
   };
+
+  readonly tiposProveedor = TIPOS_PROVEEDOR;
 
   // Nombre con el que está guardado (es la llave del proveedor)
   nombreOriginal = '';
 
   cargando = false;
   guardando = false;
+  eliminando = false;
   error = '';
 
   constructor(
@@ -54,7 +60,9 @@ export class EditarProveedor implements OnInit {
           telefono: proveedor.telefono ?? '',
           direccion: proveedor.direccion ?? '',
           ciudad: proveedor.ciudad ?? '',
-          descripcion: proveedor.descripcion ?? ''
+          descripcion: proveedor.descripcion ?? '',
+          limite_precio: proveedor.limite_precio ?? null,
+          tipo: proveedor.tipo ?? 'figuras'
         };
         this.cargando = false;
       },
@@ -81,7 +89,8 @@ export class EditarProveedor implements OnInit {
     this.proveedorService
       .actualizarProveedor(this.nombreOriginal, {
         ...this.proveedor,
-        nombre: this.proveedor.nombre.trim()
+        nombre: this.proveedor.nombre.trim(),
+        limite_precio: Number(this.proveedor.limite_precio) || null
       })
       .subscribe({
         next: () => {
@@ -98,5 +107,26 @@ export class EditarProveedor implements OnInit {
 
   cancelar(): void {
     this.router.navigate(['/proveedores']);
+  }
+
+  eliminarProveedor(): void {
+    if (!confirm(`¿Eliminar el proveedor "${this.nombreOriginal}"?\n\nEsta acción no se puede deshacer.`)) {
+      return;
+    }
+
+    this.eliminando = true;
+    this.error = '';
+    this.proveedorService.eliminarProveedor(this.nombreOriginal).subscribe({
+      next: () => {
+        this.eliminando = false;
+        alert(`El proveedor "${this.nombreOriginal}" se eliminó.`);
+        this.router.navigate(['/proveedores']);
+      },
+      error: err => {
+        this.eliminando = false;
+        this.error = mensajeDeError(err);
+        alert(this.error);
+      }
+    });
   }
 }

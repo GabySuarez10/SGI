@@ -15,7 +15,8 @@ def listar():
 
 @pedidos_proveedor_bp.get("/<int:codigo>")
 def obtener(codigo):
-    return jsonify(q.obtener_pedido(codigo).to_dict())
+    """Incluye limite_precio: precio máximo por figura pactado con el proveedor."""
+    return jsonify(q.pedido_con_limite(q.obtener_pedido(codigo)))
 
 
 @pedidos_proveedor_bp.post("")
@@ -32,8 +33,14 @@ def actualizar(codigo):
 
 @pedidos_proveedor_bp.put("/<int:codigo>/recepcion")
 def recepcion(codigo):
-    """{ llegan: [...], danados: [...] } -> marca recibido y suma el stock"""
-    return jsonify(q.registrar_recepcion(codigo, request.get_json() or {}).to_dict())
+    """{ llegan, danados, facturado, precio_factura, observaciones } -> marca recibido y suma el stock"""
+    return jsonify(q.pedido_con_limite(q.registrar_recepcion(codigo, request.get_json() or {})))
+
+
+@pedidos_proveedor_bp.put("/<int:codigo>/destino")
+def destino(codigo):
+    """{ zona_entrega: true (Bodega) | false (Local) } -> si ya se recibió, mueve el stock"""
+    return jsonify(q.pedido_con_limite(q.cambiar_destino(codigo, request.get_json() or {})))
 
 
 @pedidos_proveedor_bp.delete("/<int:codigo>")

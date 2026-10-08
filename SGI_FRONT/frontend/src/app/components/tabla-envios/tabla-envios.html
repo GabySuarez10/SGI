@@ -1,0 +1,97 @@
+<section class="tabla-envios">
+
+  <div class="tabla-encabezado">
+    <div>
+      <h3>Tarifas de envío por tamaño</h3>
+      <p *ngIf="mostrarAyuda">
+        El envío elegido se suma al precio crudo y al precio por mayor.
+      </p>
+    </div>
+
+    <button
+      *ngIf="!editando"
+      type="button"
+      class="sgi-btn sgi-btn-secundario sgi-btn-pequeno"
+      (click)="editar()">
+      ✎ Editar
+    </button>
+  </div>
+
+  <div class="mensaje-error" *ngIf="error">
+    {{ error }}
+  </div>
+
+  <!-- MODO CONSULTA -->
+  <table *ngIf="!editando">
+    <thead>
+      <tr>
+        <th>Tamaño</th>
+        <th class="derecha">Envío</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let tarifa of tarifas">
+        <td>{{ tarifa.nombre }}</td>
+        <td class="derecha">${{ tarifa.precio | number }}</td>
+      </tr>
+      <tr *ngIf="tarifas.length === 0">
+        <td colspan="2" class="vacio">Sin tarifas registradas.</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- MODO EDICIÓN -->
+  <div *ngIf="editando">
+
+    <div class="fila-edicion" *ngFor="let tarifa of borrador; let i = index">
+      <input
+        type="text"
+        maxlength="40"
+        placeholder="Ej. Mediano"
+        [(ngModel)]="tarifa.nombre"
+        [name]="'tarifa-nombre-' + i">
+
+      <div class="precio">
+        <span>$</span>
+        <input
+          type="number"
+          min="0"
+          [(ngModel)]="tarifa.precio"
+          [name]="'tarifa-precio-' + i">
+      </div>
+
+      <button
+        type="button"
+        class="quitar"
+        aria-label="Quitar tamaño"
+        (click)="quitarFila(i)">
+        ✕
+      </button>
+    </div>
+
+    <button
+      type="button"
+      class="sgi-btn sgi-btn-enlace agregar"
+      (click)="agregarFila()">
+      + Agregar tamaño
+    </button>
+
+    <div class="acciones">
+      <button
+        type="button"
+        class="sgi-btn sgi-btn-secundario sgi-btn-pequeno"
+        (click)="cancelar()">
+        Cancelar
+      </button>
+      <button
+        type="button"
+        class="sgi-btn sgi-btn-primario sgi-btn-pequeno"
+        [disabled]="guardando"
+        (click)="guardar()">
+        {{ guardando ? 'Guardando...' : 'Guardar tarifas' }}
+      </button>
+    </div>
+
+  </div>
+
+</section>

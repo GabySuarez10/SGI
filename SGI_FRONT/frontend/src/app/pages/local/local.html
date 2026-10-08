@@ -1,10 +1,24 @@
 <div class="local-page">
 
-  <div class="page-header">
+  <div class="page-header con-acciones">
 
     <div>
       <h1>Local</h1>
       <p>Consulta los productos disponibles para venta en el local.</p>
+    </div>
+
+    <div class="acciones-encabezado">
+      <a
+        class="sgi-btn sgi-btn-secundario"
+        routerLink="/traslados">
+        ⇄ Traslados
+      </a>
+      <a
+        class="sgi-btn sgi-btn-primario"
+        routerLink="/nuevo-producto"
+        [queryParams]="{ ubicacion: 'local' }">
+        + Nuevo producto en local
+      </a>
     </div>
 
   </div>
@@ -89,6 +103,22 @@
     </select>
 
 
+    <select [(ngModel)]="vista" aria-label="Tipo de producto">
+
+      <option value="todos">Todos los productos</option>
+      <option value="figuras">Figuras</option>
+      <option value="materiales">Pinturas, pinceles y otros</option>
+
+    </select>
+
+
+    <select *ngIf="vista !== 'materiales'" [(ngModel)]="categoriaSeleccionada" aria-label="Categoría">
+      <option value="">Todas las categorías</option>
+      <option *ngFor="let categoria of categorias" [value]="categoria">{{ categoria }}</option>
+      <option value="sin">Figuras sin categoría</option>
+    </select>
+
+
     <button
       class="clear-button"
       type="button"
@@ -135,6 +165,7 @@
       <div class="product-image">
 
         <img
+            appAmpliar
           [src]="producto.imagen || imagenPorDefecto"
           (error)="imagenNoCarga($event)"
           [alt]="producto.nombre">
@@ -147,7 +178,7 @@
         <div class="product-top">
 
           <span class="product-code">
-            {{ producto.codigo }}
+            {{ producto.referencia || producto.codigo }}
           </span>
 
           <span
@@ -162,6 +193,14 @@
 
 
         <h3>{{ producto.nombre }}</h3>
+
+        <span class="sgi-chip categoria-chip" *ngIf="producto.categoria">
+          {{ producto.categoria }}
+        </span>
+
+        <span class="sgi-chip tipo-chip" *ngIf="producto.tipo !== 'figura'">
+          {{ nombreTipo(producto.tipo) }}{{ producto.coleccion ? ' · ' + producto.coleccion : '' }}
+        </span>
 
         <p class="provider">
           {{ producto.proveedor }}
@@ -209,6 +248,15 @@
 
           </strong>
 
+        </div>
+
+        <div class="card-actions">
+          <button
+            type="button"
+            class="sgi-btn sgi-btn-secundario sgi-btn-pequeno"
+            (click)="editarProducto(producto.codigo)">
+            ✎ Editar
+          </button>
         </div>
 
       </div>

@@ -23,7 +23,7 @@
   display: block;
   margin-bottom: 6px;
 
-  color: #2563EB;
+  color: #2f3a8f;
 
   font-size: 12px;
   font-weight: 700;
@@ -35,7 +35,7 @@
 .page-header h1 {
   margin: 0;
 
-  color: #1E293B;
+  color: #1f2433;
 
   font-size: 28px;
   font-weight: 700;
@@ -46,7 +46,7 @@
 .page-header p {
   margin: 8px 0 0;
 
-  color: #64748B;
+  color: #5b6275;
 
   font-size: 14px;
   line-height: 1.5;
@@ -60,12 +60,7 @@
 .filters-card {
   display: grid;
 
-  grid-template-columns:
-    minmax(220px, 1.5fr)
-    minmax(190px, 1fr)
-    minmax(150px, 0.8fr)
-    minmax(150px, 0.8fr)
-    auto;
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
 
   align-items: end;
 
@@ -133,7 +128,7 @@
   border-radius: 9px;
 
   background: #FFFFFF;
-  color: #1E293B;
+  color: #1f2433;
 
   font-family: inherit;
   font-size: 14px;
@@ -160,10 +155,10 @@
 
 .filter-group input:focus,
 .filter-group select:focus {
-  border-color: #2563EB;
+  border-color: #2f3a8f;
 
   box-shadow:
-    0 0 0 3px rgba(37, 99, 235, 0.10);
+    0 0 0 3px rgba(47, 58, 143, 0.10);
 }
 
 
@@ -198,9 +193,9 @@
 }
 
 .clear-button:hover {
-  background: #F8FAFC;
+  background: #f6f7f9;
   border-color: #94A3B8;
-  color: #2563EB;
+  color: #2f3a8f;
 }
 
 
@@ -224,13 +219,13 @@
 }
 
 .results-header strong {
-  color: #1E293B;
+  color: #1f2433;
 
   font-size: 15px;
 }
 
 .results-header span {
-  color: #64748B;
+  color: #5b6275;
 
   font-size: 13px;
 }
@@ -264,7 +259,7 @@ table {
 }
 
 thead {
-  background: #F8FAFC;
+  background: #f6f7f9;
 }
 
 th {
@@ -272,7 +267,7 @@ th {
 
   border-bottom: 1px solid #E2E8F0;
 
-  color: #64748B;
+  color: #5b6275;
 
   font-size: 12px;
   font-weight: 700;
@@ -306,7 +301,7 @@ tbody tr {
 }
 
 tbody tr:hover {
-  background: #F8FAFC;
+  background: #f6f7f9;
 }
 
 
@@ -334,8 +329,8 @@ tbody tr:hover {
 }
 
 .tipo-traslado {
-  background: #EFF6FF;
-  color: #2563EB;
+  background: #eef0fb;
+  color: #2f3a8f;
 }
 
 .tipo-pedido {
@@ -355,7 +350,7 @@ tbody tr:hover {
 }
 
 .product-name {
-  color: #1E293B;
+  color: #1f2433;
 
   font-weight: 600;
 }
@@ -441,7 +436,7 @@ tbody tr:hover {
 .empty-state p {
   margin: 0 0 18px;
 
-  color: #64748B;
+  color: #5b6275;
 
   font-size: 13px;
 }
@@ -466,7 +461,7 @@ tbody tr:hover {
 }
 
 .btn-secondary:hover {
-  background: #F8FAFC;
+  background: #f6f7f9;
   border-color: #94A3B8;
 }
 

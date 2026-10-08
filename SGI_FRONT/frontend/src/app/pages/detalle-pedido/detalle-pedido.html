@@ -1,7 +1,7 @@
 <div class="detalle-page">
 
-  <!-- ENCABEZADO -->
-  <div class="page-header">
+  <!-- ENCABEZADO (queda fijo arriba con las acciones) -->
+  <div class="page-header encabezado-fijo">
 
     <div class="header-info">
 
@@ -15,87 +15,114 @@
       <div>
         <span class="page-label">Pedido de proveedor</span>
 
-        <h1>Detalle del pedido</h1>
+        <h1>Detalle del pedido {{ pedido ? '#' + numeroPedido : '' }}</h1>
 
         <p>
-          Revisa la recepción de los productos y registra las cantidades recibidas.
+          Compara la factura del proveedor con lo que llegó y registra la recepción.
         </p>
       </div>
 
     </div>
 
-    <div class="order-status" *ngIf="pedido">
-      <span class="status-dot"></span>
-      {{ pedido.estado ? 'Recibido' : 'Pendiente de recepción' }}
+    <div class="acciones-encabezado">
+
+      <div class="order-status" *ngIf="pedido">
+        <span class="status-dot"></span>
+        {{ pedido.estado ? 'Recibido' : 'Pendiente de recepción' }}
+      </div>
+
+      <span class="sgi-chip mal" *ngIf="pedido && totalInconsistencias > 0">
+        {{ totalInconsistencias }} inconsistencia(s)
+      </span>
+
+      <button
+        *ngIf="!soloLectura"
+        type="button"
+        class="sgi-btn sgi-btn-primario"
+        [disabled]="guardando || !pedido"
+        (click)="registrarRecepcion()">
+        {{ guardando ? 'Registrando...' : 'Registrar recepción' }}
+      </button>
+
     </div>
 
   </div>
 
 
- 
-<!-- CARGA / ERROR -->
-<div class="estado-carga" *ngIf="cargando">
-  Cargando pedido...
-</div>
+  <!-- CARGA / ERROR -->
+  <div class="estado-carga" *ngIf="cargando">
+    Cargando pedido...
+  </div>
 
-<div class="mensaje-error" *ngIf="error">
-  {{ error }}
-</div>
-
-
-<!-- INFORMACIÓN DEL PEDIDO -->
-<section class="order-info-card" *ngIf="pedido">
-
-  <div class="order-info-item">
-
-    <span>Pedido</span>
-
-    <strong>#{{ numeroPedido }}</strong>
-
+  <div class="mensaje-error" *ngIf="error">
+    {{ error }}
   </div>
 
 
-  <div class="order-info-item">
+  <!-- INFORMACIÓN DEL PEDIDO -->
+  <section class="order-info-card" *ngIf="pedido">
 
-    <span>Proveedor</span>
+    <div class="order-info-item">
+      <span>Proveedor</span>
+      <strong>{{ pedido.proveedor }}</strong>
+      <small *ngIf="limite">Límite pactado: ${{ limite | number }} por figura</small>
+    </div>
 
-    <strong>{{ pedido.proveedor }}</strong>
+    <div class="order-info-item">
+      <span>Fecha del pedido</span>
+      <strong>{{ pedido.fecha_pedido | date:'d MMM y' }}</strong>
+    </div>
 
-  </div>
+    <div class="order-info-item" *ngIf="pedido.estado">
+      <span>Fecha de llegada</span>
+      <strong>{{ pedido.fecha_llegada | date:'d MMM y, h:mm a' }}</strong>
+    </div>
+
+    <!-- DESTINO: se puede cambiar aunque el pedido ya haya llegado -->
+    <div class="order-info-item destino">
+      <span>Destino del pedido</span>
+
+      <div class="destino-control">
+        <select
+          [(ngModel)]="destinoSeleccionado"
+          [disabled]="cambiandoDestino"
+          aria-label="Destino del pedido">
+          <option [ngValue]="true">Bodega</option>
+          <option [ngValue]="false">Local</option>
+        </select>
+
+        <button
+          *ngIf="destinoSeleccionado !== pedido.zona_entrega"
+          type="button"
+          class="sgi-btn sgi-btn-secundario sgi-btn-pequeno"
+          [disabled]="cambiandoDestino"
+          (click)="cambiarDestino()">
+          {{ cambiandoDestino ? 'Cambiando...' : 'Cambiar' }}
+        </button>
+      </div>
+
+      <small *ngIf="pedido.estado && destinoSeleccionado !== pedido.zona_entrega">
+        Las unidades recibidas se moverán de {{ pedido.zona_entrega ? 'Bodega' : 'Local' }}
+        a {{ destinoSeleccionado ? 'Bodega' : 'Local' }}.
+      </small>
+    </div>
+
+  </section>
 
 
-  <div class="order-info-item">
-
-    <span>Fecha del pedido</span>
-
-    <strong>{{ pedido.fecha_pedido | date:'d MMM y' }}</strong>
-
-  </div>
-
-
-  <div class="order-info-item">
-
-    <span>{{ pedido.estado ? 'Fecha de llegada' : 'Destino del pedido' }}</span>
-
-    <strong *ngIf="!pedido.estado">{{ pedido.zona_entrega ? 'Bodega' : 'Local' }}</strong>
-    <strong *ngIf="pedido.estado">{{ pedido.fecha_llegada | date:'d MMM y, h:mm a' }} · {{ pedido.zona_entrega ? 'Bodega' : 'Local' }}</strong>
-
-  </div>
-
-</section>
-
-
-
-  <!-- TABLA DE RECEPCIÓN -->
-  <section class="products-card">
+  <!-- TABLA DE COMPARACIÓN: PEDIDO vs FACTURA vs RECIBIDO -->
+  <section class="products-card" *ngIf="pedido">
 
     <div class="section-heading">
 
       <div>
-        <h2>Productos del pedido</h2>
+        <h2>Comparativa del pedido</h2>
 
-        <p>
-          Registra lo que realmente llegó y marca las unidades dañadas.
+        <p *ngIf="!soloLectura">
+          Copia de la factura las unidades y el precio cobrado, y registra lo que realmente llegó.
+        </p>
+        <p *ngIf="soloLectura">
+          Resultado de la recepción registrada.
         </p>
       </div>
 
@@ -114,13 +141,15 @@
 
           <tr>
             <th>Producto</th>
-            <th>Solicitado</th>
+            <th>Pedido</th>
+            <th>Facturado</th>
             <th>Recibido</th>
+            <th>Dañado</th>
             <th>Faltante</th>
             <th>Sobrante</th>
-            <th>Dañado</th>
-            <th>Precio unitario</th>
-            <th>Total esperado</th>
+            <th>Precio esperado</th>
+            <th>Precio factura</th>
+            <th>Revisión</th>
           </tr>
 
         </thead>
@@ -128,85 +157,57 @@
 
         <tbody>
 
-          <tr *ngFor="let producto of productos">
+          <tr
+            *ngFor="let producto of productos"
+            [class.fila-con-problema]="problemas(producto).length > 0">
 
             <!-- PRODUCTO -->
             <td>
-
               <div class="product-cell">
 
                 <div class="product-thumbnail">
-
                   <img
+            appAmpliar
                     [src]="producto.imagen || imagenPorDefecto"
                     [alt]="producto.nombre"
                     (error)="imagenNoCarga($event)">
-
                 </div>
 
                 <div class="product-details">
-
-                  <span class="product-reference">
-                    {{ producto.referencia }}
-                  </span>
-
-                  <strong>
-                    {{ producto.nombre }}
-                  </strong>
-
+                  <span class="product-reference">{{ producto.referencia }}</span>
+                  <strong>{{ producto.nombre }}</strong>
                 </div>
 
               </div>
-
             </td>
 
-
-            <!-- SOLICITADO -->
+            <!-- PEDIDO -->
             <td>
-
-              <span class="requested-quantity">
-                {{ producto.solicitado }}
-              </span>
-
+              <span class="requested-quantity">{{ producto.solicitado }}</span>
             </td>
 
+            <!-- FACTURADO -->
+            <td>
+              <input
+                class="quantity-input"
+                type="number"
+                min="0"
+                [disabled]="soloLectura"
+                [(ngModel)]="producto.facturado">
+            </td>
 
             <!-- RECIBIDO -->
             <td>
-
               <input
                 class="quantity-input"
                 type="number"
                 min="0"
                 [disabled]="soloLectura"
                 [(ngModel)]="producto.recibido">
-
             </td>
-
-
-            <!-- FALTANTE -->
-            <td>
-
-              <span class="quantity-result quantity-missing">
-                {{ getFaltantes(producto) }}
-              </span>
-
-            </td>
-
-
-            <!-- SOBRANTE -->
-            <td>
-
-              <span class="quantity-result quantity-surplus">
-                {{ getSobrantes(producto) }}
-              </span>
-
-            </td>
-
 
             <!-- DAÑADO -->
             <td>
-
               <input
                 class="quantity-input damaged-input"
                 type="number"
@@ -214,27 +215,46 @@
                 [max]="producto.recibido"
                 [disabled]="soloLectura"
                 [(ngModel)]="producto.danado">
-
             </td>
 
-
-            <!-- PRECIO -->
+            <!-- FALTANTE -->
             <td>
-
-              <span class="unit-price">
-                ${{ producto.precioEsperado | number }}
-              </span>
-
+              <span class="quantity-result quantity-missing">{{ getFaltantes(producto) }}</span>
             </td>
 
-
-            <!-- TOTAL -->
+            <!-- SOBRANTE -->
             <td>
+              <span class="quantity-result quantity-surplus">{{ getSobrantes(producto) }}</span>
+            </td>
 
-              <strong class="total-product">
-                ${{ getTotalProducto(producto) | number }}
-              </strong>
+            <!-- PRECIO ESPERADO -->
+            <td>
+              <span class="unit-price">${{ producto.precioEsperado | number }}</span>
+            </td>
 
+            <!-- PRECIO FACTURA -->
+            <td>
+              <input
+                class="quantity-input precio-input"
+                type="number"
+                min="0"
+                [class.sobre-limite]="superaLimite(producto)"
+                [disabled]="soloLectura"
+                [(ngModel)]="producto.precioFactura">
+            </td>
+
+            <!-- REVISIÓN -->
+            <td>
+              <div class="revision">
+                <span class="sgi-chip ok" *ngIf="problemas(producto).length === 0">✓ Correcto</span>
+                <span
+                  *ngFor="let problema of problemas(producto)"
+                  class="sgi-chip"
+                  [class.mal]="problema.nivel === 'mal'"
+                  [class.medio]="problema.nivel === 'medio'">
+                  {{ problema.texto }}
+                </span>
+              </div>
             </td>
 
           </tr>
@@ -249,93 +269,52 @@
 
 
   <!-- RESUMEN DE CANTIDADES -->
-  <section class="quantity-summary">
+  <section class="quantity-summary" *ngIf="pedido">
 
     <div class="quantity-card">
-
-      <span class="quantity-label">
-        Total solicitado
-      </span>
-
-      <strong>
-        {{ getTotalSolicitado() }}
-      </strong>
-
+      <span class="quantity-label">Pedido</span>
+      <strong>{{ getTotalSolicitado() }}</strong>
     </div>
 
-
     <div class="quantity-card">
-
-      <span class="quantity-label">
-        Total recibido
-      </span>
-
-      <strong class="text-blue">
-        {{ getTotalRecibido() }}
-      </strong>
-
+      <span class="quantity-label">Facturado</span>
+      <strong>{{ getTotalFacturado() }}</strong>
     </div>
 
-
     <div class="quantity-card">
-
-      <span class="quantity-label">
-        Faltantes
-      </span>
-
-      <strong class="text-warning">
-        {{ getTotalFaltantes() }}
-      </strong>
-
+      <span class="quantity-label">Recibido</span>
+      <strong class="text-blue">{{ getTotalRecibido() }}</strong>
     </div>
 
-
     <div class="quantity-card">
-
-      <span class="quantity-label">
-        Sobrantes
-      </span>
-
-      <strong class="text-purple">
-        {{ getTotalSobrantes() }}
-      </strong>
-
+      <span class="quantity-label">Faltantes</span>
+      <strong class="text-warning">{{ getTotalFaltantes() }}</strong>
     </div>
 
+    <div class="quantity-card">
+      <span class="quantity-label">Sobrantes</span>
+      <strong class="text-purple">{{ getTotalSobrantes() }}</strong>
+    </div>
 
     <div class="quantity-card">
-
-      <span class="quantity-label">
-        Dañadas
-      </span>
-
-      <strong class="text-danger">
-        {{ getTotalDanados() }}
-      </strong>
-
+      <span class="quantity-label">Dañadas</span>
+      <strong class="text-danger">{{ getTotalDanados() }}</strong>
     </div>
 
   </section>
 
 
   <!-- RESUMEN ECONÓMICO -->
-  <section class="financial-card">
+  <section class="financial-card" *ngIf="pedido">
 
     <div class="financial-header">
 
       <div>
-
         <h2>Resumen económico</h2>
-
-        <p>
-          Valores calculados según las cantidades solicitadas, recibidas y dañadas.
-        </p>
-
+        <p>Pedido vs. factura del proveedor vs. lo que llegó en buen estado.</p>
       </div>
 
-      <div class="financial-icon">
-        $
-      </div>
+      <div class="financial-icon">$</div>
 
     </div>
 
@@ -343,70 +322,38 @@
     <div class="financial-grid">
 
       <div class="financial-item">
-
-        <span>
-          Total esperado
-        </span>
-
-        <strong>
-          ${{ getTotalEsperado() | number }}
-        </strong>
-
-        <small>
-          Valor de las unidades solicitadas
-        </small>
-
+        <span>Total esperado</span>
+        <strong>${{ getTotalEsperado() | number }}</strong>
+        <small>Unidades pedidas × precio esperado</small>
       </div>
 
-
       <div class="financial-item">
-
-        <span>
-          Valor faltante
-        </span>
-
-        <strong class="text-warning">
-          ${{ getValorFaltante() | number }}
+        <span>Total facturado</span>
+        <strong [class.text-danger]="getTotalFacturadoValor() > getTotalEsperado()">
+          ${{ getTotalFacturadoValor() | number }}
         </strong>
-
         <small>
-          Unidades que no llegaron
+          Unidades facturadas × precio factura
+          ({{ getTotalFacturadoValor() - getTotalEsperado() >= 0 ? '+' : '' }}${{ getTotalFacturadoValor() - getTotalEsperado() | number }})
         </small>
-
       </div>
 
-
       <div class="financial-item">
-
-        <span>
-          Valor dañado
-        </span>
-
-        <strong class="text-danger">
-          ${{ getValorDanado() | number }}
-        </strong>
-
-        <small>
-          Unidades recibidas con daño
-        </small>
-
+        <span>Valor faltante</span>
+        <strong class="text-warning">${{ getValorFaltante() | number }}</strong>
+        <small>Unidades que no llegaron</small>
       </div>
 
+      <div class="financial-item">
+        <span>Valor dañado</span>
+        <strong class="text-danger">${{ getValorDanado() | number }}</strong>
+        <small>Unidades recibidas con daño</small>
+      </div>
 
       <div class="financial-item">
-
-        <span>
-          Costo utilizable
-        </span>
-
-        <strong class="text-success">
-          ${{ getCostoUtilizable() | number }}
-        </strong>
-
-        <small>
-          Unidades recibidas en buen estado
-        </small>
-
+        <span>Costo utilizable</span>
+        <strong class="text-success">${{ getCostoUtilizable() | number }}</strong>
+        <small>Unidades en buen estado × precio factura</small>
       </div>
 
     </div>
@@ -414,55 +361,65 @@
   </section>
 
 
-  <!-- OBSERVACIONES (aún no se guardan: la tabla Pedido_proveedor no tiene esa columna) -->
-  <section class="observations-card" *ngIf="!soloLectura">
+  <!-- OBSERVACIONES -->
+  <section class="observations-card" *ngIf="pedido">
 
     <div class="observations-header">
 
       <div>
-
         <h2>Observaciones</h2>
-
-        <p>
-          Registra cualquier novedad encontrada durante la recepción.
-        </p>
-
+        <p>Novedades encontradas al comparar la factura con lo recibido.</p>
       </div>
 
     </div>
 
-
     <textarea
       rows="4"
-      placeholder="Ejemplo: Llegaron 2 unidades con detalles en la pintura...">
+      [disabled]="soloLectura"
+      [(ngModel)]="observaciones"
+      placeholder="Ejemplo: Llegaron 2 unidades con detalles en la pintura; la factura cobra 3.300 en vez de 3.150...">
     </textarea>
 
   </section>
 
 
   <!-- ACCIONES -->
-  <div class="page-actions" *ngIf="!soloLectura">
+  <div class="page-actions" *ngIf="!soloLectura && pedido">
 
     <button
       type="button"
       class="btn-secondary"
       (click)="volver()">
-
       Cancelar
-
     </button>
-
 
     <button
       type="button"
       class="btn-primary"
       [disabled]="guardando || !pedido"
       (click)="registrarRecepcion()">
-
       {{ guardando ? 'Registrando...' : 'Registrar recepción' }}
-
     </button>
 
   </div>
+
+
+  <!-- ELIMINAR (solo pedidos pendientes) -->
+  <section class="zona-eliminar" *ngIf="pedido && !pedido.estado">
+    <div>
+      <strong>Eliminar pedido</strong>
+      <p>
+        Úsalo si el pedido se canceló o nunca va a llegar. Los pedidos ya
+        recibidos no se pueden eliminar porque sus unidades ya entraron al inventario.
+      </p>
+    </div>
+    <button
+      type="button"
+      class="sgi-btn sgi-btn-peligro"
+      [disabled]="eliminando"
+      (click)="eliminarPedido()">
+      {{ eliminando ? 'Eliminando...' : 'Eliminar pedido' }}
+    </button>
+  </section>
 
 </div>

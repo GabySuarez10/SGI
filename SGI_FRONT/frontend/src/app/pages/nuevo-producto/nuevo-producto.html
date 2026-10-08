@@ -1,7 +1,7 @@
 <div class="nuevo-producto-page">
 
-  <!-- ENCABEZADO -->
-  <div class="page-header">
+  <!-- ENCABEZADO (queda fijo arriba con las acciones) -->
+  <div class="page-header encabezado-fijo">
 
     <div class="header-info">
 
@@ -21,13 +21,37 @@
           Catálogo
         </span>
 
-        <h1>Nuevo producto</h1>
+        <h1>{{ tituloPagina }}</h1>
 
         <p>
-          Registra uno o varios productos en el catálogo de Pintarte.
+          Registra uno o varios productos y elige si quedan en la bodega, en el local o en ambos.
         </p>
 
       </div>
+
+    </div>
+
+    <div class="acciones-encabezado">
+
+      <span class="resumen-rapido">
+        <strong>{{ productos.length }}</strong> {{ esPintura ? 'tono(s)' : 'producto(s)' }} ·
+        {{ etiquetaUbicacion }}
+      </span>
+
+      <button
+        type="button"
+        class="sgi-btn sgi-btn-secundario"
+        (click)="cancelar()">
+        Cancelar
+      </button>
+
+      <button
+        type="button"
+        class="sgi-btn sgi-btn-primario"
+        [disabled]="guardando"
+        (click)="guardarProductos()">
+        {{ guardando ? 'Guardando...' : 'Guardar productos' }}
+      </button>
 
     </div>
 
@@ -40,17 +64,18 @@
   </div>
 
 
-  <!-- PROVEEDOR -->
+  <!-- PROVEEDOR Y UBICACIÓN -->
   <section class="form-card">
 
     <div class="section-heading">
 
       <div>
 
-        <h2>Proveedor</h2>
+        <h2>Tipo, proveedor y ubicación</h2>
 
         <p>
-          Selecciona el proveedor de los productos que vas a registrar.
+          Todos los productos quedan en el catálogo general; la ubicación define si
+          aparecen en Bodega, en Local o en ambos.
         </p>
 
       </div>
@@ -58,7 +83,72 @@
     </div>
 
 
+    <!-- TIPO DE PRODUCTO -->
+    <div class="tipo-opciones">
+      <button
+        *ngFor="let opcion of tiposProducto"
+        type="button"
+        class="tipo-opcion"
+        [class.active]="tipo === opcion.valor"
+        (click)="cambiarTipo(opcion.valor)">
+        <span>{{ opcion.icono }}</span>
+        {{ opcion.nombre }}
+      </button>
+    </div>
+
     <div class="form-grid">
+
+      <!-- COLECCIÓN (solo pinturas) -->
+      <div class="form-group form-group-full" *ngIf="esPintura">
+
+        <label for="coleccion">
+          Colección de la pintura
+          <span>*</span>
+        </label>
+
+        <div class="coleccion-fila">
+          <select
+            id="coleccion"
+            [(ngModel)]="coleccion">
+            <option value="">Selecciona una colección</option>
+            <option *ngFor="let item of colecciones" [value]="item.nombre">
+              {{ item.nombre }} ({{ item.tonos }} tonos)
+            </option>
+          </select>
+
+          <button
+            *ngIf="!creandoColeccion"
+            type="button"
+            class="sgi-btn sgi-btn-secundario"
+            (click)="creandoColeccion = true">
+            + Nueva colección
+          </button>
+        </div>
+
+        <div class="coleccion-fila nueva" *ngIf="creandoColeccion">
+          <input
+            type="text"
+            maxlength="60"
+            placeholder="Ej. Gamusa"
+            [(ngModel)]="nuevaColeccion"
+            (keyup.enter)="crearColeccion()">
+          <button type="button" class="sgi-btn sgi-btn-secundario" (click)="creandoColeccion = false">
+            Cancelar
+          </button>
+          <button
+            type="button"
+            class="sgi-btn sgi-btn-primario"
+            [disabled]="guardandoColeccion"
+            (click)="crearColeccion()">
+            Crear colección
+          </button>
+        </div>
+
+        <small class="ayuda">
+          Cada tono que agregues abajo quedará como "{{ coleccion || 'Colección' }} - Tono".
+        </small>
+
+      </div>
 
       <div class="form-group">
 
@@ -76,12 +166,39 @@
           </option>
 
           <option
-            *ngFor="let proveedorRegistrado of proveedores"
-            [value]="proveedorRegistrado">
+            *ngFor="let proveedorRegistrado of proveedoresDelTipo"
+            [value]="proveedorRegistrado.nombre">
 
-            {{ proveedorRegistrado }}
+            {{ proveedorRegistrado.nombre }}{{ proveedorRegistrado.limite_precio ? ' · límite $' + (proveedorRegistrado.limite_precio | number) : '' }}
 
           </option>
+
+        </select>
+
+        <small class="ayuda" *ngIf="proveedoresDelTipo.length === 0">
+          No hay proveedores de {{ esMaterial ? 'materiales' : 'figuras' }}. Créalo en Proveedores.
+        </small>
+        <small class="ayuda" *ngIf="proveedor">
+          Las referencias se generan como {{ prefijoReferencia }}00001, {{ prefijoReferencia }}00002...
+        </small>
+
+      </div>
+
+
+      <div class="form-group">
+
+        <label for="ubicacion">
+          Ubicación
+          <span>*</span>
+        </label>
+
+        <select
+          id="ubicacion"
+          [(ngModel)]="ubicacion">
+
+          <option value="bodega">Bodega</option>
+          <option value="local">Local</option>
+          <option value="ambos">Bodega y local</option>
 
         </select>
 
@@ -92,6 +209,12 @@
   </section>
 
 
+  <!-- TARIFAS DE ENVÍO (solo figuras) -->
+  <section class="form-card" *ngIf="!esMaterial">
+    <app-tabla-envios [(tarifas)]="tarifas"></app-tabla-envios>
+  </section>
+
+
   <!-- PRODUCTOS -->
   <section class="form-card">
 
@@ -99,10 +222,12 @@
 
       <div>
 
-        <h2>Productos</h2>
+        <h2>{{ esPintura ? 'Tonos' : 'Productos' }}</h2>
 
         <p>
-          Agrega todos los productos nuevos que pertenezcan a este proveedor.
+          {{ esPintura
+            ? 'Agrega todos los tonos de la colección que llegaron.'
+            : 'Agrega todos los productos nuevos que pertenezcan a este proveedor.' }}
         </p>
 
       </div>
@@ -122,11 +247,11 @@
         <div>
 
           <span class="product-number">
-            Producto {{ i + 1 }}
+            {{ esPintura ? 'Tono' : 'Producto' }} {{ i + 1 }}
           </span>
 
           <h3>
-            Información del producto
+            {{ producto.nombre ? nombreFinal(producto.nombre) : 'Información del producto' }}
           </h3>
 
         </div>
@@ -153,11 +278,8 @@
         <div class="form-group">
 
           <label [for]="'nombre-' + i">
-
-            Nombre del producto
-
+            {{ esPintura ? 'Tono' : 'Nombre del producto' }}
             <span>*</span>
-
           </label>
 
           <input
@@ -165,28 +287,46 @@
             type="text"
             [(ngModel)]="producto.nombre"
             [name]="'nombre-' + i"
-            placeholder="Ej. Muñeco de nieve">
+            [placeholder]="placeholderNombre">
 
         </div>
 
 
-        <!-- TAMAÑO -->
+        <!-- TAMAÑO EN CM -->
         <div class="form-group">
 
           <label [for]="'tamano-' + i">
-
-            Tamaño
-
-            <span>*</span>
-
+            {{ esMaterial ? 'Presentación' : 'Tamaño (cm)' }}
+            <span *ngIf="!esMaterial">*</span>
           </label>
 
           <input
             [id]="'tamano-' + i"
             type="text"
+            maxlength="60"
             [(ngModel)]="producto.tamano"
             [name]="'tamano-' + i"
-            placeholder="Ej. 15 cm">
+            [placeholder]="esMaterial ? 'Ej. 120 ml, N° 8, paquete x 10' : 'Ej. 15 x 10 cm'">
+
+        </div>
+
+
+        <!-- CATEGORÍA (solo figuras) -->
+        <div class="form-group" *ngIf="!esMaterial">
+
+          <label [for]="'categoria-' + i">
+            Categoría
+          </label>
+
+          <select
+            [id]="'categoria-' + i"
+            [(ngModel)]="producto.categoria"
+            [name]="'categoria-' + i">
+            <option value="">Sin categoría</option>
+            <option *ngFor="let categoria of categorias" [value]="categoria.nombre">
+              {{ categoria.nombre }}
+            </option>
+          </select>
 
         </div>
 
@@ -195,9 +335,7 @@
         <div class="form-group">
 
           <label [for]="'referencia-' + i">
-
             Referencia
-
           </label>
 
           <input
@@ -211,62 +349,34 @@
         </div>
 
 
-        <!-- COSTO -->
+        <!-- EXISTENCIAS INICIALES -->
         <div class="form-group">
 
-          <label [for]="'costo-' + i">
-
-            Costo (COP)
-
+          <label [for]="'existencias-' + i">
+            Unidades iniciales en {{ ubicacion === 'local' ? 'el local' : 'bodega' }}
           </label>
 
           <input
-            [id]="'costo-' + i"
+            [id]="'existencias-' + i"
             type="number"
             min="0"
-            [(ngModel)]="producto.costo"
-            [name]="'costo-' + i"
-            placeholder="Ej. 3000">
+            [(ngModel)]="producto.existencias"
+            [name]="'existencias-' + i">
 
         </div>
 
 
-        <!-- PRECIO DE VENTA -->
-        <div class="form-group">
+        <!-- PRECIOS (fábrica, envío, crudo y por mayor) -->
+        <div class="form-group form-group-full">
 
-          <label [for]="'precio-venta-' + i">
-
-            Precio de venta (COP)
-
-          </label>
-
-          <input
-            [id]="'precio-venta-' + i"
-            type="number"
-            min="0"
-            [(ngModel)]="producto.precio_venta"
-            [name]="'precio-venta-' + i"
-            placeholder="Ej. 4500">
-
-        </div>
-
-
-        <!-- PRECIO MAYORISTA -->
-        <div class="form-group">
-
-          <label [for]="'precio-mayorista-' + i">
-
-            Precio mayorista (COP)
-
-          </label>
-
-          <input
-            [id]="'precio-mayorista-' + i"
-            type="number"
-            min="0"
-            [(ngModel)]="producto.precio_mayorista"
-            [name]="'precio-mayorista-' + i"
-            placeholder="Ej. 4000">
+          <app-precio-producto
+            [datos]="producto"
+            [tarifas]="tarifas"
+            [valores]="valores"
+            [limite]="limiteProveedor"
+            [esFigura]="!esMaterial"
+            [idPrefijo]="'producto-' + i">
+          </app-precio-producto>
 
         </div>
 
@@ -275,14 +385,12 @@
         <div class="form-group form-group-full">
 
           <label [for]="'descripcion-' + i">
-
             Descripción
-
           </label>
 
           <textarea
             [id]="'descripcion-' + i"
-            rows="4"
+            rows="3"
             [(ngModel)]="producto.descripcion"
             [name]="'descripcion-' + i"
             placeholder="Describe brevemente el producto...">
@@ -301,53 +409,40 @@
 
           <div class="image-upload-area">
 
-
-            <!-- VISTA PREVIA -->
             <div
               class="image-preview"
               [class.has-image]="producto.imagen">
 
-
               <img
+            appAmpliar
                 *ngIf="producto.imagen"
                 [src]="producto.imagen"
                 [alt]="producto.nombre || 'Vista previa del producto'"
                 (error)="imagenNoCarga($event)">
 
-
               <div
                 class="empty-image"
                 *ngIf="!producto.imagen">
 
-                <span class="image-icon">
-                  ▧
-                </span>
+                <span class="image-icon">▧</span>
 
-                <strong>
-                  Sin imagen
-                </strong>
+                <strong>Sin imagen</strong>
 
-                <span>
-                  Agrega una foto del producto
-                </span>
+                <span>Agrega una foto del producto</span>
 
               </div>
 
             </div>
 
 
-            <!-- CARGAR -->
             <div class="upload-content">
 
-              <h3>
-                Foto del producto
-              </h3>
+              <h3>Foto del producto</h3>
 
               <p>
                 Pega la URL de la imagen alojada en la nube
                 (por ejemplo Cloudinary, Imgur o Google Drive público).
               </p>
-
 
               <div class="form-group">
 
@@ -377,11 +472,9 @@
       class="add-product-button"
       (click)="agregarProducto()">
 
-      <span>
-        +
-      </span>
+      <span>+</span>
 
-      Agregar otro producto
+      {{ esPintura ? 'Agregar otro tono' : 'Agregar otro producto' }}
 
     </button>
 
@@ -391,19 +484,16 @@
   <!-- REFERENCIA -->
   <section class="reference-card">
 
-    <div class="reference-icon">
-      #
-    </div>
+    <div class="reference-icon">#</div>
 
     <div>
 
-      <strong>
-        Código de los productos
-      </strong>
+      <strong>Código de los productos</strong>
 
       <p>
         Si dejas la referencia vacía, se asigna automáticamente con las
-        iniciales del proveedor (ej. Arte y Color → AC0001).
+        iniciales del proveedor y 5 dígitos (ej. Casa del Arte → CA00001,
+        Fredy Bogotá → FB00001).
       </p>
 
     </div>

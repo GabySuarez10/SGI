@@ -1,100 +1,66 @@
 <header class="header">
 
-  <!-- Parte izquierda -->
   <div class="header-left">
 
-    <!-- Botón menú móvil -->
+    <!-- Abre el menú lateral (solo celular y tablet) -->
     <button
       class="menu-button"
       type="button"
-      aria-label="Menú">
-
-      <span>☰</span>
-
+      aria-label="Abrir menú"
+      (click)="menuToggle.emit()">
+      <app-icono nombre="menu" [tamano]="22"></app-icono>
     </button>
 
+    <!-- Escritorio: la fecha (el título ya está en la página) -->
+    <div class="header-fecha">
+      <strong>{{ hoy | date:"EEEE d 'de' MMMM" }}</strong>
+      <span>Pintarte · Inventario</span>
+    </div>
+
+    <!-- Celular: nombre de la sección actual -->
     <div class="header-title">
-      <h1>Inicio</h1>
-      <p>Gestiona el inventario de Pintarte</p>
+      <h1>{{ titulo }}</h1>
+      <p>{{ descripcion }}</p>
     </div>
 
   </div>
 
 
-  <!-- Parte derecha -->
-  <div class="header-actions">
+  <!-- Usuario -->
+  <div class="user-menu">
 
-    <!-- Notificaciones -->
     <button
-      class="notification-button"
       type="button"
-      aria-label="Notificaciones">
+      class="user-button"
+      [attr.aria-expanded]="menuUsuarioAbierto"
+      aria-haspopup="menu"
+      (click)="alternarMenuUsuario()">
 
-      <span>♧</span>
-      <span class="notification-dot"></span>
+      <span class="user-avatar">{{ iniciales }}</span>
+
+      <span class="user-info">
+        <strong>{{ nombreUsuario }}</strong>
+        <span>Sesión iniciada</span>
+      </span>
+
+      <app-icono class="user-arrow" [class.abierto]="menuUsuarioAbierto" nombre="abajo" [tamano]="16"></app-icono>
 
     </button>
 
 
-    <!-- Usuario -->
-    <div class="user-profile">
+    <div class="user-dropdown" role="menu" *ngIf="menuUsuarioAbierto">
 
-      <div class="avatar">
-        {{ iniciales.charAt(0) }}
-      </div>
+      <button type="button" class="dropdown-item" role="menuitem" (click)="irAConfiguracion()">
+        <app-icono nombre="usuario" [tamano]="18"></app-icono>
+        <span>Mi cuenta</span>
+      </button>
 
-      <div class="user-menu">
+      <div class="dropdown-divider"></div>
 
-  <button
-    type="button"
-    class="user-button"
-    (click)="alternarMenuUsuario()">
-
-    <div class="user-avatar">
-      {{ iniciales }}
-    </div>
-
-    <div class="user-info">
-      <strong>{{ nombreUsuario }}</strong>
-      <span>Usuario</span>
-    </div>
-
-    <span class="user-arrow">
-      {{ menuUsuarioAbierto ? '⌃' : '⌄' }}
-    </span>
-
-  </button>
-
-
-  <div
-    class="user-dropdown"
-    *ngIf="menuUsuarioAbierto">
-
-    <button
-      type="button"
-      class="dropdown-item"
-      (click)="irAConfiguracion()">
-
-      <span>⚙</span>
-      <span>Mi cuenta</span>
-
-    </button>
-
-    <div class="dropdown-divider"></div>
-
-    <button
-      type="button"
-      class="dropdown-item logout"
-      (click)="cerrarSesion()">
-
-      <span>↪</span>
-      <span>Cerrar sesión</span>
-
-    </button>
-
-  </div>
-
-</div>
+      <button type="button" class="dropdown-item logout" role="menuitem" (click)="cerrarSesion()">
+        <app-icono nombre="salir" [tamano]="18"></app-icono>
+        <span>Cerrar sesión</span>
+      </button>
 
     </div>
 

@@ -1,21 +1,52 @@
 <div class="nuevo-pedido-page">
 
   <!-- ENCABEZADO -->
-  <div class="page-header">
+  <div class="page-header encabezado-fijo">
 
     <div>
-      <h1>Nuevo pedido</h1>
+      <h1>{{ soloMateriales ? 'Pedido de pinturas y materiales' : 'Nuevo pedido' }}</h1>
       <p>
-        Registra los productos que necesitas solicitar al proveedor.
+        {{ pasoActual === 1
+          ? 'Paso 1 de 2 · Elige el proveedor y las cantidades.'
+          : 'Paso 2 de 2 · Revisa precios y guarda el pedido.' }}
       </p>
     </div>
 
-    <button
-      type="button"
-      class="btn-secondary"
-      (click)="cancelar()">
-      Cancelar
-    </button>
+    <!-- Acciones siempre visibles arriba -->
+    <div class="acciones-encabezado">
+
+      <span class="resumen-rapido" *ngIf="totalUnidades > 0">
+        <strong>{{ totalProductos }}</strong> productos ·
+        <strong>{{ totalUnidades }}</strong> unidades ·
+        <strong>${{ precioTotal | number }}</strong>
+      </span>
+
+      <button
+        type="button"
+        class="sgi-btn sgi-btn-secundario"
+        (click)="pasoActual === 1 ? cancelar() : volverAProductos()">
+        {{ pasoActual === 1 ? 'Cancelar' : '← Volver' }}
+      </button>
+
+      <button
+        *ngIf="pasoActual === 1"
+        type="button"
+        class="sgi-btn sgi-btn-primario"
+        [disabled]="totalUnidades === 0"
+        (click)="continuar()">
+        Continuar →
+      </button>
+
+      <button
+        *ngIf="pasoActual === 2"
+        type="button"
+        class="sgi-btn sgi-btn-primario"
+        [disabled]="guardando"
+        (click)="guardarPedido()">
+        {{ guardando ? 'Guardando...' : 'Guardar pedido' }}
+      </button>
+
+    </div>
 
   </div>
 
@@ -69,9 +100,9 @@
 
             <option
               *ngFor="let item of proveedores"
-              [value]="item">
+              [value]="item.nombre">
 
-              {{ item }}
+              {{ item.nombre }}{{ item.limite_precio ? ' · límite $' + (item.limite_precio | number) : '' }}
 
             </option>
 
@@ -161,6 +192,16 @@
 
         </div>
 
+        <select
+          *ngIf="categorias.length > 0"
+          class="filtro-categoria"
+          [(ngModel)]="categoriaSeleccionada"
+          aria-label="Categoría">
+          <option value="">Todas las categorías</option>
+          <option *ngFor="let categoria of categorias" [value]="categoria">{{ categoria }}</option>
+          <option value="sin">Figuras sin categoría</option>
+        </select>
+
         <span
           *ngIf="proveedor"
           class="provider-filter">
@@ -182,6 +223,7 @@
           <div class="product-image">
 
             <img
+            appAmpliar
               [src]="producto.imagen || imagenPorDefecto"
               [alt]="producto.nombre"
               (error)="imagenNoCarga($event)">
@@ -193,6 +235,8 @@
 
             <span class="product-reference">
               {{ producto.referencia }}
+              <span *ngIf="producto.tipo !== 'figura'"> · {{ nombreTipo(producto.tipo) }}</span>
+              <span *ngIf="producto.categoria"> · {{ producto.categoria }}</span>
             </span>
 
             <h3>
@@ -333,6 +377,7 @@
           <div class="review-product">
 
             <img
+            appAmpliar
               [src]="producto.imagen || imagenPorDefecto"
               [alt]="producto.nombre"
               (error)="imagenNoCarga($event)">
@@ -382,6 +427,12 @@
                 [(ngModel)]="producto.precioEsperado">
 
             </div>
+
+            <span
+              class="limite-aviso"
+              *ngIf="limiteProveedor && producto.precioEsperado > limiteProveedor">
+              Supera el límite de ${{ limiteProveedor | number }}
+            </span>
 
           </div>
 

@@ -12,10 +12,10 @@
   background:
     radial-gradient(
       circle at top left,
-      #DBEAFE 0,
+      #dfe3f7 0,
       transparent 35%
     ),
-    #F8FAFC;
+    #f6f7f9;
 }
 
 .registro-container {
@@ -46,20 +46,20 @@
 
   border-radius: 12px;
 
-  background: #2563EB;
+  background: #2f3a8f;
   color: #FFFFFF;
 
   font-size: 15px;
   font-weight: 800;
 
   box-shadow:
-    0 6px 16px rgba(37, 99, 235, 0.20);
+    0 6px 16px rgba(47, 58, 143, 0.20);
 }
 
 .brand h1 {
   margin: 0;
 
-  color: #1E293B;
+  color: #1f2433;
 
   font-size: 22px;
   font-weight: 800;
@@ -70,7 +70,7 @@
 
   margin-top: 2px;
 
-  color: #64748B;
+  color: #5b6275;
 
   font-size: 11px;
 }
@@ -98,7 +98,7 @@
 .card-header h2 {
   margin: 0;
 
-  color: #1E293B;
+  color: #1f2433;
 
   font-size: 23px;
   font-weight: 700;
@@ -107,7 +107,7 @@
 .card-header p {
   margin: 7px 0 0;
 
-  color: #64748B;
+  color: #5b6275;
 
   font-size: 14px;
   line-height: 1.5;
@@ -141,7 +141,7 @@
   border-radius: 10px;
 
   background: #FFFFFF;
-  color: #1E293B;
+  color: #1f2433;
 
   font-family: inherit;
   font-size: 14px;
@@ -162,10 +162,10 @@
 }
 
 .form-group input:focus {
-  border-color: #2563EB;
+  border-color: #2f3a8f;
 
   box-shadow:
-    0 0 0 3px rgba(37, 99, 235, 0.10);
+    0 0 0 3px rgba(47, 58, 143, 0.10);
 }
 
 .password-wrapper {
@@ -189,7 +189,7 @@
   border: none;
 
   background: transparent;
-  color: #2563EB;
+  color: #2f3a8f;
 
   font-family: inherit;
 
@@ -200,7 +200,7 @@
 }
 
 .password-button:hover {
-  color: #1D4ED8;
+  color: #252e73;
 }
 
 .registro-button {
@@ -209,10 +209,10 @@
 
   margin-top: 4px;
 
-  border: 1px solid #2563EB;
+  border: 1px solid #2f3a8f;
   border-radius: 10px;
 
-  background: #2563EB;
+  background: #2f3a8f;
   color: #FFFFFF;
 
   font-family: inherit;
@@ -228,10 +228,10 @@
 }
 
 .registro-button:hover {
-  background: #1D4ED8;
+  background: #252e73;
 
   box-shadow:
-    0 5px 14px rgba(37, 99, 235, 0.20);
+    0 5px 14px rgba(47, 58, 143, 0.20);
 }
 
 .login-link {
@@ -247,11 +247,11 @@
 }
 
 .login-link span {
-  color: #64748B;
+  color: #5b6275;
 }
 
 .login-link a {
-  color: #2563EB;
+  color: #2f3a8f;
 
   font-weight: 700;
 

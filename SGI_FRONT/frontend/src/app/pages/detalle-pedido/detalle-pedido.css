@@ -37,12 +37,12 @@
 }
 
 .back-button:hover {
-  background: #f8fafc;
+  background: #f6f7f9;
   border-color: #94a3b8;
 }
 
 .page-label {
-  color: #2563eb;
+  color: #2f3a8f;
   font-size: 12px;
   font-weight: 700;
   text-transform: uppercase;
@@ -51,14 +51,14 @@
 
 .page-header h1 {
   margin: 4px 0 0;
-  color: #1e293b;
+  color: #1f2433;
   font-size: 28px;
   font-weight: 700;
 }
 
 .page-header p {
   margin: 6px 0 0;
-  color: #64748b;
+  color: #5b6275;
   font-size: 14px;
 }
 
@@ -107,12 +107,12 @@
 }
 
 .order-info-item span {
-  color: #64748b;
+  color: #5b6275;
   font-size: 12px;
 }
 
 .order-info-item strong {
-  color: #1e293b;
+  color: #1f2433;
   font-size: 14px;
 }
 
@@ -158,13 +158,13 @@
 
 .section-heading h2 {
   margin: 0;
-  color: #1e293b;
+  color: #1f2433;
   font-size: 19px;
 }
 
 .section-heading p {
   margin: 5px 0 0;
-  color: #64748b;
+  color: #5b6275;
   font-size: 13px;
 }
 
@@ -172,7 +172,7 @@
   padding: 6px 10px;
   border-radius: 7px;
   background: #f1f5f9;
-  color: #64748b;
+  color: #5b6275;
   font-size: 12px;
   font-weight: 600;
 }
@@ -194,13 +194,13 @@ table {
 }
 
 thead {
-  background: #f8fafc;
+  background: #f6f7f9;
 }
 
 th {
   padding: 12px 10px;
   border-bottom: 1px solid #e2e8f0;
-  color: #64748b;
+  color: #5b6275;
   font-size: 11px;
   font-weight: 700;
   text-align: left;
@@ -236,8 +236,8 @@ tbody tr:hover {
 }
 
 .product-thumbnail {
-  width: 48px;
-  height: 48px;
+  width: 64px;
+  height: 64px;
   flex-shrink: 0;
   overflow: hidden;
   border-radius: 9px;
@@ -264,13 +264,13 @@ tbody tr:hover {
 }
 
 .product-reference {
-  color: #2563eb;
+  color: #2f3a8f;
   font-size: 10px;
   font-weight: 700;
 }
 
 .product-details strong {
-  color: #1e293b;
+  color: #1f2433;
   font-size: 13px;
   font-weight: 600;
   white-space: nowrap;
@@ -294,15 +294,15 @@ tbody tr:hover {
   border: 1px solid #cbd5e1;
   border-radius: 7px;
   background: #ffffff;
-  color: #1e293b;
+  color: #1f2433;
   font-size: 13px;
   text-align: center;
   outline: none;
 }
 
 .quantity-input:focus {
-  border-color: #2563eb;
-  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.08);
+  border-color: #2f3a8f;
+  box-shadow: 0 0 0 3px rgba(47, 58, 143, 0.08);
 }
 
 .damaged-input {
@@ -347,7 +347,7 @@ tbody tr:hover {
 }
 
 .total-product {
-  color: #1e293b;
+  color: #1f2433;
   white-space: nowrap;
 }
 
@@ -377,19 +377,19 @@ tbody tr:hover {
 }
 
 .quantity-label {
-  color: #64748b;
+  color: #5b6275;
   font-size: 11px;
   font-weight: 500;
 }
 
 .quantity-card strong {
-  color: #1e293b;
+  color: #1f2433;
   font-size: 20px;
   line-height: 1;
 }
 
 .text-blue {
-  color: #2563eb !important;
+  color: #2f3a8f !important;
 }
 
 .text-warning {
@@ -416,9 +416,9 @@ tbody tr:hover {
 .financial-card {
   margin-bottom: 18px;
   padding: 24px 26px;
-  border: 1px solid #bfdbfe;
+  border: 1px solid #c9cff0;
   border-radius: 16px;
-  background: #f8fbff;
+  background: #f7f8fd;
 }
 
 .financial-header {
@@ -431,13 +431,13 @@ tbody tr:hover {
 
 .financial-header h2 {
   margin: 0;
-  color: #1e293b;
+  color: #1f2433;
   font-size: 18px;
 }
 
 .financial-header p {
   margin: 5px 0 0;
-  color: #64748b;
+  color: #5b6275;
   font-size: 13px;
 }
 
@@ -445,8 +445,8 @@ tbody tr:hover {
   width: 38px;
   height: 38px;
   border-radius: 10px;
-  background: #dbeafe;
-  color: #2563eb;
+  background: #dfe3f7;
+  color: #2f3a8f;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -462,7 +462,7 @@ tbody tr:hover {
 
 .financial-item {
   padding: 0 22px;
-  border-right: 1px solid #dbeafe;
+  border-right: 1px solid #dfe3f7;
 }
 
 .financial-item:first-child {
@@ -477,13 +477,13 @@ tbody tr:hover {
 .financial-item span {
   display: block;
   margin-bottom: 7px;
-  color: #64748b;
+  color: #5b6275;
   font-size: 12px;
 }
 
 .financial-item strong {
   display: block;
-  color: #1e293b;
+  color: #1f2433;
   font-size: 20px;
 }
 
@@ -513,13 +513,13 @@ tbody tr:hover {
 
 .observations-header h2 {
   margin: 0;
-  color: #1e293b;
+  color: #1f2433;
   font-size: 17px;
 }
 
 .observations-header p {
   margin: 5px 0 0;
-  color: #64748b;
+  color: #5b6275;
   font-size: 13px;
 }
 
@@ -532,7 +532,7 @@ tbody tr:hover {
   border: 1px solid #cbd5e1;
   border-radius: 9px;
   background: #ffffff;
-  color: #1e293b;
+  color: #1f2433;
   font-family: inherit;
   font-size: 13px;
   line-height: 1.5;
@@ -540,8 +540,8 @@ tbody tr:hover {
 }
 
 .observations-card textarea:focus {
-  border-color: #2563eb;
-  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.08);
+  border-color: #2f3a8f;
+  box-shadow: 0 0 0 3px rgba(47, 58, 143, 0.08);
 }
 
 
@@ -568,14 +568,14 @@ tbody tr:hover {
 }
 
 .btn-primary {
-  border: 1px solid #2563eb;
-  background: #2563eb;
+  border: 1px solid #2f3a8f;
+  background: #2f3a8f;
   color: #ffffff;
 }
 
 .btn-primary:hover {
-  background: #1d4ed8;
-  border-color: #1d4ed8;
+  background: #252e73;
+  border-color: #252e73;
 }
 
 .btn-secondary {
@@ -585,7 +585,7 @@ tbody tr:hover {
 }
 
 .btn-secondary:hover {
-  background: #f8fafc;
+  background: #f6f7f9;
   border-color: #94a3b8;
 }
 
@@ -673,7 +673,7 @@ tbody tr:hover {
   .financial-item:nth-child(3) {
     padding: 0 0 18px;
     border-right: none;
-    border-bottom: 1px solid #dbeafe;
+    border-bottom: 1px solid #dfe3f7;
   }
 
   .financial-item:last-child {
@@ -725,4 +725,66 @@ tbody tr:hover {
     font-size: 18px;
   }
 
+}
+
+/* =========================================================
+   Destino editable, factura e inconsistencias
+   ========================================================= */
+
+.order-info-item small {
+  display: block;
+  margin-top: 4px;
+  color: #5b6275;
+  font-size: 12px;
+}
+
+.destino-control {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.destino-control select {
+  height: 36px;
+  padding: 0 10px;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  background: #ffffff;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  color: #1f2433;
+}
+
+.precio-input {
+  width: 100px;
+}
+
+.precio-input.sobre-limite {
+  border-color: #f87171;
+  background: #fef2f2;
+  color: #b91c1c;
+}
+
+.revision {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  min-width: 140px;
+}
+
+tr.fila-con-problema td {
+  background: #fffbeb;
+}
+
+.observations-card textarea:disabled {
+  background: #f6f7f9;
+  color: #475569;
+}
+
+.product-thumbnail img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }

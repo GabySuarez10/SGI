@@ -6,7 +6,9 @@ Cada venta, traslado o pedido guarda VARIOS productos en listas; aquí se
 """
 
 from database import db
-from models import Venta, Traslado, PedidoProveedor, Producto, InventarioBodega, InventarioLocal
+from models import (
+    Venta, Traslado, PedidoProveedor, Producto, InventarioBodega, InventarioLocal, Proveedor,
+)
 
 STOCK_BAJO = 5
 
@@ -29,7 +31,7 @@ def listar_movimientos(limite=None):
                 "origen": "Local",
                 "destino": venta.cliente or "Cliente",
                 "fecha": datos["fecha"],
-                "estado": "Completado",
+                "estado": venta.modalidad or "Completado",
             })
 
     for traslado in Traslado.query.all():
@@ -40,8 +42,8 @@ def listar_movimientos(limite=None):
                 "codigo": f"T{traslado.codigo:04d}",
                 "producto": nombre,
                 "cantidad": cantidad,
-                "origen": "Bodega",
-                "destino": "Local",
+                "origen": "Local" if traslado.sentido == "local_bodega" else "Bodega",
+                "destino": "Bodega" if traslado.sentido == "local_bodega" else "Local",
                 "fecha": datos["fecha"],
                 "estado": "Completado",
             })
@@ -62,6 +64,16 @@ def listar_movimientos(limite=None):
                 "fecha": fecha,
                 "estado": "Recibido" if pedido.estado else "Pendiente",
             })
+
+    # Categoría y tipo de cada producto (por nombre) para poder filtrar el historial
+    datos_producto = {
+        (nombre or "").strip().lower(): (categoria or "", tipo or "figura")
+        for nombre, categoria, tipo in db.session.query(Producto.nombre, Producto.categoria, Producto.tipo)
+    }
+    for movimiento in movimientos:
+        categoria, tipo = datos_producto.get(movimiento["producto"].strip().lower(), ("", "figura"))
+        movimiento["categoria"] = categoria
+        movimiento["tipo_producto"] = tipo
 
     movimientos.sort(key=lambda m: m["fecha"] or "", reverse=True)
     return movimientos[:limite] if limite else movimientos
@@ -102,6 +114,32 @@ def resumen_dashboard():
                 "nivel": "danger",
                 "titulo": "Productos dañados",
                 "mensaje": f"{danados} unidad(es) llegaron dañadas en el pedido #{ultimo.codigo:03d}.",
+            })
+
+        # Comparativa con la factura del proveedor
+        proveedor = db.session.get(Proveedor, ultimo.proveedor) if ultimo.proveedor else None
+        limite = proveedor.limite_precio if proveedor else None
+        sobre_limite = [
+            nombre for nombre, precio in zip(datos["productos"], datos["precio_factura"])
+            if limite and precio > limite
+        ]
+        diferencias = sum(
+            1 for fact, llego in zip(datos["facturado"], datos["llegan"]) if fact and fact != llego
+        )
+        if sobre_limite:
+            alertas.append({
+                "nivel": "danger",
+                "titulo": "Precio por encima del límite",
+                "mensaje": (
+                    f"{len(sobre_limite)} producto(s) del pedido #{ultimo.codigo:03d} se facturaron por "
+                    f"encima de ${f'{limite:,}'.replace(',', '.')} pactados con {ultimo.proveedor}."
+                ),
+            })
+        if diferencias:
+            alertas.append({
+                "nivel": "warning",
+                "titulo": "Factura no coincide",
+                "mensaje": f"En {diferencias} producto(s) del pedido #{ultimo.codigo:03d} lo facturado no coincide con lo recibido.",
             })
     if stock_bajo_local:
         alertas.append({

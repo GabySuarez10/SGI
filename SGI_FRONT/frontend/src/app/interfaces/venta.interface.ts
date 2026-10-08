@@ -9,6 +9,7 @@ export interface IVenta {
   cliente: string;
   observacion: string;
   usuario: string;
+  modalidad: string;
 }
 
 export interface IVentaNueva {
@@ -18,5 +19,6 @@ export interface IVentaNueva {
   cliente: string;
   observacion: string;
   usuario: string;
+  modalidad: string;
   fecha?: string;
 }

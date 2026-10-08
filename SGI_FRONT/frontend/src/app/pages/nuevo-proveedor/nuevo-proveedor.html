@@ -95,6 +95,41 @@
       </div>
 
 
+      <div class="form-group">
+
+        <label for="tipoProveedor">
+          ¿Qué vende este proveedor? <span>*</span>
+        </label>
+
+        <select id="tipoProveedor" [(ngModel)]="tipo">
+          <option *ngFor="let opcion of tiposProveedor" [value]="opcion.valor">
+            {{ opcion.nombre }}
+          </option>
+        </select>
+
+      </div>
+
+
+      <div class="form-group">
+
+        <label for="limitePrecio">
+          Límite de precio por figura (opcional)
+        </label>
+
+        <input
+          id="limitePrecio"
+          type="number"
+          min="0"
+          [(ngModel)]="limitePrecio"
+          placeholder="Ej. 3150 — vacío = sin límite">
+
+        <small class="ayuda">
+          Precio máximo pactado. Al recibir pedidos se marcan los productos que lo superen.
+        </small>
+
+      </div>
+
+
       <div class="form-group full-width">
 
         <label for="descripcion">

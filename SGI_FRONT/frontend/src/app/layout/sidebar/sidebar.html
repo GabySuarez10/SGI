@@ -1,150 +1,48 @@
 <aside
   class="sidebar"
-  [class.sidebar-open]="open">
+  [class.sidebar-open]="open"
+  aria-label="Menú principal">
 
-  <!-- Logo -->
+  <!-- Marca -->
   <div class="brand">
-    <div class="brand-icon">◈</div>
+    <div class="brand-icon" aria-hidden="true">P</div>
 
     <div class="brand-text">
-      <span class="brand-name">SGI</span>
-      <span class="brand-subtitle">Inventario</span>
+      <span class="brand-name">Pintarte</span>
+      <span class="brand-subtitle">Inventario SGI</span>
     </div>
+
+    <!-- Cerrar (solo celular) -->
+    <button
+      type="button"
+      class="close-button"
+      aria-label="Cerrar menú"
+      (click)="cerrar.emit()">
+      <app-icono nombre="cerrar" [tamano]="20"></app-icono>
+    </button>
   </div>
 
 
   <!-- Navegación -->
   <nav class="navigation">
 
-    <!-- PRINCIPAL -->
-    <div class="nav-section">
+    <div class="nav-section" *ngFor="let seccion of secciones">
 
-      <span class="section-title">PRINCIPAL</span>
-
-      <a
-  class="nav-item"
-  routerLink="/"
-  routerLinkActive="active"
-  [routerLinkActiveOptions]="{ exact: true }">
-
-  <span class="nav-icon">⌂</span>
-  <span>Inicio</span>
-
-</a>
-
-    </div>
-
-
-    <!-- GESTIÓN -->
-    <div class="nav-section">
-
-      <span class="section-title">GESTIÓN</span>
+      <span class="section-title">{{ seccion.titulo }}</span>
 
       <a
-  class="nav-item"
-  routerLink="/productos"
-  routerLinkActive="active">
+        *ngFor="let enlace of seccion.enlaces"
+        class="nav-item"
+        [routerLink]="enlace.ruta"
+        [queryParams]="enlace.parametros ?? null"
+        routerLinkActive="active"
+        [routerLinkActiveOptions]="{ exact: !!enlace.exacto }"
+        (click)="cerrar.emit()">
 
-  <span class="nav-icon">▦</span>
-  <span>Productos</span>
-
-</a>
-
-<a
-  class="nav-item"
-  routerLink="/proveedores"
-  routerLinkActive="active">
-
-  <span class="nav-icon">♙</span>
-  <span>Proveedores</span>
-
-</a>
-
-    </div>
-
-
-    <!-- COMPRAS -->
-    <div class="nav-section">
-
-      <span class="section-title">COMPRAS</span>
-
-    <a
-      class="nav-item"
-      routerLink="/pedidos-proveedor"
-      routerLinkActive="active">
-
-  <span class="nav-icon">▣</span>
-  <span>Pedidos de proveedor</span>
-
-</a>
-    </div>
-
-
-    <!-- INVENTARIO -->
-    <div class="nav-section">
-
-      <span class="section-title">INVENTARIO</span>
-
-      <a
-         class="nav-item"
-        routerLink="/bodega"
-        routerLinkActive="active">
-
-        <span class="nav-icon">▤</span>
-        <span>Bodega</span>
+        <app-icono class="nav-icon" [nombre]="enlace.icono" [tamano]="19"></app-icono>
+        <span>{{ enlace.texto }}</span>
 
       </a>
-
-      <a
-    class="nav-item"
-    routerLink="/local"
-    routerLinkActive="active">
-
-    <span class="nav-icon">▤</span>
-    <span>Local</span>
-
-      </a>
-
-      <a
-  class="nav-item"
-  routerLink="/traslados"
-  routerLinkActive="active">
-
-  <span class="nav-icon">⇄</span>
-  <span>Traslados</span>
-
-</a>
-
-    </div>
-
-
-    <!-- VENTAS -->
-    <div class="nav-section">
-
-      <span class="section-title">VENTAS</span>
-
-      <a
-  class="nav-item"
-  routerLink="/ventas"
-  routerLinkActive="active">
-
-  <span class="nav-icon">$</span>
-  <span>Ventas / Salidas</span>
-
-</a>
-
-    </div>
-
-
-    <!-- CONSULTAS -->
-    <div class="nav-section">
-
-      <span class="section-title">CONSULTAS</span>
-
-      <a class="nav-item" routerLink="/historial" routerLinkActive="active">
-  <span class="nav-icon">◷</span>
-  <span>Historial</span>
-</a>
 
     </div>
 
@@ -155,14 +53,16 @@
   <div class="sidebar-bottom">
 
     <a
-  class="nav-item"
-  routerLink="/configuracion"
-  routerLinkActive="active">
+      class="nav-item"
+      routerLink="/configuracion"
+      routerLinkActive="active"
+      (click)="cerrar.emit()">
 
-  <span class="nav-icon">⚙</span>
-  <span>Configuración</span>
+      <app-icono class="nav-icon" nombre="configuracion" [tamano]="19"></app-icono>
+      <span>Configuración</span>
 
-</a>
+    </a>
+
   </div>
 
 </aside>

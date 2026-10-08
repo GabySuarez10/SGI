@@ -63,8 +63,19 @@
     </div>
 
 
+    <div class="filter-group">
+      <label for="categoria">Categoría</label>
+
+      <select id="categoria" [(ngModel)]="categoriaSeleccionada">
+        <option value="">Todas las categorías</option>
+        <option *ngFor="let categoria of categorias" [value]="categoria">{{ categoria }}</option>
+        <option value="sin">Figuras sin categoría</option>
+      </select>
+    </div>
+
+
     <button
-      *ngIf="tipoSeleccionado || productoBuscado || fechaDesde || fechaHasta"
+      *ngIf="tipoSeleccionado || productoBuscado || fechaDesde || fechaHasta || categoriaSeleccionada"
       type="button"
       class="clear-button"
       (click)="limpiarFiltros()">
@@ -138,6 +149,7 @@
             <td>
               <span class="product-name">
                 {{ movimiento.producto }}
+                <span class="sgi-chip categoria-chip" *ngIf="movimiento.categoria">{{ movimiento.categoria }}</span>
               </span>
             </td>
 

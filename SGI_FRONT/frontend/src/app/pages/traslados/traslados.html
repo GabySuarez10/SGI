@@ -1,10 +1,36 @@
 <div class="traslados-page">
 
-  <div class="page-header">
+  <div class="page-header encabezado-fijo">
 
     <div>
       <h1>Traslados</h1>
-      <p>Traslada productos de bodega al inventario del local.</p>
+      <p>Mueve productos entre la bodega y el local, en el sentido que elijas.</p>
+    </div>
+
+    <!-- Acciones siempre visibles arriba -->
+    <div class="acciones-encabezado">
+
+      <span class="resumen-rapido" *ngIf="productosSeleccionados.length > 0">
+        <strong>{{ productosSeleccionados.length }}</strong> productos ·
+        <strong>{{ totalUnidades }}</strong> unidades
+      </span>
+
+      <button
+        *ngIf="productosSeleccionados.length > 0"
+        type="button"
+        class="sgi-btn sgi-btn-secundario"
+        (click)="limpiar()">
+        Limpiar
+      </button>
+
+      <button
+        type="button"
+        class="sgi-btn sgi-btn-primario"
+        [disabled]="guardando || productosSeleccionados.length === 0"
+        (click)="registrarTraslado()">
+        {{ guardando ? 'Registrando...' : 'Registrar traslado' }}
+      </button>
+
     </div>
 
   </div>
@@ -19,10 +45,28 @@
     </div>
 
     <div>
-      <strong>Bodega → Local</strong>
+      <strong>{{ origenNombre }} → {{ destinoNombre }}</strong>
       <span>
         Selecciona los productos y las cantidades que deseas trasladar.
       </span>
+    </div>
+
+    <!-- SENTIDO DEL TRASLADO -->
+    <div class="sentido">
+      <button
+        type="button"
+        [class.active]="sentido === 'bodega_local'"
+        [disabled]="guardando"
+        (click)="cambiarSentido('bodega_local')">
+        Bodega → Local
+      </button>
+      <button
+        type="button"
+        [class.active]="sentido === 'local_bodega'"
+        [disabled]="guardando"
+        (click)="cambiarSentido('local_bodega')">
+        Local → Bodega
+      </button>
     </div>
 
   </div>
@@ -42,6 +86,22 @@
         placeholder="Buscar producto por nombre o código...">
 
     </div>
+
+    <select [(ngModel)]="vista" aria-label="Tipo de producto" class="vista-select">
+      <option value="todos">Todos los productos</option>
+      <option value="figuras">Figuras</option>
+      <option value="materiales">Pinturas, pinceles y otros</option>
+    </select>
+
+    <select
+      *ngIf="vista !== 'materiales'"
+      [(ngModel)]="categoriaSeleccionada"
+      aria-label="Categoría"
+      class="vista-select">
+      <option value="">Todas las categorías</option>
+      <option *ngFor="let categoria of categorias" [value]="categoria">{{ categoria }}</option>
+      <option value="sin">Figuras sin categoría</option>
+    </select>
 
   </div>
 
@@ -81,6 +141,7 @@
       <div class="product-image">
 
         <img
+            appAmpliar
           [src]="producto.imagen || imagenPorDefecto"
           [alt]="producto.nombre"
           (error)="imagenNoCarga($event)">
@@ -93,7 +154,7 @@
         <div class="product-top">
 
           <span class="product-code">
-            {{ producto.codigo }}
+            {{ producto.referencia || producto.codigo }}
           </span>
 
           <span class="available">
@@ -104,6 +165,8 @@
 
 
         <h3>{{ producto.nombre }}</h3>
+
+        <span class="sgi-chip categoria-chip" *ngIf="producto.categoria">{{ producto.categoria }}</span>
 
         <p class="provider">
           {{ producto.proveedor }}
@@ -180,7 +243,7 @@
         </strong>
 
         <span>
-          {{ totalUnidades }} unidades serán trasladadas al local
+          {{ totalUnidades }} unidades pasarán de {{ origenNombre.toLowerCase() }} a {{ destinoNombre.toLowerCase() }}
         </span>
       </div>
 

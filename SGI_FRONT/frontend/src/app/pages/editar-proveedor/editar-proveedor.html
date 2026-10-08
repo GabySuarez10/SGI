@@ -78,6 +78,37 @@
             placeholder="Ej. Bogotá">
         </div>
 
+        <div class="form-group">
+
+        <label for="tipoProveedor">
+          ¿Qué vende este proveedor? <span>*</span>
+        </label>
+
+        <select id="tipoProveedor" [(ngModel)]="proveedor.tipo">
+          <option *ngFor="let opcion of tiposProveedor" [value]="opcion.valor">
+            {{ opcion.nombre }}
+          </option>
+        </select>
+
+        </div>
+
+        <div class="form-group">
+          <label for="limitePrecio">
+            Límite de precio por figura (opcional)
+          </label>
+
+          <input
+            id="limitePrecio"
+            type="number"
+            min="0"
+            [(ngModel)]="proveedor.limite_precio"
+            placeholder="Ej. 3150 — vacío = sin límite">
+
+          <small class="ayuda">
+            Precio máximo pactado. Al recibir pedidos se marcan los productos que lo superen.
+          </small>
+        </div>
+
         <div class="form-group full-width">
           <label for="descripcion">
             Descripción
@@ -114,6 +145,25 @@
 
     </div>
 
+  </section>
+
+
+  <!-- ELIMINAR -->
+  <section class="zona-eliminar" *ngIf="!cargando && nombreOriginal">
+    <div>
+      <strong>Eliminar proveedor</strong>
+      <p>
+        Solo se puede si no tiene productos ni pedidos pendientes. Si aún tiene
+        productos, elimínalos o asígnales otro proveedor primero.
+      </p>
+    </div>
+    <button
+      type="button"
+      class="sgi-btn sgi-btn-peligro"
+      [disabled]="eliminando"
+      (click)="eliminarProveedor()">
+      {{ eliminando ? 'Eliminando...' : 'Eliminar proveedor' }}
+    </button>
   </section>
 
 </div>

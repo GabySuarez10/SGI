@@ -7,7 +7,8 @@ inventario_bodega_bp = Blueprint("inventario_bodega", __name__, url_prefix="/api
 
 @inventario_bodega_bp.get("")
 def listar():
-    return jsonify([i.to_dict() for i in q.listar_bodega()])
+    """Incluye tipo (figura, pintura, pincel, otro), colección y referencia."""
+    return jsonify(q.con_tipo(q.listar_bodega()))
 
 
 @inventario_bodega_bp.get("/<int:codigo>")

@@ -12,4 +12,6 @@ export interface IMovimiento {
   destino: string;
   fecha: string;
   estado: string;
+  categoria: string;       // categoría de la figura (vacío en materiales)
+  tipo_producto: string;   // figura | pintura | pincel | otro
 }

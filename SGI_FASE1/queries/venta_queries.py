@@ -8,7 +8,7 @@ Registrar una venta:
 """
 
 from database import db
-from models import Venta
+from models import Venta, Producto
 from queries.comunes import (
     obtener_o_404, validar_listas_mismo_largo, validar_sin_repetidos, entero,
 )
@@ -16,6 +16,8 @@ from queries.inventario_queries import fila_local
 from utils.errores import ErrorAPI, NoEncontrado
 from utils.fechas import a_fecha
 from utils.listas import lista_textos, lista_numeros, lista_a_texto
+from utils.precios import MODALIDADES, normalizar_modalidad, precio_por_modalidad
+from queries.configuracion_queries import valores as valores_configuracion
 
 
 def listar_ventas():
@@ -31,13 +33,21 @@ def crear_venta(data):
     Body:
     { "producto": ["Lapiz HB", "Borrador blanco"],
       "cantidad": [10, 4],
-      "precio_unitario": [800, 700],      # opcional: si no llega, usa precio_venta del local
+      "precio_unitario": [800, 700],      # opcional: si no llega, se calcula por modalidad
+      "modalidad": "Detal",               # Detal | Pintar en el local | Kit para llevar |
+                                          # Pintada | Por mayor (local) | Empresa por mayor |
+                                          # Empresa con contrato
       "cliente": "Cliente mostrador",
       "observacion": "...", "usuario": "cajero_demo", "fecha": "2026-10-07" }
     """
     cliente = (data.get("cliente") or "").strip()
     if not cliente:
         raise ErrorAPI("Ingresa el cliente o destino de la venta")
+
+    modalidad = normalizar_modalidad(data.get("modalidad"))
+    if modalidad not in MODALIDADES:
+        raise ErrorAPI(f"Modalidad no válida. Usa una de: {', '.join(MODALIDADES)}")
+    config = valores_configuracion()
 
     nombres = lista_textos(data.get("producto"))
     cantidades = lista_numeros(data.get("cantidad"))
@@ -64,7 +74,11 @@ def crear_venta(data):
             )
 
         if precio is None:
-            precio = local.precio_venta or 0
+            producto = db.session.get(Producto, local.codigo)
+            es_figura = (producto.tipo if producto else "figura") in (None, "", "figura")
+            precio = precio_por_modalidad(
+                modalidad, local.precio_venta, local.precio_mayorista, config, es_figura
+            )
         else:
             precio = entero(precio, "precio_unitario", 0)
         local.existencias -= cantidad
@@ -80,6 +94,7 @@ def crear_venta(data):
         cliente=cliente,
         observacion=data.get("observacion") or "",
         usuario=data.get("usuario") or "",
+        modalidad=modalidad,
     )
     fecha = a_fecha(data.get("fecha"))
     if fecha:

@@ -1,21 +1,34 @@
 <div class="editar-producto-page">
 
-  <div class="page-header">
+  <div class="page-header encabezado-fijo">
 
     <div>
       <h1>Editar producto</h1>
       <p>
-        Actualiza la información del producto.
+        Actualiza la información, los precios y la ubicación del producto.
       </p>
     </div>
 
-    <button
-      type="button"
-      class="back-button"
-      (click)="cancelar()"
-    >
-      ← Volver
-    </button>
+    <div class="acciones-encabezado">
+
+      <button
+        type="button"
+        class="sgi-btn sgi-btn-secundario"
+        (click)="cancelar()"
+      >
+        ← Volver
+      </button>
+
+      <button
+        type="button"
+        class="sgi-btn sgi-btn-primario"
+        [disabled]="cargando || guardando"
+        (click)="guardarCambios()"
+      >
+        {{ guardando ? 'Guardando...' : 'Guardar cambios' }}
+      </button>
+
+    </div>
 
   </div>
 
@@ -53,6 +66,7 @@
         <div class="image-preview">
 
           <img
+            appAmpliar
             [src]="producto.imagen || imagenPorDefecto"
             [alt]="producto.nombre"
             (error)="imagenNoCarga($event)"
@@ -79,6 +93,8 @@
           Imagen representativa del producto.
         </p>
 
+        <app-tabla-envios *ngIf="!esMaterial" [(tarifas)]="tarifas"></app-tabla-envios>
+
       </div>
 
 
@@ -102,6 +118,53 @@
 
         <div class="form-group">
 
+          <label for="tipo">
+            Tipo de producto *
+          </label>
+
+          <select id="tipo" [(ngModel)]="producto.tipo">
+            <option *ngFor="let opcion of tiposProducto" [value]="opcion.valor">
+              {{ opcion.icono }} {{ opcion.nombre }}
+            </option>
+          </select>
+
+        </div>
+
+
+        <div class="form-group" *ngIf="producto.tipo === 'figura'">
+
+          <label for="categoria">
+            Categoría
+          </label>
+
+          <select id="categoria" [(ngModel)]="producto.categoria">
+            <option value="">Sin categoría</option>
+            <option *ngFor="let item of categorias" [value]="item.nombre">
+              {{ item.nombre }}
+            </option>
+          </select>
+
+        </div>
+
+
+        <div class="form-group" *ngIf="producto.tipo === 'pintura'">
+
+          <label for="coleccion">
+            Colección *
+          </label>
+
+          <select id="coleccion" [(ngModel)]="producto.coleccion">
+            <option value="">Selecciona una colección</option>
+            <option *ngFor="let item of colecciones" [value]="item.nombre">
+              {{ item.nombre }}
+            </option>
+          </select>
+
+        </div>
+
+
+        <div class="form-group">
+
           <label for="proveedor">
             Proveedor *
           </label>
@@ -111,10 +174,10 @@
             [(ngModel)]="producto.proveedor"
           >
             <option
-              *ngFor="let nombreProveedor of proveedores"
-              [value]="nombreProveedor"
+              *ngFor="let item of proveedoresDelTipo"
+              [value]="item.nombre"
             >
-              {{ nombreProveedor }}
+              {{ item.nombre }}{{ item.limite_precio ? ' · límite $' + (item.limite_precio | number) : '' }}
             </option>
           </select>
 
@@ -124,63 +187,73 @@
         <div class="form-group">
 
           <label for="tamano">
-            Tamaño *
+            {{ esMaterial ? 'Presentación' : 'Tamaño (cm) *' }}
           </label>
 
           <input
             id="tamano"
             type="text"
             [(ngModel)]="producto.tamano"
-            placeholder="Ej. 15 cm"
+            maxlength="60"
+            placeholder="Ej. 15 x 10 cm"
           />
+
+        </div>
+
+
+        <!-- UBICACIÓN Y EXISTENCIAS -->
+        <div class="form-group">
+
+          <label for="existenciasBodega">
+            Unidades en bodega
+          </label>
+
+          <input
+            id="existenciasBodega"
+            type="number"
+            min="0"
+            [(ngModel)]="existenciasBodega"
+            [placeholder]="producto.en_bodega ? '0' : 'No está en bodega'"
+          />
+
+          <small class="ayuda" *ngIf="!producto.en_bodega">
+            Escribe una cantidad para agregarlo a la bodega.
+          </small>
 
         </div>
 
 
         <div class="form-group">
 
-          <label for="costo">
-            Costo (COP)
+          <label for="existenciasLocal">
+            Unidades en el local
           </label>
 
           <input
-            id="costo"
+            id="existenciasLocal"
             type="number"
             min="0"
-            [(ngModel)]="producto.costo"
+            [(ngModel)]="existenciasLocal"
+            [placeholder]="producto.en_local ? '0' : 'No está en el local'"
           />
+
+          <small class="ayuda" *ngIf="!producto.en_local">
+            Escribe una cantidad para agregarlo al local.
+          </small>
 
         </div>
 
 
-        <div class="form-group">
+        <!-- PRECIOS (fábrica, envío, crudo y por mayor) -->
+        <div class="form-group full-width" *ngIf="!cargando">
 
-          <label for="precioVenta">
-            Precio de venta en local (COP)
-          </label>
-
-          <input
-            id="precioVenta"
-            type="number"
-            min="0"
-            [(ngModel)]="producto.precio_venta"
-          />
-
-        </div>
-
-
-        <div class="form-group">
-
-          <label for="precioMayorista">
-            Precio mayorista (COP)
-          </label>
-
-          <input
-            id="precioMayorista"
-            type="number"
-            min="0"
-            [(ngModel)]="producto.precio_mayorista"
-          />
+          <app-precio-producto
+            [datos]="producto"
+            [tarifas]="tarifas"
+            [valores]="valores"
+            [limite]="limiteProveedor"
+            [esFigura]="!esMaterial">
+          </app-precio-producto>
 
         </div>
 
@@ -226,6 +299,25 @@
 
     </div>
 
+  </section>
+
+
+  <!-- ELIMINAR -->
+  <section class="zona-eliminar" *ngIf="!cargando && producto.codigo">
+    <div>
+      <strong>Eliminar producto</strong>
+      <p>
+        Se borra del catálogo, de la bodega y del local. Las ventas, traslados y
+        pedidos ya registrados conservan su nombre en el historial.
+      </p>
+    </div>
+    <button
+      type="button"
+      class="sgi-btn sgi-btn-peligro"
+      [disabled]="eliminando"
+      (click)="eliminarProducto()">
+      {{ eliminando ? 'Eliminando...' : 'Eliminar producto' }}
+    </button>
   </section>
 
 </div>

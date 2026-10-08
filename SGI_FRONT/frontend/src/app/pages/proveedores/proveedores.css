@@ -19,7 +19,7 @@
 .page-label {
   display: block;
   margin-bottom: 6px;
-  color: #2563eb;
+  color: #2f3a8f;
   font-size: 12px;
   font-weight: 700;
   text-transform: uppercase;
@@ -28,14 +28,14 @@
 
 .page-header h1 {
   margin: 0;
-  color: #1e293b;
+  color: #1f2433;
   font-size: 28px;
   line-height: 1.2;
 }
 
 .page-header p {
   margin: 8px 0 0;
-  color: #64748b;
+  color: #5b6275;
   font-size: 14px;
 }
 
@@ -53,7 +53,7 @@
   padding: 0 17px;
   border: none;
   border-radius: 9px;
-  background: #2563eb;
+  background: #2f3a8f;
   color: #ffffff;
   font-size: 14px;
   font-weight: 600;
@@ -61,7 +61,7 @@
 }
 
 .btn-primary:hover {
-  background: #1e40af;
+  background: #252e73;
 }
 
 .btn-icon {
@@ -107,14 +107,14 @@
   padding: 0 14px 0 42px;
   border: 1px solid #e2e8f0;
   border-radius: 9px;
-  background: #f8fafc;
-  color: #1e293b;
+  background: #f6f7f9;
+  color: #1f2433;
   font-size: 14px;
   outline: none;
 }
 
 .search-box input:focus {
-  border-color: #2563eb;
+  border-color: #2f3a8f;
   background: #ffffff;
 }
 
@@ -123,7 +123,7 @@
   padding: 0 12px;
   border: none;
   background: transparent;
-  color: #2563eb;
+  color: #2f3a8f;
   font-size: 13px;
   font-weight: 600;
   cursor: pointer;
@@ -140,13 +140,13 @@
 }
 
 .results-header strong {
-  color: #1e293b;
+  color: #1f2433;
   font-size: 14px;
 }
 
 .results-header span {
   margin-left: 4px;
-  color: #64748b;
+  color: #5b6275;
   font-size: 14px;
 }
 
@@ -200,8 +200,8 @@
   width: 48px;
   height: 48px;
   border-radius: 12px;
-  background: #eff6ff;
-  color: #2563eb;
+  background: #eef0fb;
+  color: #2f3a8f;
   font-size: 18px;
   font-weight: 700;
 }
@@ -212,13 +212,13 @@
   border: none;
   border-radius: 8px;
   background: transparent;
-  color: #64748b;
+  color: #5b6275;
   font-size: 20px;
   cursor: pointer;
 }
 
 .more-button:hover {
-  background: #f8fafc;
+  background: #f6f7f9;
 }
 
 
@@ -232,14 +232,14 @@
 
 .provider-content h2 {
   margin: 0 0 6px;
-  color: #1e293b;
+  color: #1f2433;
   font-size: 17px;
 }
 
 .provider-description {
   min-height: 40px;
   margin: 0;
-  color: #64748b;
+  color: #5b6275;
   font-size: 13px;
   line-height: 1.5;
 }
@@ -273,8 +273,8 @@
   width: 30px;
   height: 30px;
   border-radius: 7px;
-  background: #f8fafc;
-  color: #64748b;
+  background: #f6f7f9;
+  color: #5b6275;
   font-size: 14px;
 }
 
@@ -308,17 +308,17 @@
   width: 100%;
   height: 38px;
   margin-top: 15px;
-  border: 1px solid #dbeafe;
+  border: 1px solid #dfe3f7;
   border-radius: 8px;
-  background: #eff6ff;
-  color: #2563eb;
+  background: #eef0fb;
+  color: #2f3a8f;
   font-size: 13px;
   font-weight: 600;
   cursor: pointer;
 }
 
 .edit-button:hover {
-  background: #dbeafe;
+  background: #dfe3f7;
 }
 
 
@@ -343,8 +343,8 @@
   height: 50px;
   margin: 0 auto 14px;
   border-radius: 50%;
-  background: #eff6ff;
-  color: #2563eb;
+  background: #eef0fb;
+  color: #2f3a8f;
   font-size: 24px;
 }
 
@@ -356,7 +356,7 @@
 
 .empty-state p {
   margin: 7px 0 18px;
-  color: #64748b;
+  color: #5b6275;
   font-size: 14px;
 }
 
@@ -414,4 +414,7 @@
     padding: 12px;
   }
 
+}
+.tipo-proveedor {
+  margin-bottom: 8px;
 }

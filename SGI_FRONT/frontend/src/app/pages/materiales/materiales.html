@@ -1,0 +1,230 @@
+<div class="materiales-page">
+
+  <!-- ENCABEZADO -->
+  <div class="page-header encabezado-fijo">
+
+    <div>
+      <span class="page-label">Inventario del local</span>
+      <h1>Pinturas, pinceles y otros</h1>
+      <p>Organiza las pinturas por colección y controla sus existencias.</p>
+    </div>
+
+    <div class="acciones-encabezado">
+      <button type="button" class="sgi-btn sgi-btn-secundario" (click)="abrirNuevaColeccion()">
+        + Nueva colección
+      </button>
+      <button
+        type="button"
+        class="sgi-btn sgi-btn-primario"
+        (click)="agregar(pestana)">
+        + {{ pestana === 'pintura' ? 'Agregar pinturas' : pestana === 'pincel' ? 'Nuevo pincel' : 'Nuevo material' }}
+      </button>
+    </div>
+
+  </div>
+
+
+  <!-- RESUMEN -->
+  <section class="resumen">
+    <div class="resumen-item">
+      <span>Pinturas</span>
+      <strong>{{ cantidad('pintura') }}</strong>
+      <small>{{ unidadesPinturasLocal | number }} unidades en el local</small>
+    </div>
+    <div class="resumen-item">
+      <span>Colecciones</span>
+      <strong>{{ colecciones.length }}</strong>
+      <small>Acrílicas, pátinas, metalizados...</small>
+    </div>
+    <div class="resumen-item">
+      <span>Pinceles</span>
+      <strong>{{ cantidad('pincel') }}</strong>
+      <small>{{ unidadesPincelesLocal | number }} unidades en el local</small>
+    </div>
+    <div class="resumen-item">
+      <span>Otros materiales</span>
+      <strong>{{ cantidad('otro') }}</strong>
+      <small>Barnices, pegantes, etc.</small>
+    </div>
+  </section>
+
+
+  <div class="estado-carga" *ngIf="cargando">
+    Cargando materiales...
+  </div>
+
+  <div class="mensaje-error" *ngIf="error">
+    {{ error }}
+  </div>
+
+
+  <!-- PESTAÑAS Y BÚSQUEDA -->
+  <div class="barra">
+
+    <div class="pestanas">
+      <button
+        *ngFor="let opcion of pestanas"
+        type="button"
+        [class.active]="pestana === opcion.valor"
+        (click)="pestana = opcion.valor">
+        {{ opcion.icono }} {{ opcion.nombre }}
+        <span>{{ cantidad(opcion.valor) }}</span>
+      </button>
+    </div>
+
+    <input
+      type="text"
+      class="buscar"
+      placeholder="Buscar por nombre, tono, colección o referencia..."
+      [(ngModel)]="busqueda">
+
+  </div>
+
+
+  <!-- FORMULARIO DE COLECCIÓN -->
+  <section class="tarjeta form-coleccion" *ngIf="creandoColeccion || editandoColeccion">
+    <strong>{{ editandoColeccion ? 'Renombrar colección' : 'Nueva colección de pinturas' }}</strong>
+    <div class="fila">
+      <input
+        type="text"
+        maxlength="60"
+        placeholder="Ej. Gamusa"
+        [(ngModel)]="nombreColeccion"
+        (keyup.enter)="guardarColeccion()">
+      <button type="button" class="sgi-btn sgi-btn-secundario" (click)="cancelarColeccion()">
+        Cancelar
+      </button>
+      <button
+        type="button"
+        class="sgi-btn sgi-btn-primario"
+        [disabled]="guardandoColeccion"
+        (click)="guardarColeccion()">
+        {{ guardandoColeccion ? 'Guardando...' : 'Guardar' }}
+      </button>
+    </div>
+    <small *ngIf="!editandoColeccion">Después podrás agregarle todos sus tonos.</small>
+  </section>
+
+
+  <!-- =========================== PINTURAS =========================== -->
+  <ng-container *ngIf="pestana === 'pintura' && !cargando">
+
+    <section class="tarjeta coleccion" *ngFor="let coleccion of coleccionesVisibles">
+
+      <div class="coleccion-encabezado">
+        <div>
+          <h2>{{ coleccion.nombre }}</h2>
+          <small>
+            {{ tonosDe(coleccion).length }} tono(s) ·
+            {{ unidadesLocal(tonosDe(coleccion)) | number }} unidades en el local
+          </small>
+        </div>
+
+        <div class="acciones">
+          <button type="button" class="sgi-btn sgi-btn-enlace" (click)="abrirRenombrar(coleccion)">
+            Renombrar
+          </button>
+          <button
+            *ngIf="coleccion.tonos === 0"
+            type="button"
+            class="sgi-btn sgi-btn-enlace eliminar"
+            (click)="eliminarColeccion(coleccion)">
+            Eliminar
+          </button>
+          <button
+            type="button"
+            class="sgi-btn sgi-btn-secundario sgi-btn-pequeno"
+            (click)="agregar('pintura', coleccion.nombre)">
+            + Agregar tonos
+          </button>
+        </div>
+      </div>
+
+      <div class="tabla" *ngIf="tonosDe(coleccion).length > 0">
+        <table>
+          <thead>
+            <tr>
+              <th>Referencia</th>
+              <th>Tono</th>
+              <th>Presentación</th>
+              <th class="num">Local</th>
+              <th class="num">Bodega</th>
+              <th class="num">Precio</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let producto of tonosDe(coleccion)">
+              <td class="ref">{{ producto.referencia }}</td>
+              <td><strong>{{ tono(producto) }}</strong></td>
+              <td>{{ producto.tamano || '—' }}</td>
+              <td class="num" [class.bajo]="producto.existencias_local <= 5">
+                {{ producto.en_local ? producto.existencias_local : '—' }}
+              </td>
+              <td class="num">{{ producto.en_bodega ? producto.existencias_bodega : '—' }}</td>
+              <td class="num">${{ producto.precio_venta | number }}</td>
+              <td class="num">
+                <button type="button" class="sgi-btn sgi-btn-enlace" (click)="editar(producto)">Editar</button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <p class="vacio" *ngIf="tonosDe(coleccion).length === 0">
+        Esta colección aún no tiene tonos.
+      </p>
+
+    </section>
+
+    <p class="vacio" *ngIf="coleccionesVisibles.length === 0">
+      No hay colecciones que coincidan con la búsqueda.
+    </p>
+
+  </ng-container>
+
+
+  <!-- ===================== PINCELES Y OTROS ===================== -->
+  <section class="tarjeta" *ngIf="pestana !== 'pintura' && !cargando">
+
+    <div class="tabla" *ngIf="delTipo(pestana).length > 0">
+      <table>
+        <thead>
+          <tr>
+            <th>Referencia</th>
+            <th>Nombre</th>
+            <th>Presentación</th>
+            <th>Proveedor</th>
+            <th class="num">Local</th>
+            <th class="num">Bodega</th>
+            <th class="num">Precio</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let producto of delTipo(pestana)">
+            <td class="ref">{{ producto.referencia }}</td>
+            <td><strong>{{ producto.nombre }}</strong></td>
+            <td>{{ producto.tamano || '—' }}</td>
+            <td>{{ producto.proveedor }}</td>
+            <td class="num" [class.bajo]="producto.existencias_local <= 5">
+              {{ producto.en_local ? producto.existencias_local : '—' }}
+            </td>
+            <td class="num">{{ producto.en_bodega ? producto.existencias_bodega : '—' }}</td>
+            <td class="num">${{ producto.precio_venta | number }}</td>
+            <td class="num">
+              <button type="button" class="sgi-btn sgi-btn-enlace" (click)="editar(producto)">Editar</button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p class="vacio" *ngIf="delTipo(pestana).length === 0">
+      No hay {{ pestana === 'pincel' ? 'pinceles' : 'otros materiales' }} registrados.
+      <button type="button" class="sgi-btn sgi-btn-enlace" (click)="agregar(pestana)">Agregar ahora</button>
+    </p>
+
+  </section>
+
+</div>

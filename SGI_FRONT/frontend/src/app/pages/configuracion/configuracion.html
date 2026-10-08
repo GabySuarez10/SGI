@@ -4,7 +4,7 @@
     <div>
       <span class="page-label">Sistema</span>
       <h1>Configuración</h1>
-      <p>Administra la información de tu cuenta y de la empresa.</p>
+      <p>Administra tu cuenta, los precios de venta, los kits y las tarifas de envío.</p>
     </div>
   </div>
 
@@ -84,68 +84,54 @@
   </section>
 
 
-  <!-- EMPRESA -->
+  <!-- PRECIOS, KITS Y ENVÍOS -->
 
   <section class="config-card">
 
     <div class="section-heading">
 
       <div class="section-icon company-icon">
-        🏢
+        $
       </div>
 
       <div>
-        <h2>Empresa</h2>
-        <p>Información de la empresa asociada a esta cuenta.</p>
+        <h2>Precios, kits y envíos</h2>
+        <p>Valores que usa el sistema para calcular precios. Si cambian, actualízalos aquí.</p>
       </div>
 
     </div>
 
-    <div class="form-grid">
+    <div class="mensaje-error" *ngIf="errorPrecios">
+      {{ errorPrecios }}
+    </div>
 
-      <div class="form-group">
+    <div class="mensaje-exito" *ngIf="mensajePrecios">
+      {{ mensajePrecios }}
+    </div>
 
-        <label for="empresa">
-          Nombre de la empresa
-        </label>
+    <div class="sgi-aviso info formula">
+      Precio crudo = fábrica × <strong>{{ valores.multiplicador_crudo }}</strong> + envío ·
+      Precio por mayor = (fábrica × {{ valores.multiplicador_crudo }}) ÷ <strong>{{ valores.divisor_mayor }}</strong> + envío.
+      Ej.: fábrica $2.000 → crudo ${{ ejemplo.crudo | number }} · por mayor ${{ ejemplo.mayor | number }} (sin envío).
+    </div>
 
-        <input
-          id="empresa"
-          type="text"
-          [(ngModel)]="empresa"
-        >
+    <div class="precios-layout">
 
-      </div>
+      <div class="sgi-grid">
 
-      <div class="form-group">
-
-        <label for="ciudad">
-          Ciudad
-        </label>
-
-        <input
-          id="ciudad"
-          type="text"
-          [(ngModel)]="ciudad"
-        >
-
-      </div>
-
-      <div class="form-group">
-
-        <label>
-          Estado
-        </label>
-
-        <div class="status-box">
-
-          <span class="status-dot"></span>
-
-          {{ estadoEmpresa }}
-
+        <div class="sgi-campo" *ngFor="let campo of camposPrecios">
+          <label [for]="'config-' + campo.clave">{{ campo.titulo }}</label>
+          <input
+            [id]="'config-' + campo.clave"
+            type="number"
+            min="0"
+            [(ngModel)]="valores[campo.clave]">
+          <small>{{ campo.ayuda }}</small>
         </div>
 
       </div>
+
+      <app-tabla-envios [(tarifas)]="tarifas"></app-tabla-envios>
 
     </div>
 
@@ -154,12 +140,91 @@
       <button
         type="button"
         class="btn-primary"
-        (click)="guardarEmpresa()">
+        [disabled]="guardandoPrecios"
+        (click)="guardarPrecios()">
 
-        Guardar cambios
+        {{ guardandoPrecios ? 'Guardando...' : 'Guardar valores' }}
 
       </button>
 
+    </div>
+
+  </section>
+
+
+  <!-- CATEGORÍAS DE FIGURAS -->
+
+  <section class="config-card">
+
+    <div class="section-heading">
+
+      <div class="section-icon company-icon">
+        🏷
+      </div>
+
+      <div>
+        <h2>Categorías de figuras</h2>
+        <p>Sirven para agrupar y filtrar las figuras en productos, pedidos, ventas e historial.</p>
+      </div>
+
+    </div>
+
+    <div class="mensaje-error" *ngIf="errorCategorias">
+      {{ errorCategorias }}
+    </div>
+
+    <div class="categorias-lista">
+
+      <div class="categoria-fila" *ngFor="let categoria of categorias">
+
+        <ng-container *ngIf="categoriaEditando?.id !== categoria.id">
+          <span class="sgi-chip categoria-chip">{{ categoria.nombre }}</span>
+          <small>{{ categoria.figuras }} figura(s)</small>
+          <span class="espaciador"></span>
+          <button type="button" class="sgi-btn sgi-btn-enlace" (click)="editarCategoria(categoria)">
+            Renombrar
+          </button>
+          <button type="button" class="sgi-btn sgi-btn-enlace eliminar" (click)="eliminarCategoria(categoria)">
+            Eliminar
+          </button>
+        </ng-container>
+
+        <ng-container *ngIf="categoriaEditando?.id === categoria.id">
+          <input
+            type="text"
+            maxlength="40"
+            aria-label="Nuevo nombre de la categoría"
+            [(ngModel)]="nombreCategoria"
+            (keyup.enter)="guardarCategoria()">
+          <button type="button" class="sgi-btn sgi-btn-secundario sgi-btn-pequeno" (click)="cancelarCategoria()">
+            Cancelar
+          </button>
+          <button type="button" class="sgi-btn sgi-btn-primario sgi-btn-pequeno" (click)="guardarCategoria()">
+            Guardar
+          </button>
+        </ng-container>
+
+      </div>
+
+      <p class="vacio" *ngIf="categorias.length === 0">Aún no hay categorías.</p>
+
+    </div>
+
+    <div class="nueva-categoria">
+      <input
+        type="text"
+        maxlength="40"
+        placeholder="Nueva categoría, ej. Halloween"
+        aria-label="Nueva categoría"
+        [(ngModel)]="nuevaCategoria"
+        (keyup.enter)="crearCategoria()">
+      <button
+        type="button"
+        class="sgi-btn sgi-btn-primario"
+        [disabled]="!nuevaCategoria.trim()"
+        (click)="crearCategoria()">
+        + Agregar categoría
+      </button>
     </div>
 
   </section>

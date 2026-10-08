@@ -1,5 +1,7 @@
 import hmac
 
+from flask import current_app
+
 from database import db
 from models import Usuario
 from queries.comunes import obtener_o_404
@@ -15,7 +17,10 @@ def obtener_usuario(id_usuario):
 
 
 def _buscar_por_nombre(nombre):
-    return Usuario.query.filter(db.func.lower(Usuario.nombre) == nombre.strip().lower()).first()
+    # trim(): si la columna es CHAR(n), PostgreSQL la rellena con espacios
+    return Usuario.query.filter(
+        db.func.lower(db.func.trim(Usuario.nombre)) == nombre.strip().lower()
+    ).first()
 
 
 def crear_usuario(data):
@@ -68,8 +73,17 @@ def iniciar_sesion(nombre, contrasena):
         raise ErrorAPI("Ingresa el usuario y la contraseña")
 
     usuario = _buscar_por_nombre(nombre)
-    if usuario is None or not hmac.compare_digest(
-        (usuario.contrasena or "").encode(), contrasena.encode()
-    ):
+    if usuario is None:
+        current_app.logger.warning("Login fallido: no existe el usuario %r en la tabla usuarios", nombre)
+        raise ErrorAPI("Usuario o contraseña incorrectos", 401)
+
+    # Se ignoran espacios al inicio/fin: las columnas CHAR(n) devuelven
+    # la contraseña rellena con espacios hasta completar el tamaño.
+    guardada = (usuario.contrasena or "").strip()
+    if not hmac.compare_digest(guardada.encode(), contrasena.strip().encode()):
+        current_app.logger.warning(
+            "Login fallido: contraseña incorrecta para %r (largo guardado=%d, largo recibido=%d)",
+            usuario.nombre, len(guardada), len(contrasena.strip()),
+        )
         raise ErrorAPI("Usuario o contraseña incorrectos", 401)
     return usuario

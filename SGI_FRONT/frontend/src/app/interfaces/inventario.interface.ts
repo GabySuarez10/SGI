@@ -1,3 +1,5 @@
+import { TipoProducto } from '../utils/tipos';
+
 export interface IInventarioBodega {
   codigo: number;
   nombre: string;
@@ -7,6 +9,10 @@ export interface IInventarioBodega {
   descripcion: string;
   costo: number;
   existencias: number;
+  tipo: TipoProducto;     // del catálogo
+  coleccion: string;
+  referencia: string;
+  categoria: string;      // solo figuras
 }
 
 export interface IInventarioLocal {
@@ -18,4 +24,8 @@ export interface IInventarioLocal {
   existencias: number;
   precio_venta: number;
   precio_mayorista: number;
+  tipo: TipoProducto;     // del catálogo
+  coleccion: string;
+  referencia: string;
+  categoria: string;      // solo figuras
 }

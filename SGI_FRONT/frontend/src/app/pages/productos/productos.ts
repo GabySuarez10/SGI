@@ -5,12 +5,20 @@ import { Router, RouterLink } from '@angular/router';
 import { IProducto } from '../../interfaces/producto.interface';
 import { ProductoService } from '../../services/producto.service';
 import { mensajeDeError } from '../../utils/http-error';
+import { Ampliar } from '../../components/visor-imagen/ampliar.directive';
+import {
+  VistaProductos,
+  categoriasDe,
+  coincideCategoria,
+  coincideVista,
+  nombreTipo
+} from '../../utils/tipos';
 import { IMAGEN_POR_DEFECTO, imagenNoCarga } from '../../utils/imagen';
 
 @Component({
   selector: 'app-productos',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink],
+  imports: [CommonModule, FormsModule, RouterLink, Ampliar],
   templateUrl: './productos.html',
   styleUrl: './productos.css'
 })
@@ -19,6 +27,21 @@ export class Productos implements OnInit {
   busqueda = '';
 
   proveedorSeleccionado = '';
+
+  // Todos, solo figuras o solo pinturas, pinceles y otros
+  vista: VistaProductos = 'todos';
+  readonly vistas: { valor: VistaProductos; nombre: string }[] = [
+    { valor: 'todos', nombre: 'Todos' },
+    { valor: 'figuras', nombre: 'Figuras' },
+    { valor: 'materiales', nombre: 'Pinturas, pinceles y otros' }
+  ];
+  nombreTipo = nombreTipo;
+
+  // Categoría de figura ('' = todas, 'sin' = sin categoría)
+  categoriaSeleccionada = '';
+
+  // '' = todas, 'bodega', 'local' o 'sin' (sin ubicación)
+  ubicacionSeleccionada = '';
 
   productos: IProducto[] = [];
   cargando = false;
@@ -64,6 +87,7 @@ export class Productos implements OnInit {
       const coincideBusqueda =
         !texto ||
         producto.nombre.toLowerCase().includes(texto) ||
+        (producto.coleccion ?? '').toLowerCase().includes(texto) ||
         (producto.referencia ?? '').toLowerCase().includes(texto) ||
         String(producto.codigo).includes(texto);
 
@@ -71,13 +95,34 @@ export class Productos implements OnInit {
         !this.proveedorSeleccionado ||
         producto.proveedor === this.proveedorSeleccionado;
 
-      return coincideBusqueda && coincideProveedor;
+      const coincideUbicacion =
+        !this.ubicacionSeleccionada ||
+        (this.ubicacionSeleccionada === 'bodega' && producto.en_bodega) ||
+        (this.ubicacionSeleccionada === 'local' && producto.en_local) ||
+        (this.ubicacionSeleccionada === 'sin' && !producto.en_bodega && !producto.en_local);
+
+      const coincideCat =
+        !this.categoriaSeleccionada ||
+        (producto.tipo === 'figura' && coincideCategoria(producto.categoria, this.categoriaSeleccionada));
+
+      return coincideVista(producto.tipo, this.vista) && coincideCat &&
+        coincideBusqueda && coincideProveedor && coincideUbicacion;
     });
+  }
+
+  get categorias(): string[] {
+    return categoriasDe(this.productos);
+  }
+
+  contarVista(vista: VistaProductos): number {
+    return this.productos.filter(producto => coincideVista(producto.tipo, vista)).length;
   }
 
   limpiarFiltros(): void {
     this.busqueda = '';
     this.proveedorSeleccionado = '';
+    this.ubicacionSeleccionada = '';
+    this.categoriaSeleccionada = '';
   }
 
   editarProducto(producto: IProducto): void {

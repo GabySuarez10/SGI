@@ -17,13 +17,13 @@
   margin: 0 0 6px;
   font-size: 26px;
   font-weight: 700;
-  color: #1e293b;
+  color: #1f2433;
 }
 
 .header-left p {
   margin: 0;
   font-size: 14px;
-  color: #64748b;
+  color: #5b6275;
 }
 
 .back-button {
@@ -32,14 +32,14 @@
   border: 1px solid #e2e8f0;
   border-radius: 10px;
   background: #ffffff;
-  color: #1e293b;
+  color: #1f2433;
   font-size: 22px;
   cursor: pointer;
   transition: 0.2s;
 }
 
 .back-button:hover {
-  background: #f8fafc;
+  background: #f6f7f9;
   border-color: #cbd5e1;
 }
 
@@ -58,13 +58,13 @@
 .card-header h2 {
   margin: 0 0 6px;
   font-size: 18px;
-  color: #1e293b;
+  color: #1f2433;
 }
 
 .card-header p {
   margin: 0;
   font-size: 14px;
-  color: #64748b;
+  color: #5b6275;
 }
 
 .form-grid {
@@ -102,7 +102,7 @@
   padding: 12px 14px;
   font-family: inherit;
   font-size: 14px;
-  color: #1e293b;
+  color: #1f2433;
   background: #ffffff;
   outline: none;
   transition: 0.2s;
@@ -124,8 +124,8 @@
 
 .form-group input:focus,
 .form-group textarea:focus {
-  border-color: #2563eb;
-  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+  border-color: #2f3a8f;
+  box-shadow: 0 0 0 3px rgba(47, 58, 143, 0.1);
 }
 
 .actions {
@@ -153,18 +153,18 @@
 }
 
 .btn-secondary:hover {
-  background: #f8fafc;
+  background: #f6f7f9;
 }
 
 .btn-primary {
-  border: 1px solid #2563eb;
-  background: #2563eb;
+  border: 1px solid #2f3a8f;
+  background: #2f3a8f;
   color: #ffffff;
 }
 
 .btn-primary:hover {
-  background: #1e40af;
-  border-color: #1e40af;
+  background: #252e73;
+  border-color: #252e73;
 }
 
 
@@ -224,4 +224,11 @@
     width: 100%;
   }
 
+}
+
+.ayuda {
+  display: block;
+  margin-top: 6px;
+  color: #5b6275;
+  font-size: 12px;
 }

@@ -4,12 +4,31 @@
        ENCABEZADO
   ================================= -->
 
-  <div class="page-header">
+  <div class="page-header encabezado-fijo">
     <div>
       <h1>Ventas / Salidas</h1>
       <p>
         Registra la salida de productos y prepara los pedidos de clientes.
       </p>
+    </div>
+
+    <!-- Acciones siempre visibles arriba -->
+    <div class="acciones-encabezado">
+
+      <span class="resumen-rapido" *ngIf="totalUnidades > 0">
+        {{ modalidad }} ·
+        <strong>{{ totalUnidades }}</strong> unidades ·
+        <strong>${{ totalVenta.toLocaleString('es-CO') }}</strong>
+      </span>
+
+      <button
+        type="button"
+        class="sgi-btn sgi-btn-primario"
+        [disabled]="guardando || productosSeleccionados.length === 0"
+        (click)="registrarSalida()">
+        {{ guardando ? 'Registrando...' : 'Registrar salida' }}
+      </button>
+
     </div>
   </div>
 
@@ -24,7 +43,7 @@
       <div>
         <h2>Información de la venta</h2>
         <p>
-          Define primero el tipo y la modalidad de esta salida.
+          Define primero la modalidad de esta venta: de ella depende el precio.
         </p>
       </div>
     </div>
@@ -66,104 +85,7 @@
 
 
       <!-- ================================
-           TIPO DE VENTA
-      ================================= -->
-
-      <div class="form-group full-width">
-
-        <label>
-          Tipo de venta
-        </label>
-
-        <div class="sale-type-options">
-
-          <!-- DISTRIBUCIÓN -->
-          <button
-            type="button"
-            class="sale-type-option"
-            [class.active]="tipoVenta === 'Distribución / Institucional'"
-            (click)="tipoVenta = 'Distribución / Institucional'"
-          >
-
-            <span class="sale-type-icon">
-              🏢
-            </span>
-
-            <span class="sale-type-content">
-
-              <strong>
-                Distribución / Institucional
-              </strong>
-
-              <small>
-                Pedidos para centros recreacionales y clientes institucionales.
-              </small>
-
-            </span>
-
-          </button>
-
-
-          <!-- VENTA NORMAL -->
-          <button
-            type="button"
-            class="sale-type-option"
-            [class.active]="tipoVenta === 'Venta normal'"
-            (click)="tipoVenta = 'Venta normal'"
-          >
-
-            <span class="sale-type-icon">
-              🏪
-            </span>
-
-            <span class="sale-type-content">
-
-              <strong>
-                Venta normal
-              </strong>
-
-              <small>
-                Venta de productos del local.
-              </small>
-
-            </span>
-
-          </button>
-
-
-          <!-- MAYORISTA -->
-          <button
-            type="button"
-            class="sale-type-option"
-            [class.active]="tipoVenta === 'Mayorista'"
-            (click)="tipoVenta = 'Mayorista'"
-          >
-
-            <span class="sale-type-icon">
-              📦
-            </span>
-
-            <span class="sale-type-content">
-
-              <strong>
-                Mayorista
-              </strong>
-
-              <small>
-                Venta por volumen con precio mayorista.
-              </small>
-
-            </span>
-
-          </button>
-
-        </div>
-
-      </div>
-
-
-      <!-- ================================
-           MODALIDAD
+           MODALIDAD DE VENTA
       ================================= -->
 
       <div class="form-group full-width">
@@ -172,78 +94,30 @@
           Modalidad de venta
         </label>
 
-        <div class="modality-options">
+        <div class="sale-type-options">
 
-          <!-- CRUDA -->
           <button
+            *ngFor="let opcion of modalidades"
             type="button"
-            class="modality-option"
-            [class.active]="modalidad === 'Figura cruda'"
-            (click)="modalidad = 'Figura cruda'"
+            class="sale-type-option"
+            [class.active]="modalidad === opcion.valor"
+            (click)="modalidad = opcion.valor"
           >
 
-            <span class="modality-icon">
-              🏺
+            <span class="sale-type-icon">
+              {{ opcion.icono }}
             </span>
 
-            <span>
+            <span class="sale-type-content">
+
               <strong>
-                Figura cruda
+                {{ opcion.valor }}
               </strong>
 
               <small>
-                Figura sin pintar.
+                {{ opcion.descripcion }}
               </small>
-            </span>
 
-          </button>
-
-
-          <!-- KIT -->
-          <button
-            type="button"
-            class="modality-option kit-option"
-            [class.active]="modalidad === 'Figura en kit'"
-            (click)="modalidad = 'Figura en kit'"
-          >
-
-            <span class="modality-icon">
-              🎨
-            </span>
-
-            <span>
-              <strong>
-                Figura en kit
-              </strong>
-
-              <small>
-                Figura + 5 pinturas + 1 pincel.
-              </small>
-            </span>
-
-          </button>
-
-
-          <!-- PINTADA -->
-          <button
-            type="button"
-            class="modality-option"
-            [class.active]="modalidad === 'Figura pintada'"
-            (click)="modalidad = 'Figura pintada'"
-          >
-
-            <span class="modality-icon">
-              🖌️
-            </span>
-
-            <span>
-              <strong>
-                Figura pintada
-              </strong>
-
-              <small>
-                Figura terminada. No descuenta materiales.
-              </small>
             </span>
 
           </button>
@@ -257,9 +131,47 @@
            INFORMACIÓN DEL KIT
       ================================= -->
 
+      <!-- ================================
+           FIGURA PINTADA: VALOR ADICIONAL
+      ================================= -->
+
+      <div
+        class="kit-notice full-width pintada-notice"
+        *ngIf="esPintada"
+      >
+
+        <span class="notice-icon">
+          ✨
+        </span>
+
+        <div>
+
+          <strong>
+            Figura vendida pintada
+          </strong>
+
+          <p>
+            Se suma un valor adicional al precio crudo de cada figura.
+            Puedes ajustarlo por figura en los productos seleccionados.
+          </p>
+
+          <label class="adicional-general" for="adicionalPintada">
+            Valor adicional por figura (COP)
+            <input
+              id="adicionalPintada"
+              type="number"
+              min="0"
+              [(ngModel)]="adicionalPintadaGeneral">
+          </label>
+
+        </div>
+
+      </div>
+
+
       <div
         class="kit-notice full-width"
-        *ngIf="modalidad === 'Figura en kit'"
+        *ngIf="esKit"
       >
 
         <span class="notice-icon">
@@ -273,18 +185,22 @@
           </strong>
 
           <p>
-            Cada figura seleccionada consumirá
-            <strong>5 pinturas y 1 pincel</strong>.
+            Cada figura seleccionada lleva
+            <strong>{{ valores.pinturas_por_kit }} pinturas y {{ valores.pinceles_por_kit }} pincel(es)</strong>.
           </p>
 
-          <p
-            *ngIf="tipoVenta === 'Distribución / Institucional'"
-          >
-            Precio de distribución:
+          <p *ngIf="modalidad === 'Kit para llevar'">
+            Precio: precio crudo de la figura +
+            <strong>${{ valores.valor_kit_local.toLocaleString('es-CO') }}</strong> del kit.
+          </p>
+
+          <p *ngIf="modalidad === 'Empresa con contrato'">
+            Precio de contrato:
             <strong>
-              ${{ precioKitDistribucion.toLocaleString('es-CO') }}
-              por figura.
+              ${{ valores.precio_kit_contrato.toLocaleString('es-CO') }}
+              por kit.
             </strong>
+            Se cambia en Configuración.
           </p>
 
         </div>
@@ -332,8 +248,31 @@
         </h2>
 
         <p>
-          Selecciona las figuras y cantidades que harán parte de esta salida.
+          Selecciona las figuras, pinturas, pinceles u otros materiales de esta salida.
         </p>
+
+        <!-- FILTRO POR CATEGORÍA (figuras) -->
+        <select
+          *ngIf="vista !== 'materiales'"
+          class="filtro-categoria"
+          [(ngModel)]="categoriaSeleccionada"
+          aria-label="Categoría">
+          <option value="">Todas las categorías</option>
+          <option *ngFor="let categoria of categorias" [value]="categoria">{{ categoria }}</option>
+          <option value="sin">Figuras sin categoría</option>
+        </select>
+
+        <!-- PESTAÑAS: figuras / materiales / todo -->
+        <div class="pestanas-venta">
+          <button
+            *ngFor="let opcion of vistasVenta"
+            type="button"
+            [class.active]="vista === opcion.valor"
+            (click)="vista = opcion.valor">
+            {{ opcion.nombre }}
+            <span *ngIf="contarSeleccionados(opcion.valor) > 0">{{ contarSeleccionados(opcion.valor) }}</span>
+          </button>
+        </div>
 
       </div>
 
@@ -365,11 +304,11 @@
       <div>
 
         <span>
-          Tipo de venta
+          Precio aplicado
         </span>
 
         <strong>
-          {{ tipoVenta }}
+          {{ descripcionPrecio }}
         </strong>
 
       </div>
@@ -389,7 +328,7 @@
 
 
       <div
-        *ngIf="modalidad === 'Figura en kit'"
+        *ngIf="esKit"
       >
 
         <span>
@@ -397,7 +336,7 @@
         </span>
 
         <strong>
-          5 pinturas + 1 pincel
+          {{ valores.pinturas_por_kit }} pinturas + {{ valores.pinceles_por_kit }} pincel(es)
         </strong>
 
       </div>
@@ -431,6 +370,7 @@
         <div class="product-image">
 
           <img
+            appAmpliar
             [src]="producto.imagen || imagenPorDefecto"
             [alt]="producto.nombre"
             (error)="imagenNoCarga($event)"
@@ -452,12 +392,20 @@
         <div class="product-content">
 
           <div class="product-code">
-            {{ producto.codigo }}
+            {{ producto.referencia || producto.codigo }}
           </div>
 
           <h3>
             {{ producto.nombre }}
           </h3>
+
+          <span class="sgi-chip categoria-chip" *ngIf="producto.categoria">
+            {{ producto.categoria }}
+          </span>
+
+          <span class="sgi-chip local" *ngIf="producto.tipo !== 'figura'">
+            {{ nombreTipo(producto.tipo) }}
+          </span>
 
           <p class="available">
             Disponible:
@@ -510,6 +458,30 @@
             class="product-price"
             *ngIf="producto.cantidad > 0"
           >
+
+            <div *ngIf="esPintada && producto.tipo === 'figura'" class="adicional-figura">
+
+              <label [for]="'adicional-' + producto.codigo">
+                Adicional pintada
+              </label>
+
+              <input
+                [id]="'adicional-' + producto.codigo"
+                type="number"
+                min="0"
+                [placeholder]="'' + adicionalPintadaGeneral"
+                [(ngModel)]="producto.adicionalPintada">
+
+              <button
+                *ngIf="producto.adicionalPintada !== null"
+                type="button"
+                class="sgi-btn sgi-btn-enlace"
+                (click)="restablecerAdicional(producto)">
+                Usar general
+              </button>
+
+            </div>
+
 
             <div>
 
@@ -627,6 +599,7 @@
         <div class="summary-product-info">
 
           <img
+            appAmpliar
             [src]="producto.imagen || imagenPorDefecto"
             [alt]="producto.nombre"
             (error)="imagenNoCarga($event)"
@@ -663,7 +636,7 @@
 
     <div
       class="materials-summary"
-      *ngIf="modalidad === 'Figura en kit'"
+      *ngIf="esKit"
     >
 
       <!-- PINTURAS -->
@@ -768,7 +741,7 @@
 
 
       <div
-        *ngIf="modalidad === 'Figura en kit'"
+        *ngIf="esKit"
       >
 
         <span>
@@ -783,7 +756,7 @@
 
 
       <div
-        *ngIf="modalidad === 'Figura en kit'"
+        *ngIf="esKit"
       >
 
         <span>

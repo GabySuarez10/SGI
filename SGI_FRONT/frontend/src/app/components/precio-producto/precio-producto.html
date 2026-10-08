@@ -1,0 +1,107 @@
+<div class="precio-producto">
+
+  <div class="sgi-grid">
+
+    <!-- PRECIO DE FÁBRICA -->
+    <div class="sgi-campo">
+      <label [for]="idPrefijo + '-costo'">
+        {{ esFigura ? 'Precio de fábrica (COP)' : 'Precio de compra (COP)' }} <span>*</span>
+      </label>
+      <input
+        [id]="idPrefijo + '-costo'"
+        type="number"
+        min="0"
+        placeholder="Ej. 2000"
+        [(ngModel)]="datos.costo"
+        (ngModelChange)="recalcular()">
+      <small *ngIf="limite && esFigura">
+        Límite pactado con el proveedor: ${{ limite | number }}
+      </small>
+    </div>
+
+
+    <!-- ENVÍO (solo figuras) -->
+    <div class="sgi-campo" *ngIf="esFigura">
+      <label [for]="idPrefijo + '-envio'">
+        Envío según tamaño
+      </label>
+      <div class="envio">
+        <select
+          [id]="idPrefijo + '-envio'"
+          [ngModel]="categoriaSeleccionada"
+          (ngModelChange)="elegirEnvio($event)">
+          <option value="">Sin envío</option>
+          <option *ngFor="let tarifa of tarifas" [value]="tarifa.nombre">
+            {{ tarifa.nombre }} · ${{ tarifa.precio | number }}
+          </option>
+          <option [value]="personalizado">Otro valor...</option>
+        </select>
+
+        <input
+          type="number"
+          min="0"
+          aria-label="Valor del envío"
+          [disabled]="!envioEditable"
+          [(ngModel)]="datos.envio"
+          (ngModelChange)="recalcular()">
+      </div>
+      <small>Elige un tamaño de la tabla o "Otro valor..." para escribirlo.</small>
+    </div>
+
+
+    <!-- PRECIO CRUDO -->
+    <div class="sgi-campo" [class.calculado]="esFigura && !crudoEditado" [class.editado]="crudoEditado">
+      <label [for]="idPrefijo + '-crudo'">
+        {{ esFigura ? 'Precio crudo / detal (COP)' : 'Precio de venta al público (COP)' }}
+      </label>
+      <input
+        [id]="idPrefijo + '-crudo'"
+        type="number"
+        min="0"
+        [ngModel]="datos.precio_venta"
+        (ngModelChange)="editarCrudo($event)">
+      <small *ngIf="!esFigura">Precio por unidad en el local.</small>
+      <small *ngIf="esFigura && !crudoEditado">
+        Fábrica × {{ valores.multiplicador_crudo }} + envío (calculado)
+      </small>
+      <small *ngIf="crudoEditado">
+        Editado a mano · calculado: ${{ calculado.crudo | number }}
+        <button type="button" class="sgi-btn sgi-btn-enlace" (click)="usarCalculadoCrudo()">
+          Usar calculado
+        </button>
+      </small>
+    </div>
+
+
+    <!-- PRECIO POR MAYOR -->
+    <div class="sgi-campo" [class.calculado]="esFigura && !mayorEditado" [class.editado]="mayorEditado">
+      <label [for]="idPrefijo + '-mayor'">
+        Precio por mayor (COP)
+      </label>
+      <input
+        [id]="idPrefijo + '-mayor'"
+        type="number"
+        min="0"
+        [ngModel]="datos.precio_mayorista"
+        (ngModelChange)="editarMayor($event)">
+      <small *ngIf="!esFigura">Precio por unidad en ventas al por mayor.</small>
+      <small *ngIf="esFigura && !mayorEditado">
+        (Fábrica × {{ valores.multiplicador_crudo }}) ÷ {{ valores.divisor_mayor }} + envío (calculado)
+      </small>
+      <small *ngIf="mayorEditado">
+        Editado a mano · calculado: ${{ calculado.mayor | number }}
+        <button type="button" class="sgi-btn sgi-btn-enlace" (click)="usarCalculadoMayor()">
+          Usar calculado
+        </button>
+      </small>
+    </div>
+
+  </div>
+
+
+  <div class="sgi-aviso peligro" *ngIf="superaLimite">
+    El precio de fábrica (${{ datos.costo | number }}) supera el límite de
+    ${{ limite | number }} pactado con el proveedor.
+  </div>
+
+</div>

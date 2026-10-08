@@ -13,7 +13,7 @@ class InventarioLocal(db.Model):
     nombre = db.Column("nombre", db.Text)
     imagen = db.Column("imagen", db.Text)
     proveedor = db.Column("proveedor", db.String(100))
-    tamano = db.Column("tamano", db.String(20))
+    tamano = db.Column("tamano", db.String(60))
     existencias = db.Column("existencias", db.Integer)
     precio_venta = db.Column("precio_venta", db.Integer)
     precio_mayorista = db.Column("precio_mayorista", db.Integer)

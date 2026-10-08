@@ -9,6 +9,28 @@ from utils.errores import NoEncontrado
 # Bodega
 # ------------------------------------------------------------------
 
+def _datos_catalogo():
+    """{codigo: (tipo, coleccion, referencia, categoria)} para agregar a los inventarios."""
+    return {
+        codigo: (tipo or "figura", coleccion or "", referencia or "", categoria or "")
+        for codigo, tipo, coleccion, referencia, categoria in db.session.query(
+            Producto.codigo, Producto.tipo, Producto.coleccion, Producto.referencia, Producto.categoria
+        )
+    }
+
+
+def con_tipo(filas):
+    """Filas de inventario como dicts con tipo, colección, referencia y categoría del catálogo."""
+    catalogo = _datos_catalogo()
+    resultado = []
+    for fila in filas:
+        item = fila.to_dict()
+        tipo, coleccion, referencia, categoria = catalogo.get(fila.codigo, ("figura", "", "", ""))
+        item.update(tipo=tipo, coleccion=coleccion, referencia=referencia, categoria=categoria)
+        resultado.append(item)
+    return resultado
+
+
 def listar_bodega():
     return InventarioBodega.query.order_by(InventarioBodega.codigo).all()
 
@@ -45,10 +67,15 @@ def actualizar_local(codigo, data):
     item = obtener_local(codigo)
     if "existencias" in data:
         item.existencias = entero(data["existencias"], "existencias", 0)
+    producto = db.session.get(Producto, codigo)
     if "precio_venta" in data:
         item.precio_venta = entero(data["precio_venta"], "precio_venta", 0)
+        if producto is not None:
+            producto.precio_venta = item.precio_venta
     if "precio_mayorista" in data:
         item.precio_mayorista = entero(data["precio_mayorista"], "precio_mayorista", 0)
+        if producto is not None:
+            producto.precio_mayorista = item.precio_mayorista
     db.session.commit()
     return item
 
@@ -99,8 +126,9 @@ def fila_local(nombre, crear=False, codigo=None):
         if fila is None:
             fila = InventarioLocal(
                 codigo=producto.codigo, nombre=producto.nombre, imagen=producto.imagen,
-                proveedor=producto.proveedor, tamano=producto.tamano,
-                existencias=0, precio_venta=0, precio_mayorista=0,
+                proveedor=producto.proveedor, tamano=producto.tamano, existencias=0,
+                precio_venta=producto.precio_venta or 0,
+                precio_mayorista=producto.precio_mayorista or 0,
             )
             db.session.add(fila)
     return fila

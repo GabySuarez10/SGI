@@ -1,0 +1,117 @@
+.tabla-envios {
+  padding: 18px 20px;
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  background: #ffffff;
+}
+
+.tabla-encabezado {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.tabla-encabezado h3 {
+  margin: 0;
+  color: #1f2433;
+  font-size: 15px;
+}
+
+.tabla-encabezado p {
+  margin: 4px 0 0;
+  color: #5b6275;
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+th {
+  padding: 8px 6px;
+  border-bottom: 1px solid #e2e8f0;
+  color: #5b6275;
+  font-size: 12px;
+  font-weight: 600;
+  text-align: left;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+td {
+  padding: 9px 6px;
+  border-bottom: 1px solid #f1f5f9;
+  color: #334155;
+}
+
+tr:last-child td {
+  border-bottom: none;
+}
+
+.derecha {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.vacio {
+  color: #94a3b8;
+  text-align: center;
+}
+
+.fila-edicion {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 120px 32px;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.fila-edicion input {
+  width: 100%;
+  box-sizing: border-box;
+  height: 38px;
+  padding: 0 10px;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  font-family: inherit;
+  font-size: 14px;
+}
+
+.precio {
+  position: relative;
+}
+
+.precio span {
+  position: absolute;
+  left: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #94a3b8;
+  font-size: 13px;
+}
+
+.precio input {
+  padding-left: 22px;
+}
+
+.quitar {
+  border: none;
+  border-radius: 8px;
+  background: #fef2f2;
+  color: #b91c1c;
+  cursor: pointer;
+}
+
+.agregar {
+  margin: 4px 0 12px;
+}
+
+.acciones {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}

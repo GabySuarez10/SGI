@@ -11,6 +11,9 @@ from models.inventario_local import InventarioLocal
 from models.venta import Venta
 from models.traslado import Traslado
 from models.pedido_proveedor import PedidoProveedor
+from models.configuracion import TarifaEnvio, Configuracion
+from models.coleccion_material import ColeccionMaterial
+from models.categoria_figura import CategoriaFigura
 
 __all__ = [
     "Usuario",
@@ -21,4 +24,8 @@ __all__ = [
     "Venta",
     "Traslado",
     "PedidoProveedor",
+    "TarifaEnvio",
+    "Configuracion",
+    "ColeccionMaterial",
+    "CategoriaFigura",
 ]

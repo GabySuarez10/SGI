@@ -23,6 +23,7 @@ class Venta(db.Model):
     cliente = db.Column("cliente", db.Text)
     observacion = db.Column("observacion", db.Text)
     usuario = db.Column("usuario", db.String(100))
+    modalidad = db.Column("modalidad", db.String(40))
 
     def to_dict(self):
         return {
@@ -35,4 +36,5 @@ class Venta(db.Model):
             "cliente": self.cliente,
             "observacion": self.observacion,
             "usuario": self.usuario,
+            "modalidad": self.modalidad or "",
         }

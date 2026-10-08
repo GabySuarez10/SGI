@@ -1,0 +1,64 @@
+.visor {
+  position: fixed;
+  inset: 0;
+  z-index: 2000;
+
+  display: grid;
+  place-items: center;
+  padding: 24px;
+
+  background: rgba(15, 18, 32, 0.82);
+  cursor: zoom-out;
+  animation: aparecer 0.15s ease-out;
+}
+
+figure {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  max-width: min(900px, 100%);
+  cursor: default;
+}
+
+img {
+  display: block;
+  max-width: 100%;
+  max-height: calc(100vh - 140px);
+  max-height: calc(100dvh - 140px);
+  object-fit: contain;
+  border-radius: 14px;
+  background: #ffffff;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.35);
+}
+
+figcaption {
+  color: #ffffff;
+  font-size: 16px;
+  font-weight: 600;
+  text-align: center;
+}
+
+.cerrar {
+  position: absolute;
+  top: max(16px, env(safe-area-inset-top));
+  right: 16px;
+
+  width: 46px;
+  height: 46px;
+  display: grid;
+  place-items: center;
+
+  border: none;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.95);
+  color: #1f2433;
+  cursor: pointer;
+}
+
+@keyframes aparecer {
+  from {
+    opacity: 0;
+  }
+}

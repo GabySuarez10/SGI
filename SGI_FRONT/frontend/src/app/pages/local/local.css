@@ -14,13 +14,13 @@
   margin: 0 0 6px;
   font-size: 26px;
   font-weight: 700;
-  color: #1e293b;
+  color: #1f2433;
 }
 
 .page-header p {
   margin: 0;
   font-size: 14px;
-  color: #64748b;
+  color: #5b6275;
 }
 
 
@@ -55,8 +55,8 @@
 }
 
 .stat-icon.blue {
-  background: #eff6ff;
-  color: #2563eb;
+  background: #eef0fb;
+  color: #2f3a8f;
 }
 
 .stat-icon.green {
@@ -73,12 +73,12 @@
   display: block;
   margin-bottom: 4px;
   font-size: 13px;
-  color: #64748b;
+  color: #5b6275;
 }
 
 .stat-card strong {
   font-size: 23px;
-  color: #1e293b;
+  color: #1f2433;
 }
 
 
@@ -133,8 +133,8 @@
 
 .search-box input:focus,
 .filters-card select:focus {
-  border-color: #2563eb;
-  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+  border-color: #2f3a8f;
+  box-shadow: 0 0 0 3px rgba(47, 58, 143, 0.1);
 }
 
 .clear-button {
@@ -150,7 +150,7 @@
 }
 
 .clear-button:hover {
-  background: #f8fafc;
+  background: #f6f7f9;
 }
 
 
@@ -163,12 +163,12 @@
 .products-header h2 {
   margin: 0 0 4px;
   font-size: 18px;
-  color: #1e293b;
+  color: #1f2433;
 }
 
 .products-header span {
   font-size: 13px;
-  color: #64748b;
+  color: #5b6275;
 }
 
 
@@ -194,7 +194,7 @@
 }
 
 .product-image {
-  height: 190px;
+  height: 210px;
   background: #f1f5f9;
   overflow: hidden;
 }
@@ -220,7 +220,7 @@
 .product-code {
   font-size: 12px;
   font-weight: 700;
-  color: #2563eb;
+  color: #2f3a8f;
 }
 
 .stock-badge {
@@ -240,13 +240,13 @@
 .product-content h3 {
   margin: 0 0 5px;
   font-size: 17px;
-  color: #1e293b;
+  color: #1f2433;
 }
 
 .provider {
   margin: 0 0 16px;
   font-size: 13px;
-  color: #64748b;
+  color: #5b6275;
 }
 
 
@@ -262,23 +262,23 @@
 .price-box {
   padding: 12px;
   border-radius: 10px;
-  background: #eff6ff;
+  background: #eef0fb;
 }
 
 .price-box.wholesale {
-  background: #f8fafc;
+  background: #f6f7f9;
 }
 
 .price-box span {
   display: block;
   margin-bottom: 5px;
   font-size: 11px;
-  color: #64748b;
+  color: #5b6275;
 }
 
 .price-box strong {
   font-size: 15px;
-  color: #1e40af;
+  color: #252e73;
 }
 
 .price-box.wholesale strong {
@@ -326,8 +326,8 @@
   height: 54px;
   margin: 0 auto 16px;
   border-radius: 14px;
-  background: #eff6ff;
-  color: #2563eb;
+  background: #eef0fb;
+  color: #2f3a8f;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -336,12 +336,12 @@
 
 .empty-state h3 {
   margin: 0 0 6px;
-  color: #1e293b;
+  color: #1f2433;
 }
 
 .empty-state p {
   margin: 0 0 18px;
-  color: #64748b;
+  color: #5b6275;
   font-size: 14px;
 }
 
@@ -350,7 +350,7 @@
   padding: 0 16px;
   border: 0;
   border-radius: 9px;
-  background: #2563eb;
+  background: #2f3a8f;
   color: #ffffff;
   font-weight: 600;
   cursor: pointer;
@@ -432,4 +432,27 @@
     grid-template-columns: 1fr;
   }
 
+}
+
+/* Encabezado con acciones (nuevo producto, traslados) */
+.page-header.con-acciones {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.page-header .acciones-encabezado a {
+  text-decoration: none;
+}
+
+.card-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 14px;
+}
+
+.tipo-chip {
+  margin: 2px 0 6px;
 }
