@@ -20,5 +20,5 @@ class Config:
 
     # Orígenes del front de Angular (ng serve) que pueden llamar a la API
     CORS_ORIGINS = os.getenv(
-        "CORS_ORIGINS", "http://localhost:4200,http://127.0.0.1:4200"
+        "CORS_ORIGINS", "http://localhost:4200,http://127.0.0.1:4200,https://sgi-1-9kg9.onrender.com"
     ).split(",")
