@@ -101,7 +101,7 @@
             type="button"
             class="sale-type-option"
             [class.active]="modalidad === opcion.valor"
-            (click)="modalidad = opcion.valor"
+            (click)="cambiarModalidad(opcion.valor)"
           >
 
             <span class="sale-type-icon">
@@ -132,37 +132,53 @@
       ================================= -->
 
       <!-- ================================
-           FIGURA PINTADA: VALOR ADICIONAL
+           PINTAR EN EL LOCAL / PINTADA: VALOR ADICIONAL
       ================================= -->
 
       <div
         class="kit-notice full-width pintada-notice"
-        *ngIf="esPintada"
+        *ngIf="llevaAdicional"
       >
 
         <span class="notice-icon">
-          ✨
+          {{ modalidad === 'Pintar en el local' ? '🖌️' : '✨' }}
         </span>
 
         <div>
 
-          <strong>
+          <strong *ngIf="modalidad === 'Pintar en el local'">
+            Figura para pintar en el local
+          </strong>
+          <strong *ngIf="modalidad === 'Pintada'">
             Figura vendida pintada
           </strong>
 
           <p>
-            Se suma un valor adicional al precio crudo de cada figura.
-            Puedes ajustarlo por figura en los productos seleccionados.
+            Se suma un valor adicional al precio crudo de cada figura
+            (sugerido en Configuración: ${{ adicionalSugerido.toLocaleString('es-CO') }}).
+            Puedes cambiarlo para esta venta o por figura en los productos seleccionados.
           </p>
 
-          <label class="adicional-general" for="adicionalPintada">
-            Valor adicional por figura (COP)
-            <input
-              id="adicionalPintada"
-              type="number"
-              min="0"
-              [(ngModel)]="adicionalPintadaGeneral">
-          </label>
+          <div class="adicional-general">
+            <label for="adicionalGeneral">
+              Valor adicional por figura (COP)
+            </label>
+            <div class="adicional-general-fila">
+              <input
+                id="adicionalGeneral"
+                type="number"
+                min="0"
+                step="100"
+                [(ngModel)]="adicionalGeneral">
+              <button
+                *ngIf="adicionalGeneral !== adicionalSugerido"
+                type="button"
+                class="sgi-btn sgi-btn-enlace"
+                (click)="restablecerAdicionalGeneral()">
+                Usar sugerido
+              </button>
+            </div>
+          </div>
 
         </div>
 
@@ -459,21 +475,22 @@
             *ngIf="producto.cantidad > 0"
           >
 
-            <div *ngIf="esPintada && producto.tipo === 'figura'" class="adicional-figura">
+            <div *ngIf="llevaAdicional && producto.tipo === 'figura'" class="adicional-figura">
 
               <label [for]="'adicional-' + producto.codigo">
-                Adicional pintada
+                Adicional
               </label>
 
               <input
                 [id]="'adicional-' + producto.codigo"
                 type="number"
                 min="0"
-                [placeholder]="'' + adicionalPintadaGeneral"
-                [(ngModel)]="producto.adicionalPintada">
+                step="100"
+                [placeholder]="'' + adicionalGeneral"
+                [(ngModel)]="producto.adicional">
 
               <button
-                *ngIf="producto.adicionalPintada !== null"
+                *ngIf="producto.adicional !== null"
                 type="button"
                 class="sgi-btn sgi-btn-enlace"
                 (click)="restablecerAdicional(producto)">

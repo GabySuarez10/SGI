@@ -14,10 +14,10 @@ export const TIPOS_PRODUCTO: { valor: TipoProducto; nombre: string; plural: stri
   { valor: 'otro', nombre: 'Otro material', plural: 'Otros materiales', icono: '🧰' }
 ];
 
-export const TIPOS_PROVEEDOR: { valor: TipoProveedor; nombre: string }[] = [
-  { valor: 'figuras', nombre: 'Figuras' },
-  { valor: 'materiales', nombre: 'Pinturas, pinceles y otros' },
-  { valor: 'ambos', nombre: 'Figuras y materiales' }
+export const TIPOS_PROVEEDOR: { valor: TipoProveedor; nombre: string; descripcion: string; icono: string }[] = [
+  { valor: 'figuras', nombre: 'Figuras', descripcion: 'Solo figuras de yeso', icono: '🏺' },
+  { valor: 'materiales', nombre: 'Pinturas, pinceles y otros', descripcion: 'Solo materiales', icono: '🎨' },
+  { valor: 'ambos', nombre: 'Figuras y materiales', descripcion: 'Vende las dos cosas', icono: '🧩' }
 ];
 
 export function nombreTipo(tipo: string | null | undefined): string {

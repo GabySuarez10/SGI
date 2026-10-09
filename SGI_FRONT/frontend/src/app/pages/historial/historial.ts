@@ -3,6 +3,8 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { IMovimiento, TipoMovimiento } from '../../interfaces/movimiento.interface';
 import { HistorialService } from '../../services/historial.service';
+import { VentaService } from '../../services/venta.service';
+import { TrasladoService } from '../../services/traslado.service';
 import { mensajeDeError } from '../../utils/http-error';
 import { categoriasDe, coincideCategoria } from '../../utils/tipos';
 
@@ -28,10 +30,22 @@ export class Historial implements OnInit {
   cargando = false;
   error = '';
 
-  constructor(private historialService: HistorialService) {}
+  // Referencia (V0012, T0003) que se está anulando en este momento
+  anulando = '';
+
+  constructor(
+    private historialService: HistorialService,
+    private ventaService: VentaService,
+    private trasladoService: TrasladoService
+  ) {}
 
   ngOnInit(): void {
+    this.cargarMovimientos();
+  }
+
+  cargarMovimientos(): void {
     this.cargando = true;
+    this.error = '';
 
     this.historialService.getMovimientos().subscribe({
       next: movimientos => {
@@ -94,6 +108,59 @@ export class Historial implements OnInit {
     this.productoBuscado = '';
     this.fechaDesde = '';
     this.fechaHasta = '';
+  }
+
+  // Solo ventas y traslados se pueden anular desde el historial
+  sePuedeAnular(movimiento: IMovimiento): boolean {
+    return movimiento.tipo === 'Venta / Salida' || movimiento.tipo === 'Traslado';
+  }
+
+  /*
+    Anula la venta o el traslado completo al que pertenece la fila.
+    Una venta o un traslado puede tener varios productos (varias filas con la
+    misma referencia); al anularlo se devuelven TODAS sus unidades:
+      - Venta:    las unidades vuelven al inventario del local.
+      - Traslado: las unidades vuelven del destino al origen.
+  */
+  anular(movimiento: IMovimiento): void {
+    if (!this.sePuedeAnular(movimiento) || this.anulando) {
+      return;
+    }
+
+    const numero = Number(movimiento.codigo.replace(/\D/g, ''));
+    const esVenta = movimiento.tipo === 'Venta / Salida';
+    const filas = this.movimientos.filter(
+      item => item.tipo === movimiento.tipo && item.codigo === movimiento.codigo
+    );
+    const detalle = filas.map(item => `• ${item.cantidad} × ${item.producto}`).join('\n');
+    const devolucion = esVenta
+      ? 'Las unidades vuelven al inventario del local.'
+      : `Las unidades vuelven de ${movimiento.destino} a ${movimiento.origen}.`;
+
+    const confirmado = confirm(
+      `¿Anular ${esVenta ? 'la venta' : 'el traslado'} ${movimiento.codigo}?\n\n` +
+      `${detalle}\n\n${devolucion}\nEsta acción no se puede deshacer.`
+    );
+    if (!confirmado) {
+      return;
+    }
+
+    this.anulando = movimiento.codigo;
+    const peticion = esVenta
+      ? this.ventaService.anularVenta(numero)
+      : this.trasladoService.anularTraslado(numero);
+
+    peticion.subscribe({
+      next: () => {
+        this.anulando = '';
+        alert(`${esVenta ? 'Venta' : 'Traslado'} ${movimiento.codigo} anulado. ${devolucion}`);
+        this.cargarMovimientos();
+      },
+      error: err => {
+        this.anulando = '';
+        alert(mensajeDeError(err));
+      }
+    });
   }
 
   obtenerClaseTipo(tipo: TipoMovimiento): string {

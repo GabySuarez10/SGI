@@ -49,28 +49,43 @@ export function esModalidadKit(modalidad: ModalidadVenta): boolean {
   return modalidad === 'Kit para llevar' || modalidad === 'Empresa con contrato';
 }
 
+// Modalidades en las que se suma un valor adicional editable al precio crudo
+export function llevaAdicional(modalidad: ModalidadVenta): boolean {
+  return modalidad === 'Pintar en el local' || modalidad === 'Pintada';
+}
+
+// Valor adicional sugerido (de Configuración) para la modalidad
+export function adicionalSugerido(modalidad: ModalidadVenta, valores: IValoresConfiguracion): number {
+  if (modalidad === 'Pintar en el local') {
+    return Number(valores.valor_pintar_local) || 0;
+  }
+  if (modalidad === 'Pintada') {
+    return Number(valores.valor_pintada) || 0;
+  }
+  return 0;
+}
+
 /*
   Precio unitario de una figura según la modalidad.
-  adicionalPintada: valor que se suma al crudo en la modalidad "Pintada"
-  (si no se envía, se usa el sugerido de Configuración).
+  adicional: valor que se suma al crudo en "Pintar en el local" y "Pintada".
+  Si no se envía, se usa el sugerido de Configuración.
 */
 export function precioPorModalidad(
   modalidad: ModalidadVenta,
   precioCrudo: number,
   precioMayor: number,
   valores: IValoresConfiguracion,
-  adicionalPintada: number = valores.valor_pintada
+  adicional: number = adicionalSugerido(modalidad, valores)
 ): number {
   switch (modalidad) {
     case 'Por mayor (local)':
     case 'Empresa por mayor':
       return precioMayor;
     case 'Pintar en el local':
-      return precioCrudo + valores.valor_pintar_local;
+    case 'Pintada':
+      return precioCrudo + (Number(adicional) || 0);
     case 'Kit para llevar':
       return precioCrudo + valores.valor_kit_local;
-    case 'Pintada':
-      return precioCrudo + (Number(adicionalPintada) || 0);
     case 'Empresa con contrato':
       return valores.precio_kit_contrato;
     default:

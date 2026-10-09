@@ -125,6 +125,7 @@
             <th>Destino</th>
             <th>Fecha</th>
             <th>Estado</th>
+            <th class="col-accion"><span class="sr-only">Acciones</span></th>
           </tr>
         </thead>
 
@@ -176,6 +177,18 @@
                 [ngClass]="obtenerClaseEstado(movimiento.estado)">
                 {{ movimiento.estado }}
               </span>
+            </td>
+
+            <td class="col-accion">
+              <button
+                *ngIf="sePuedeAnular(movimiento)"
+                type="button"
+                class="btn-anular"
+                [disabled]="!!anulando"
+                [attr.aria-label]="'Anular ' + movimiento.codigo"
+                (click)="anular(movimiento)">
+                {{ anulando === movimiento.codigo ? 'Anulando…' : 'Anular' }}
+              </button>
             </td>
 
           </tr>

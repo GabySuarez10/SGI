@@ -13,7 +13,9 @@ import {
 import {
   MODALIDADES_VENTA,
   ModalidadVenta,
+  adicionalSugerido,
   esModalidadKit,
+  llevaAdicional,
   precioPorModalidad
 } from '../../utils/precios';
 import { mensajeDeError } from '../../utils/http-error';
@@ -43,9 +45,9 @@ interface ProductoVenta {
 
   cantidad: number;
 
-  // Solo en modalidad "Pintada": adicional propio de esta figura
+  // "Pintar en el local" y "Pintada": adicional propio de esta figura
   // (null = usa el adicional general de la venta)
-  adicionalPintada: number | null;
+  adicional: number | null;
 }
 
 @Component({
@@ -71,9 +73,10 @@ export class Ventas implements OnInit {
   // Valores editables en Configuración (precio del kit por contrato, etc.)
   valores: IValoresConfiguracion = VALORES_POR_DEFECTO;
 
-  // Modalidad "Pintada": valor que se suma al precio crudo de cada figura.
-  // Se toma el sugerido de Configuración y se puede cambiar en cada venta.
-  adicionalPintadaGeneral = VALORES_POR_DEFECTO.valor_pintada;
+  // "Pintar en el local" y "Pintada": valor que se suma al precio crudo de
+  // cada figura. Se toma el sugerido de Configuración y se puede cambiar
+  // en cada venta (y por figura).
+  adicionalGeneral = 0;
 
   busqueda = '';
 
@@ -120,7 +123,7 @@ export class Ventas implements OnInit {
     }).subscribe({
       next: ({ inventario, configuracion }) => {
         this.valores = configuracion.valores;
-        this.adicionalPintadaGeneral = configuracion.valores.valor_pintada;
+        this.adicionalGeneral = adicionalSugerido(this.modalidad, configuracion.valores);
         this.productos = inventario.map(item => ({
           codigo: String(item.codigo),
           referencia: item.referencia ?? '',
@@ -132,7 +135,7 @@ export class Ventas implements OnInit {
           precioCrudo: item.precio_venta,
           precioMayor: item.precio_mayorista,
           cantidad: 0,
-          adicionalPintada: null
+          adicional: null
         }));
         this.cargando = false;
       },
@@ -183,8 +186,27 @@ export class Ventas implements OnInit {
   // CANTIDADES Y KITS
   // ================================
 
-  get esPintada(): boolean {
-    return this.modalidad === 'Pintada';
+  // Al cambiar de modalidad se carga el adicional sugerido de esa modalidad
+  // y se descartan los valores escritos por figura
+  cambiarModalidad(modalidad: ModalidadVenta): void {
+    if (modalidad === this.modalidad) {
+      return;
+    }
+    this.modalidad = modalidad;
+    this.adicionalGeneral = adicionalSugerido(modalidad, this.valores);
+    this.productos.forEach(producto => (producto.adicional = null));
+  }
+
+  get llevaAdicional(): boolean {
+    return llevaAdicional(this.modalidad);
+  }
+
+  get adicionalSugerido(): number {
+    return adicionalSugerido(this.modalidad, this.valores);
+  }
+
+  get textoAdicional(): string {
+    return this.modalidad === 'Pintar en el local' ? 'pintar en el local' : 'figura pintada';
   }
 
   get esKit(): boolean {
@@ -234,11 +256,11 @@ export class Ventas implements OnInit {
   // PRECIOS
   // ================================
 
-  // Adicional de "Pintada" para esta figura (el propio o el general)
-  getAdicionalPintada(producto: ProductoVenta): number {
-    const propio = producto.adicionalPintada;
+  // Adicional de esta figura (el propio o el general de la venta)
+  getAdicional(producto: ProductoVenta): number {
+    const propio = producto.adicional;
     return propio === null || `${propio}` === ''
-      ? Number(this.adicionalPintadaGeneral) || 0
+      ? Number(this.adicionalGeneral) || 0
       : Number(propio) || 0;
   }
 
@@ -254,13 +276,17 @@ export class Ventas implements OnInit {
       producto.precioCrudo,
       producto.precioMayor,
       this.valores,
-      this.getAdicionalPintada(producto)
+      this.getAdicional(producto)
     );
   }
 
   // Al cambiar el adicional general, las figuras sin valor propio lo toman
   restablecerAdicional(producto: ProductoVenta): void {
-    producto.adicionalPintada = null;
+    producto.adicional = null;
+  }
+
+  restablecerAdicionalGeneral(): void {
+    this.adicionalGeneral = this.adicionalSugerido;
   }
 
   getSubtotal(producto: ProductoVenta): number {
@@ -281,7 +307,7 @@ export class Ventas implements OnInit {
       case 'Empresa por mayor':
         return 'Precio por mayor';
       case 'Pintar en el local':
-        return `Precio crudo + $${this.valores.valor_pintar_local.toLocaleString('es-CO')} por pintar en el local`;
+        return 'Precio crudo + adicional por pintar en el local';
       case 'Kit para llevar':
         return `Precio crudo + $${this.valores.valor_kit_local.toLocaleString('es-CO')} del kit`;
       case 'Pintada':
@@ -328,12 +354,13 @@ export class Ventas implements OnInit {
     }
 
     if (
-      this.esPintada &&
-      this.productosSeleccionados.some(
-        producto => producto.tipo === 'figura' && this.getAdicionalPintada(producto) < 0
-      )
+      this.llevaAdicional &&
+      (Number(this.adicionalGeneral) < 0 ||
+        this.productosSeleccionados.some(
+          producto => producto.tipo === 'figura' && this.getAdicional(producto) < 0
+        ))
     ) {
-      alert('El valor adicional por figura pintada no puede ser negativo.');
+      alert('El valor adicional no puede ser negativo.');
       return;
     }
 
@@ -366,11 +393,11 @@ export class Ventas implements OnInit {
       `Cliente / destino:\n${this.cliente}\n\n` +
       `Modalidad:\n${this.modalidad}\n\n` +
       `${detalle}\n\n` +
-      (this.esPintada
-        ? 'Adicional por pintada: ' +
+      (this.llevaAdicional
+        ? `Adicional por ${this.textoAdicional}: ` +
           seleccionados
             .filter(producto => producto.tipo === 'figura')
-            .map(producto => `$${this.getAdicionalPintada(producto).toLocaleString('es-CO')}`)
+            .map(producto => `$${this.getAdicional(producto).toLocaleString('es-CO')}`)
             .join(', ') + '\n'
         : '') +
       `Total de unidades: ${this.totalUnidades}\n` +

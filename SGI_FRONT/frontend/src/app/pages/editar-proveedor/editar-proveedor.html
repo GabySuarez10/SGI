@@ -78,19 +78,31 @@
             placeholder="Ej. Bogotá">
         </div>
 
-        <div class="form-group">
+        <div class="form-group full-width">
 
-        <label for="tipoProveedor">
+        <span class="etiqueta-grupo" id="tipoProveedorEtiqueta">
           ¿Qué vende este proveedor? <span>*</span>
-        </label>
+        </span>
 
-        <select id="tipoProveedor" [(ngModel)]="proveedor.tipo">
-          <option *ngFor="let opcion of tiposProveedor" [value]="opcion.valor">
-            {{ opcion.nombre }}
-          </option>
-        </select>
-
+        <div class="opciones-tipo-proveedor" role="radiogroup" aria-labelledby="tipoProveedorEtiqueta">
+          <label
+            *ngFor="let opcion of tiposProveedor"
+            class="opcion-tipo"
+            [class.activa]="proveedor.tipo === opcion.valor">
+            <input
+              type="radio"
+              name="tipoProveedor"
+              [value]="opcion.valor"
+              [(ngModel)]="proveedor.tipo">
+            <span class="opcion-tipo-icono" aria-hidden="true">{{ opcion.icono }}</span>
+            <span class="opcion-tipo-texto">
+              <strong>{{ opcion.nombre }}</strong>
+              <small>{{ opcion.descripcion }}</small>
+            </span>
+          </label>
         </div>
+
+      </div>
 
         <div class="form-group">
           <label for="limitePrecio">

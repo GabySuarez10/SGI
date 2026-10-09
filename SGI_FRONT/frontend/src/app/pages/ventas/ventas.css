@@ -1001,7 +1001,14 @@
 }
 
 
-/* Modalidad "Pintada": valor adicional */
+/* "Pintar en el local" y "Pintada": valor adicional */
+.adicional-general-fila {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+}
+
 .adicional-general {
   display: flex;
   flex-wrap: wrap;
