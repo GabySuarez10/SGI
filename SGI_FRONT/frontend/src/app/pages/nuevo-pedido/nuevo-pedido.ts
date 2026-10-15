@@ -9,12 +9,15 @@ import { PedidoProveedorService } from '../../services/pedido-proveedor.service'
 import { IProveedor } from '../../interfaces/proveedor.interface';
 import { mensajeDeError } from '../../utils/http-error';
 import { Ampliar } from '../../components/visor-imagen/ampliar.directive';
+import { Escaner } from '../../components/escaner/escaner';
+import { buscarPorCodigo } from '../../utils/codigos';
 import { IMAGEN_POR_DEFECTO, imagenNoCarga } from '../../utils/imagen';
 import { hoyISO } from '../../utils/fecha';
 import { categoriasDe, coincideCategoria, esMaterial, nombreTipo } from '../../utils/tipos';
 
 // Producto del catálogo con la cantidad y el precio que se van a pedir
 interface ProductoPedido {
+  codigo: number;
   referencia: string;
   tipo: string;
   categoria: string;
@@ -29,7 +32,7 @@ type Destino = '' | 'bodega' | 'local';
 
 @Component({
   selector: 'app-nuevo-pedido',
-  imports: [FormsModule, NgFor, NgIf, DecimalPipe, Ampliar],
+  imports: [FormsModule, NgFor, NgIf, DecimalPipe, Ampliar, Escaner],
   templateUrl: './nuevo-pedido.html',
   styleUrl: './nuevo-pedido.css',
 })
@@ -50,6 +53,10 @@ export class NuevoPedido implements OnInit {
 
   cargando = false;
   guardando = false;
+
+  // Resultado del último escaneo
+  mensajeEscaneo = '';
+  estadoEscaneo: 'ok' | 'error' | '' = '';
   error = '';
 
   imagenPorDefecto = IMAGEN_POR_DEFECTO;
@@ -95,6 +102,7 @@ export class NuevoPedido implements OnInit {
         this.productos = productos
           .filter(producto => !this.soloMateriales || esMaterial(producto.tipo))
           .map(producto => ({
+          codigo: producto.codigo,
           referencia: producto.referencia,
           tipo: producto.tipo ?? 'figura',
           categoria: producto.categoria ?? '',
@@ -170,6 +178,37 @@ export class NuevoPedido implements OnInit {
 
   aumentarCantidad(producto: ProductoPedido): void {
     producto.cantidad++;
+  }
+
+  /*
+    Escanear una etiqueta suma una unidad al pedido.
+    Si aún no hay proveedor elegido, se elige el del producto escaneado.
+  */
+  agregarPorCodigo(codigo: string): void {
+    const producto = buscarPorCodigo(this.productos, codigo);
+    if (!producto) {
+      this.estadoEscaneo = 'error';
+      this.mensajeEscaneo = `No hay ningún producto con el código "${codigo}"` +
+        (this.soloMateriales ? ' entre las pinturas, pinceles y otros.' : '.');
+      return;
+    }
+
+    if (producto.proveedor !== this.proveedor) {
+      const proveedorValido = this.proveedores.some(item => item.nombre === producto.proveedor);
+      if (this.totalUnidades > 0 || !proveedorValido) {
+        this.estadoEscaneo = 'error';
+        this.mensajeEscaneo =
+          `${producto.nombre} es de "${producto.proveedor}". Cada pedido es de un solo proveedor` +
+          (this.proveedor ? ` (este es de "${this.proveedor}").` : '.');
+        return;
+      }
+      this.proveedor = producto.proveedor;
+      this.actualizarProveedor();
+    }
+
+    producto.cantidad++;
+    this.estadoEscaneo = 'ok';
+    this.mensajeEscaneo = `✓ ${producto.nombre} · ${producto.cantidad} en el pedido`;
   }
 
   disminuirCantidad(producto: ProductoPedido): void {

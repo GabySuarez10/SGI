@@ -132,6 +132,26 @@
 
     </div>
 
+    <!-- CONTAR LO QUE LLEGÓ ESCANEANDO (solo pedidos pendientes) -->
+    <div class="conteo-escaner" *ngIf="!soloLectura">
+      <app-escaner
+        placeholder="Escanea cada unidad que llegó para contarla"
+        [mensaje]="mensajeEscaneo"
+        [estado]="estadoEscaneo"
+        (escaneado)="contarPorCodigo($event)">
+      </app-escaner>
+      <p class="conteo-ayuda" *ngIf="!conteoIniciado">
+        Al escanear la primera unidad, la columna "Recibido" empieza en 0 y cada etiqueta suma 1.
+      </p>
+      <button
+        type="button"
+        class="sgi-btn sgi-btn-enlace"
+        *ngIf="conteoIniciado"
+        (click)="reiniciarConteo()">
+        Volver a contar desde 0
+      </button>
+    </div>
+
 
     <div class="table-wrapper">
 

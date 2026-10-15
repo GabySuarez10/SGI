@@ -57,3 +57,16 @@ Angular CLI does not come with an end-to-end testing framework by default. You c
 ## Additional Resources
 
 For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+
+
+## Códigos QR y de barras
+
+Después de actualizar, instala la nueva dependencia (lector de QR para iPhone):
+
+```bash
+npm install
+```
+
+- `src/app/utils/qr.ts` y `src/app/utils/codigo-barras.ts`: generan los códigos (sin servicios externos).
+- `src/app/components/escaner`: barra para escanear con lector físico o con la cámara.
+- `src/app/pages/etiquetas`: imprimir, descargar y copiar etiquetas.

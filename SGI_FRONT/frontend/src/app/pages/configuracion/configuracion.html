@@ -112,7 +112,9 @@
     <div class="sgi-aviso info formula">
       Precio crudo = fábrica × <strong>{{ valores.multiplicador_crudo }}</strong> + envío ·
       Precio por mayor = (fábrica × {{ valores.multiplicador_crudo }}) ÷ <strong>{{ valores.divisor_mayor }}</strong> + envío.
-      Ej.: fábrica $2.000 → crudo ${{ ejemplo.crudo | number }} · por mayor ${{ ejemplo.mayor | number }} (sin envío).
+      Ej.: fábrica $2.000 → crudo ${{ ejemplo.crudo | number }} · por mayor ${{ ejemplo.mayor | number }}
+      · pintar en el local ${{ ejemplo.crudo * 2 | number }} · terminada ${{ ejemplo.crudo * 4 | number }} (sin envío).
+      Pintar en el local y terminada se sugieren en cada producto y se pueden editar allí.
     </div>
 
     <div class="precios-layout">

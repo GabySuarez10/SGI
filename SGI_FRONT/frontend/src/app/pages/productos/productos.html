@@ -41,6 +41,16 @@
   </div>
 
 
+  <!-- ESCANEAR: muestra el producto de la etiqueta -->
+  <app-escaner
+    class="escaner-lista"
+    placeholder="Escanea una etiqueta para ver ese producto"
+    [mensaje]="mensajeEscaneo"
+    [estado]="estadoEscaneo"
+    (escaneado)="mostrarPorCodigo($event)">
+  </app-escaner>
+
+
   <!-- FILTROS -->
   <section class="filters-card">
 
@@ -210,6 +220,11 @@
             <strong>${{ producto.precio_venta | number }} / ${{ producto.precio_mayorista | number }}</strong>
           </div>
 
+          <div *ngIf="producto.tipo === 'figura'">
+            <span>Pintar en el local / Terminada</span>
+            <strong>${{ producto.precio_pintar_local | number }} / ${{ producto.precio_terminada | number }}</strong>
+          </div>
+
         </div>
 
 
@@ -224,6 +239,14 @@
             Editar
 
           </button>
+
+          <a
+            class="btn-etiqueta"
+            [routerLink]="['/etiquetas']"
+            [queryParams]="{ codigo: producto.codigo }"
+            [attr.aria-label]="'Etiqueta de ' + producto.nombre">
+            Etiqueta
+          </a>
 
         </div>
 

@@ -514,3 +514,30 @@
 .product-provider {
   margin-right: 8px;
 }
+
+
+/* Escanear etiquetas */
+.escaner-lista {
+  margin-bottom: 16px;
+}
+
+
+/* Enlace a la etiqueta (QR + código de barras) */
+.btn-etiqueta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 38px;
+  padding: 0 14px;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  background: #ffffff;
+  color: #334155;
+  font-size: 13px;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.btn-etiqueta:hover {
+  border-color: #94a3b8;
+}

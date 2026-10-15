@@ -3,15 +3,21 @@ Fórmulas de precio de Pintarte.
 
     precio crudo     = costo de fábrica × multiplicador_crudo (4)  + envío
     precio por mayor = (costo de fábrica × 4) ÷ divisor_mayor (2)  + envío
+    pintar en el local = precio crudo × 2          (sugerido, editable)
+    figura terminada   = pintar en el local × 2    (sugerido, editable)
 
-Ejemplo: Oso navidad, fábrica 2000, sin envío -> crudo 8000, por mayor 4000.
+Ejemplo: Oso navidad, fábrica 2000, sin envío -> crudo 8000, por mayor 4000,
+pintar en el local 16000, terminada 32000.
 """
+
+FACTOR_PINTAR_LOCAL = 2   # pintar en el local = crudo × 2
+FACTOR_TERMINADA = 2      # terminada = pintar en el local × 2
 
 # Modalidades de venta y qué precio usa cada una
 DETAL = "Detal"                              # figura en crudo (yeso blanco)
-PINTAR_LOCAL = "Pintar en el local"          # crudo + pinturas y técnica en el local
+PINTAR_LOCAL = "Pintar en el local"          # precio "pintar en el local" del producto
 KIT_LLEVAR = "Kit para llevar"               # crudo + 5 pinturas + 1 pincel para la casa
-PINTADA = "Pintada"                          # crudo + valor adicional (se escribe en la venta)
+PINTADA = "Pintada"                          # precio "figura terminada" del producto
 MAYOR_LOCAL = "Por mayor (local)"
 EMPRESA_MAYOR = "Empresa por mayor"
 EMPRESA_CONTRATO = "Empresa con contrato"    # precio general del kit por contrato
@@ -42,7 +48,19 @@ def calcular_precios(costo, envio=0, multiplicador=4, divisor=2):
     return crudo + envio, mayor + envio
 
 
-def precio_por_modalidad(modalidad, precio_venta, precio_mayorista, config, es_figura=True):
+def precios_pintura(precio_crudo, pintar_guardado=None, terminada_guardado=None):
+    """
+    (pintar en el local, terminada) de una figura.
+    Si el valor guardado es NULL se usa el sugerido:
+        pintar en el local = crudo × 2,  terminada = pintar en el local × 2
+    """
+    pintar = int(pintar_guardado) if pintar_guardado is not None else int(precio_crudo or 0) * FACTOR_PINTAR_LOCAL
+    terminada = int(terminada_guardado) if terminada_guardado is not None else pintar * FACTOR_TERMINADA
+    return pintar, terminada
+
+
+def precio_por_modalidad(modalidad, precio_venta, precio_mayorista, config, es_figura=True,
+                         precio_pintar_local=None, precio_terminada=None):
     """
     Precio unitario sugerido según la modalidad de la venta.
     Pinturas, pinceles y otros materiales (es_figura=False) se venden a su precio
@@ -56,10 +74,11 @@ def precio_por_modalidad(modalidad, precio_venta, precio_mayorista, config, es_f
         return crudo
     if modalidad == KIT_LLEVAR:
         return crudo + int(config.get("valor_kit_local", 0))
+    pintar, terminada = precios_pintura(crudo, precio_pintar_local, precio_terminada)
     if modalidad == PINTAR_LOCAL:
-        return crudo + int(config.get("valor_pintar_local", 0))
+        return pintar
     if modalidad == PINTADA:
-        return crudo + int(config.get("valor_pintada", 0))
+        return terminada
     if modalidad == EMPRESA_CONTRATO:
         return int(config.get("precio_kit_contrato", 0))
     return crudo

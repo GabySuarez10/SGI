@@ -10,6 +10,8 @@ import { InventarioService } from '../../services/inventario.service';
 import { TrasladoService } from '../../services/traslado.service';
 import { mensajeDeError } from '../../utils/http-error';
 import { Ampliar } from '../../components/visor-imagen/ampliar.directive';
+import { Escaner } from '../../components/escaner/escaner';
+import { buscarPorCodigo } from '../../utils/codigos';
 import { IMAGEN_POR_DEFECTO, imagenNoCarga } from '../../utils/imagen';
 
 // Producto del inventario de origen + la cantidad que el usuario elige trasladar
@@ -27,7 +29,7 @@ interface ProductoTraslado {
 
 @Component({
   selector: 'app-traslados',
-  imports: [NgFor, NgIf, FormsModule, Ampliar],
+  imports: [NgFor, NgIf, FormsModule, Ampliar, Escaner],
   templateUrl: './traslados.html',
   styleUrl: './traslados.css',
 })
@@ -47,6 +49,10 @@ export class Traslados implements OnInit {
   productos: ProductoTraslado[] = [];
   cargando = false;
   guardando = false;
+
+  // Resultado del último escaneo
+  mensajeEscaneo = '';
+  estadoEscaneo: 'ok' | 'error' | '' = '';
   error = '';
 
   imagenPorDefecto = IMAGEN_POR_DEFECTO;
@@ -161,6 +167,27 @@ export class Traslados implements OnInit {
       producto.cantidadTraslado++;
     }
 
+  }
+
+  // Escanear una etiqueta suma una unidad de ese producto al traslado
+  agregarPorCodigo(codigo: string): void {
+    const producto = buscarPorCodigo(this.productos, codigo);
+    if (!producto) {
+      this.estadoEscaneo = 'error';
+      this.mensajeEscaneo = `"${codigo}" no está en ${this.origenNombre.toLowerCase() === 'bodega' ? 'la bodega' : 'el local'}.`;
+      return;
+    }
+    if (producto.cantidadTraslado >= producto.existencias) {
+      this.estadoEscaneo = 'error';
+      this.mensajeEscaneo = producto.existencias === 0
+        ? `${producto.nombre}: no hay unidades en ${this.origenNombre}.`
+        : `${producto.nombre}: ya agregaste las ${producto.existencias} unidades disponibles.`;
+      return;
+    }
+    producto.cantidadTraslado++;
+    this.estadoEscaneo = 'ok';
+    this.mensajeEscaneo =
+      `✓ ${producto.nombre} · ${producto.cantidadTraslado} para trasladar a ${this.destinoNombre}`;
   }
 
   disminuir(producto: ProductoTraslado): void {

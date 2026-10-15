@@ -72,6 +72,16 @@
   </div>
 
 
+  <!-- Escanear: lector o cámara del teléfono -->
+  <app-escaner
+    class="escaner-traslado"
+    placeholder="Escanea la etiqueta para sumarla al traslado"
+    [mensaje]="mensajeEscaneo"
+    [estado]="estadoEscaneo"
+    (escaneado)="agregarPorCodigo($event)">
+  </app-escaner>
+
+
   <!-- Búsqueda -->
 
   <div class="search-card">

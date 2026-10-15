@@ -1,4 +1,5 @@
 from database import db
+from utils.precios import precios_pintura
 
 
 class Producto(db.Model):
@@ -26,8 +27,19 @@ class Producto(db.Model):
     tipo = db.Column("tipo", db.String(20), default="figura")      # figura | pintura | pincel | otro
     coleccion = db.Column("coleccion", db.String(60))               # solo pinturas
     categoria = db.Column("categoria", db.String(40))               # solo figuras: Navidad, Materas...
+    # Solo figuras. NULL = se usa el sugerido (crudo × 2 y pintar en el local × 2);
+    # un número = precio escrito a mano por el administrador.
+    precio_pintar_local = db.Column("precio_pintar_local", db.Integer, nullable=True)
+    precio_terminada = db.Column("precio_terminada", db.Integer, nullable=True)
+
+    def precios_figura(self):
+        """(pintar en el local, terminada): el guardado o el sugerido."""
+        if (self.tipo or "figura") != "figura":
+            return 0, 0
+        return precios_pintura(self.precio_venta, self.precio_pintar_local, self.precio_terminada)
 
     def to_dict(self):
+        pintar_local, terminada = self.precios_figura()
         return {
             "codigo": self.codigo,
             "referencia": self.referencia,
@@ -44,4 +56,6 @@ class Producto(db.Model):
             "tipo": self.tipo or "figura",
             "coleccion": self.coleccion or "",
             "categoria": self.categoria or "",
+            "precio_pintar_local": pintar_local,
+            "precio_terminada": terminada,
         }

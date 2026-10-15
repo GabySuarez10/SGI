@@ -1,0 +1,209 @@
+<div class="etiquetas-page">
+
+  <!-- ENCABEZADO CON ACCIONES -->
+  <div class="page-header encabezado-fijo">
+
+    <div>
+      <span class="page-label">Códigos</span>
+      <h1>Etiquetas y códigos</h1>
+      <p>
+        Cada producto tiene su código QR y su código de barras, creados a partir de su referencia.
+      </p>
+    </div>
+
+    <div class="acciones-encabezado">
+      <span class="resumen-rapido">
+        <strong>{{ totalEtiquetas }}</strong> etiqueta(s) para imprimir
+      </span>
+      <button type="button" class="sgi-btn sgi-btn-secundario" (click)="descargarSeleccionadas()">
+        <app-icono nombre="descargar" [tamano]="18"></app-icono>
+        Descargar elegidas
+      </button>
+      <button type="button" class="sgi-btn sgi-btn-primario" (click)="imprimir()">
+        <app-icono nombre="imprimir" [tamano]="18"></app-icono>
+        Imprimir
+      </button>
+    </div>
+
+  </div>
+
+
+  <p class="sgi-aviso" *ngIf="aviso" role="status">{{ aviso }}</p>
+  <p class="mensaje-error" *ngIf="error">{{ error }}</p>
+
+
+  <!-- OPCIONES -->
+  <section class="tarjeta opciones">
+
+    <div class="sgi-campo">
+      <label for="contenidoEtiqueta">Qué lleva la etiqueta</label>
+      <select id="contenidoEtiqueta" [(ngModel)]="contenido" (ngModelChange)="actualizarOpciones()">
+        <option *ngFor="let opcion of contenidos" [ngValue]="opcion.valor">{{ opcion.nombre }}</option>
+      </select>
+    </div>
+
+    <div class="sgi-campo">
+      <label for="tamanoEtiqueta">Tamaño al imprimir</label>
+      <select id="tamanoEtiqueta" [(ngModel)]="tamano">
+        <option *ngFor="let opcion of tamanos" [ngValue]="opcion.valor">{{ opcion.nombre }}</option>
+      </select>
+    </div>
+
+    <fieldset class="precios-elegidos">
+      <legend>Precios impresos en la etiqueta</legend>
+      <label class="casilla" *ngFor="let tipo of tiposPrecio">
+        <input
+          type="checkbox"
+          [name]="'precio-' + tipo.valor"
+          [(ngModel)]="preciosElegidos[tipo.valor]"
+          (ngModelChange)="actualizarOpciones()">
+        {{ tipo.nombre }}
+      </label>
+    </fieldset>
+
+    <p class="ayuda">
+      Los precios quedan impresos para verlos sin escanear (en pinturas y pinceles solo salen detal y por mayor).
+      Si cambias un precio, vuelve a imprimir la etiqueta.
+      Para el teléfono usa el <strong>QR</strong>; el código de barras es para un lector de caja.
+      Imprime en papel adhesivo (hoja carta o rollo) y, para guardar un PDF, elige
+      "Guardar como PDF" en la ventana de impresión.
+    </p>
+
+  </section>
+
+
+  <!-- ESCANEAR PARA REIMPRIMIR -->
+  <app-escaner
+    placeholder="Escanea una etiqueta para sumar una copia"
+    [mensaje]="mensajeEscaneo"
+    [estado]="estadoEscaneo"
+    (escaneado)="agregarPorCodigo($event)">
+  </app-escaner>
+
+
+  <!-- FILTROS -->
+  <section class="filtros">
+
+    <div class="vistas" role="tablist" aria-label="Tipo de producto">
+      <button
+        *ngFor="let opcion of vistas"
+        type="button"
+        role="tab"
+        class="vista"
+        [class.active]="vista === opcion.valor"
+        [attr.aria-selected]="vista === opcion.valor"
+        (click)="vista = opcion.valor">
+        {{ opcion.nombre }}
+      </button>
+    </div>
+
+    <div class="filtros-fila">
+      <input
+        type="search"
+        class="filtro-texto"
+        aria-label="Buscar producto"
+        placeholder="Buscar por nombre o referencia…"
+        [(ngModel)]="busqueda">
+
+      <select aria-label="Proveedor" [(ngModel)]="proveedorSeleccionado">
+        <option value="">Todos los proveedores</option>
+        <option *ngFor="let proveedor of proveedores" [value]="proveedor">{{ proveedor }}</option>
+      </select>
+
+      <select aria-label="Categoría" [(ngModel)]="categoriaSeleccionada" *ngIf="vista !== 'materiales'">
+        <option value="">Todas las categorías</option>
+        <option *ngFor="let categoria of categorias" [value]="categoria">{{ categoria }}</option>
+        <option value="sin">Sin categoría</option>
+      </select>
+
+      <label class="casilla">
+        <input type="checkbox" [(ngModel)]="soloSeleccionados">
+        Solo las elegidas
+      </label>
+    </div>
+
+    <div class="filtros-acciones">
+      <button type="button" class="sgi-btn sgi-btn-secundario sgi-btn-pequeno" (click)="seleccionarFiltrados()">
+        Elegir los {{ filtrados.length }} de la lista (1 c/u)
+      </button>
+      <button
+        type="button"
+        class="sgi-btn sgi-btn-enlace"
+        *ngIf="seleccionados.length"
+        (click)="limpiarSeleccion()">
+        Quitar todas
+      </button>
+    </div>
+
+  </section>
+
+
+  <p class="estado-carga" *ngIf="cargando">Cargando productos…</p>
+
+  <p class="vacio" *ngIf="!cargando && !error && filtrados.length === 0">
+    No hay productos con estos filtros.
+  </p>
+
+
+  <!-- PRODUCTOS -->
+  <section class="lista">
+
+    <article
+      class="tarjeta producto"
+      *ngFor="let item of visibles; trackBy: trackPorCodigo"
+      [class.elegido]="item.copias > 0">
+
+      <app-etiqueta-producto [datos]="item.datos" [opciones]="opciones"></app-etiqueta-producto>
+
+      <div class="producto-info">
+        <strong>{{ item.producto.nombre }}</strong>
+        <span>
+          {{ nombreTipo(item.producto.tipo) }} · {{ item.producto.proveedor || 'Sin proveedor' }}
+        </span>
+        <span class="sin-referencia" *ngIf="!item.producto.referencia">
+          Sin referencia: usa el código interno {{ item.producto.codigo }}.
+          <a [routerLink]="['/editar-producto', item.producto.codigo]">Asignar referencia</a>
+        </span>
+      </div>
+
+      <div class="producto-acciones">
+
+        <div class="copias" role="group" [attr.aria-label]="'Copias de ' + item.producto.nombre">
+          <button type="button" aria-label="Una copia menos" (click)="cambiarCopias(item, -1)" [disabled]="item.copias === 0">−</button>
+          <input
+            type="number"
+            min="0"
+            max="500"
+            [attr.aria-label]="'Copias de ' + item.producto.nombre"
+            [(ngModel)]="item.copias">
+          <button type="button" aria-label="Una copia más" (click)="cambiarCopias(item, 1)">+</button>
+        </div>
+
+        <div class="botones">
+          <button type="button" class="sgi-btn sgi-btn-secundario sgi-btn-pequeno" (click)="descargar(item)" title="Descargar imagen PNG">
+            <app-icono nombre="descargar" [tamano]="16"></app-icono>
+            PNG
+          </button>
+          <button type="button" class="sgi-btn sgi-btn-secundario sgi-btn-pequeno" (click)="copiarImagen(item)" title="Copiar la etiqueta como imagen">
+            <app-icono nombre="copiar" [tamano]="16"></app-icono>
+            Imagen
+          </button>
+          <button type="button" class="sgi-btn sgi-btn-secundario sgi-btn-pequeno" (click)="copiarCodigo(item)" title="Copiar el código como texto">
+            {{ item.datos.codigo }}
+          </button>
+        </div>
+
+      </div>
+
+    </article>
+
+  </section>
+
+  <div class="mas" *ngIf="filtrados.length > visibles.length">
+    <button type="button" class="sgi-btn sgi-btn-secundario" (click)="mostrarMas()">
+      Mostrar más ({{ filtrados.length - visibles.length }} restantes)
+    </button>
+  </div>
+
+</div>
+

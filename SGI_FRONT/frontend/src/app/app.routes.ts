@@ -19,6 +19,7 @@ import { Registro } from './pages/registro/registro';
 import { Configuracion } from './pages/configuracion/configuracion';
 import { EditarProveedor } from './pages/editar-proveedor/editar-proveedor';
 import { Materiales } from './pages/materiales/materiales';
+import { Etiquetas } from './pages/etiquetas/etiquetas';
 import { authGuard } from './guards/auth.guard';
 
 export const routes: Routes = [
@@ -49,6 +50,7 @@ export const routes: Routes = [
       { path: 'editar-proveedor/:nombre', component: EditarProveedor },
       { path: 'bodega', component: Bodega },
       { path: 'materiales', component: Materiales },
+      { path: 'etiquetas', component: Etiquetas },
     ]
   },
 

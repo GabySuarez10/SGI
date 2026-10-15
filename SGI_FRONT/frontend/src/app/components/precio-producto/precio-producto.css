@@ -13,3 +13,18 @@
 small .sgi-btn-enlace {
   margin-left: 6px;
 }
+
+.precios-pintura {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding-top: 14px;
+  border-top: 1px dashed #e2e8f0;
+}
+
+.precios-pintura-titulo {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 700;
+  color: #334155;
+}

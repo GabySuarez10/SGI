@@ -6,6 +6,8 @@ import { IProducto } from '../../interfaces/producto.interface';
 import { ProductoService } from '../../services/producto.service';
 import { mensajeDeError } from '../../utils/http-error';
 import { Ampliar } from '../../components/visor-imagen/ampliar.directive';
+import { Escaner } from '../../components/escaner/escaner';
+import { buscarPorCodigo, codigoDeProducto } from '../../utils/codigos';
 import {
   VistaProductos,
   categoriasDe,
@@ -18,7 +20,7 @@ import { IMAGEN_POR_DEFECTO, imagenNoCarga } from '../../utils/imagen';
 @Component({
   selector: 'app-productos',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink, Ampliar],
+  imports: [CommonModule, FormsModule, RouterLink, Ampliar, Escaner],
   templateUrl: './productos.html',
   styleUrl: './productos.css'
 })
@@ -45,6 +47,10 @@ export class Productos implements OnInit {
 
   productos: IProducto[] = [];
   cargando = false;
+
+  // Resultado del último escaneo
+  mensajeEscaneo = '';
+  estadoEscaneo: 'ok' | 'error' | '' = '';
   error = '';
 
   imagenPorDefecto = IMAGEN_POR_DEFECTO;
@@ -116,6 +122,21 @@ export class Productos implements OnInit {
 
   contarVista(vista: VistaProductos): number {
     return this.productos.filter(producto => coincideVista(producto.tipo, vista)).length;
+  }
+
+  // Escanear una etiqueta deja a la vista solo ese producto
+  mostrarPorCodigo(codigo: string): void {
+    const producto = buscarPorCodigo(this.productos, codigo);
+    if (!producto) {
+      this.estadoEscaneo = 'error';
+      this.mensajeEscaneo = `"${codigo}" no está en el catálogo.`;
+      return;
+    }
+    this.limpiarFiltros();
+    this.vista = 'todos';
+    this.busqueda = codigoDeProducto(producto);
+    this.estadoEscaneo = 'ok';
+    this.mensajeEscaneo = `✓ ${producto.nombre} · Bodega ${producto.existencias_bodega} · Local ${producto.existencias_local}`;
   }
 
   limpiarFiltros(): void {

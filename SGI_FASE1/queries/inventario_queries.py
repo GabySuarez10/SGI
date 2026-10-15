@@ -1,6 +1,7 @@
 """Consultas de Inventario_bodega e Inventario_local."""
 
 from database import db
+from utils.precios import precios_pintura
 from models import InventarioBodega, InventarioLocal, Producto
 from queries.comunes import obtener_o_404, buscar_por_nombre, entero
 from utils.errores import NoEncontrado
@@ -10,23 +11,37 @@ from utils.errores import NoEncontrado
 # ------------------------------------------------------------------
 
 def _datos_catalogo():
-    """{codigo: (tipo, coleccion, referencia, categoria)} para agregar a los inventarios."""
-    return {
-        codigo: (tipo or "figura", coleccion or "", referencia or "", categoria or "")
-        for codigo, tipo, coleccion, referencia, categoria in db.session.query(
-            Producto.codigo, Producto.tipo, Producto.coleccion, Producto.referencia, Producto.categoria
-        )
-    }
+    """{codigo: Producto} del catálogo para agregar sus datos a los inventarios."""
+    return {producto.codigo: producto for producto in Producto.query.all()}
 
 
 def con_tipo(filas):
-    """Filas de inventario como dicts con tipo, colección, referencia y categoría del catálogo."""
+    """
+    Filas de inventario como dicts con tipo, colección, referencia y categoría
+    del catálogo, y los precios de pintar en el local y figura terminada.
+    """
     catalogo = _datos_catalogo()
     resultado = []
     for fila in filas:
         item = fila.to_dict()
-        tipo, coleccion, referencia, categoria = catalogo.get(fila.codigo, ("figura", "", "", ""))
-        item.update(tipo=tipo, coleccion=coleccion, referencia=referencia, categoria=categoria)
+        producto = catalogo.get(fila.codigo)
+        if producto is None:
+            item.update(tipo="figura", coleccion="", referencia="", categoria="",
+                        precio_pintar_local=0, precio_terminada=0)
+        else:
+            tipo = producto.tipo or "figura"
+            pintar, terminada = (0, 0)
+            if tipo == "figura":
+                # Se parte del crudo del local (o del catálogo si el local no lo tiene)
+                crudo = item.get("precio_venta") or producto.precio_venta or 0
+                pintar, terminada = precios_pintura(
+                    crudo, producto.precio_pintar_local, producto.precio_terminada
+                )
+            item.update(
+                tipo=tipo, coleccion=producto.coleccion or "", referencia=producto.referencia or "",
+                categoria=producto.categoria or "",
+                precio_pintar_local=pintar, precio_terminada=terminada,
+            )
         resultado.append(item)
     return resultado
 

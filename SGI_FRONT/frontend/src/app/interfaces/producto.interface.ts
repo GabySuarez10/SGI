@@ -14,6 +14,8 @@ export interface IProducto {
   envio: number;           // valor del envío
   precio_venta: number;    // precio crudo / detal (incluye envío)
   precio_mayorista: number;// precio por mayor (incluye envío)
+  precio_pintar_local: number; // solo figuras: sugerido crudo × 2 (editable)
+  precio_terminada: number;    // solo figuras: sugerido pintar en el local × 2 (editable)
   tipo: TipoProducto;      // figura | pintura | pincel | otro
   coleccion: string;       // solo pinturas: Acrílicas, Pátinas, Gamusa...
   categoria: string;       // solo figuras: Navidad, Materas, Juveniles...
@@ -42,6 +44,8 @@ export interface IProductoNuevo {
   envio: number;
   precio_venta: number;
   precio_mayorista: number;
+  precio_pintar_local: number;
+  precio_terminada: number;
   existencias: number;     // unidades con las que entra a la ubicación elegida
   tipo: TipoProducto;
   coleccion: string;

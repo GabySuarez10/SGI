@@ -24,6 +24,8 @@ export interface IInventarioLocal {
   existencias: number;
   precio_venta: number;
   precio_mayorista: number;
+  precio_pintar_local: number; // del catálogo (solo figuras)
+  precio_terminada: number;    // del catálogo (solo figuras)
   tipo: TipoProducto;     // del catálogo
   coleccion: string;
   referencia: string;

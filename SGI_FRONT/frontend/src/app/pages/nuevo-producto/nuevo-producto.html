@@ -64,6 +64,24 @@
   </div>
 
 
+  <!-- ESCANEAR: avisa si el producto ya existe -->
+  <div class="escaner-nuevo">
+    <app-escaner
+      placeholder="¿Ya tiene etiqueta? Escanéala para revisar si el producto existe"
+      [mensaje]="mensajeEscaneo"
+      [estado]="estadoEscaneo"
+      (escaneado)="agregarPorCodigo($event)">
+    </app-escaner>
+    <button
+      type="button"
+      class="sgi-btn sgi-btn-secundario sgi-btn-pequeno"
+      *ngIf="productoEscaneado"
+      (click)="abrirEscaneado()">
+      Abrir "{{ productoEscaneado.nombre }}"
+    </button>
+  </div>
+
+
   <!-- PROVEEDOR Y UBICACIÓN -->
   <section class="form-card">
 

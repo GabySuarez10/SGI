@@ -788,3 +788,23 @@ tr.fila-con-problema td {
   height: 100%;
   object-fit: cover;
 }
+
+
+/* Contar lo recibido escaneando */
+.conteo-escaner {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+  margin: 0 0 16px;
+}
+
+.conteo-escaner app-escaner {
+  align-self: stretch;
+}
+
+.conteo-ayuda {
+  margin: 0;
+  font-size: 13px;
+  color: #5b6275;
+}

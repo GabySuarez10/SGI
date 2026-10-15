@@ -8,10 +8,13 @@ import { PedidoProveedorService } from '../../services/pedido-proveedor.service'
 import { ProductoService } from '../../services/producto.service';
 import { mensajeDeError } from '../../utils/http-error';
 import { Ampliar } from '../../components/visor-imagen/ampliar.directive';
+import { Escaner } from '../../components/escaner/escaner';
+import { buscarPorCodigo } from '../../utils/codigos';
 import { IMAGEN_POR_DEFECTO, imagenNoCarga } from '../../utils/imagen';
 
 // Una fila de la tabla: se arma juntando la posición i de cada lista del pedido
 interface ProductoPedido {
+  codigo: number;          // código del catálogo (para reconocer la etiqueta)
   nombre: string;
   referencia: string;
   imagen: string;
@@ -30,7 +33,7 @@ interface Problema {
 
 @Component({
   selector: 'app-detalle-pedido',
-  imports: [NgFor, NgIf, DecimalPipe, DatePipe, FormsModule, Ampliar],
+  imports: [NgFor, NgIf, DecimalPipe, DatePipe, FormsModule, Ampliar, Escaner],
   templateUrl: './detalle-pedido.html',
   styleUrl: './detalle-pedido.css',
 })
@@ -48,6 +51,11 @@ export class DetallePedido implements OnInit {
   guardando = false;
   eliminando = false;
   error = '';
+
+  // Conteo de lo recibido escaneando las etiquetas
+  conteoIniciado = false;
+  mensajeEscaneo = '';
+  estadoEscaneo: 'ok' | 'error' | '' = '';
 
   imagenPorDefecto = IMAGEN_POR_DEFECTO;
   imagenNoCarga = imagenNoCarga;
@@ -84,6 +92,7 @@ export class DetallePedido implements OnInit {
           const solicitado = pedido.cantidad[i] ?? 0;
           const precioEsperado = pedido.precio_esperado[i] ?? 0;
           return {
+            codigo: producto?.codigo ?? -1,
             nombre,
             referencia: producto?.referencia ?? '',
             imagen: producto?.imagen ?? '',
@@ -105,6 +114,37 @@ export class DetallePedido implements OnInit {
         this.cargando = false;
       }
     });
+  }
+
+  /*
+    Cada etiqueta escaneada suma 1 a "Recibido" de ese producto.
+    En el primer escaneo los recibidos empiezan en 0 (antes se proponía que
+    llegó todo lo pedido).
+  */
+  contarPorCodigo(codigo: string): void {
+    const producto = buscarPorCodigo(this.productos, codigo);
+    if (!producto) {
+      this.estadoEscaneo = 'error';
+      this.mensajeEscaneo = `"${codigo}" no está en este pedido.`;
+      return;
+    }
+    if (!this.conteoIniciado) {
+      this.reiniciarConteo();
+    }
+    producto.recibido = (Number(producto.recibido) || 0) + 1;
+    this.estadoEscaneo = 'ok';
+    this.mensajeEscaneo =
+      `✓ ${producto.nombre} · recibidas ${producto.recibido} de ${producto.solicitado} pedidas`;
+  }
+
+  reiniciarConteo(): void {
+    this.productos.forEach(producto => {
+      producto.recibido = 0;
+      producto.danado = 0;
+    });
+    this.conteoIniciado = true;
+    this.mensajeEscaneo = '';
+    this.estadoEscaneo = '';
   }
 
   private mostrarPedido(pedido: IPedidoProveedor): void {

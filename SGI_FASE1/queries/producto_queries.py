@@ -21,7 +21,7 @@ from queries.comunes import obtener_o_404, buscar_por_nombre, entero
 from queries.configuracion_queries import valores as valores_configuracion
 from queries.categoria_queries import buscar_categoria
 from utils.errores import ErrorAPI
-from utils.precios import calcular_precios
+from utils.precios import calcular_precios, precios_pintura
 
 # Campos del catálogo que también se copian en Inventario_bodega / Inventario_local
 CAMPOS_COMPARTIDOS = ("nombre", "imagen", "proveedor", "tamano")
@@ -126,6 +126,25 @@ def prefijo_referencia(proveedor):
     return (utiles[0][:2]).upper().ljust(2, "X")
 
 
+def _validar_referencia(referencia, codigo_actual=None):
+    """
+    La referencia es lo que llevan el QR y el código de barras de la etiqueta:
+    debe ser única y usar solo letras sin tilde, números y guiones (máx. 15).
+    """
+    referencia = (referencia or "").strip()
+    if not re.fullmatch(r"[A-Za-z0-9-]{1,15}", referencia):
+        raise ErrorAPI(
+            f"La referencia '{referencia}' no es válida: usa solo letras sin tilde, números o guiones (máx. 15)"
+        )
+    consulta = Producto.query.filter(db.func.upper(Producto.referencia) == referencia.upper())
+    if codigo_actual is not None:
+        consulta = consulta.filter(Producto.codigo != codigo_actual)
+    otro = consulta.first()
+    if otro is not None:
+        raise ErrorAPI(f"La referencia '{referencia}' ya la usa '{otro.nombre}'", 409)
+    return referencia
+
+
 def _generar_referencia(proveedor):
     """
     Iniciales del proveedor + consecutivo de 5 dígitos: CA00001, CA00002, FB00001...
@@ -194,6 +213,24 @@ def _asignar_precios(producto, datos, config):
     producto.precio_venta = crudo if precio_venta in (None, "") else entero(precio_venta, "precio crudo", 0)
     producto.precio_mayorista = mayor if precio_mayorista in (None, "") else entero(precio_mayorista, "precio por mayor", 0)
 
+    # Pintar en el local y terminada (solo figuras). Se guarda NULL cuando el
+    # valor es el sugerido, para que siga al precio crudo si este cambia; si el
+    # administrador escribió otro valor, se guarda ese número.
+    if (producto.tipo or "figura") != "figura":
+        producto.precio_pintar_local = None
+        producto.precio_terminada = None
+        return
+    if "precio_pintar_local" in datos:
+        valor = datos.get("precio_pintar_local")
+        valor = None if valor in (None, "") else entero(valor, "precio pintar en el local", 0)
+        sugerido, _ = precios_pintura(producto.precio_venta)
+        producto.precio_pintar_local = None if valor == sugerido else valor
+    if "precio_terminada" in datos:
+        valor = datos.get("precio_terminada")
+        valor = None if valor in (None, "") else entero(valor, "precio figura terminada", 0)
+        _, sugerido = precios_pintura(producto.precio_venta, producto.precio_pintar_local)
+        producto.precio_terminada = None if valor == sugerido else valor
+
 
 def _fila_bodega_desde(producto, existencias=0):
     return InventarioBodega(
@@ -225,6 +262,7 @@ def crear_productos(data):
         "productos": [ { nombre, tamano, descripcion, imagen, referencia?,
                          costo, envio_categoria, envio,
                          precio_venta?, precio_mayorista?,      (vacíos = se calculan)
+                         precio_pintar_local?, precio_terminada?, (vacíos = sugeridos)
                          existencias? } ] }                     (unidades iniciales)
     """
     proveedor = _validar_proveedor(data.get("proveedor"))
@@ -257,7 +295,8 @@ def crear_productos(data):
         # Categoría (Navidad, Materas...): solo figuras y es opcional
         categoria = buscar_categoria(datos.get("categoria")) if tipo == "figura" else None
 
-        referencia = (datos.get("referencia") or "").strip() or _generar_referencia(proveedor)
+        referencia = (datos.get("referencia") or "").strip()
+        referencia = _validar_referencia(referencia) if referencia else _generar_referencia(proveedor)
         producto = Producto(
             tipo=tipo,
             coleccion=coleccion,
@@ -304,7 +343,7 @@ def actualizar_producto(codigo, data):
     if "tamano" in data:
         producto.tamano = (data["tamano"] or "").strip()[:60]
     if "referencia" in data and (data["referencia"] or "").strip():
-        producto.referencia = data["referencia"].strip()[:15]
+        producto.referencia = _validar_referencia(data["referencia"], codigo_actual=codigo)
     if "tipo" in data:
         producto.tipo = _validar_tipo(data["tipo"])
     if "tipo" in data or "coleccion" in data:
@@ -317,7 +356,8 @@ def actualizar_producto(codigo, data):
         if campo in data:
             setattr(producto, campo, data[campo] or "")
 
-    precios = ("costo", "envio", "envio_categoria", "precio_venta", "precio_mayorista")
+    precios = ("costo", "envio", "envio_categoria", "precio_venta", "precio_mayorista",
+               "precio_pintar_local", "precio_terminada")
     if any(campo in data for campo in precios):
         datos_precio = {c: data[c] for c in precios if c in data}
         # Si no se envía un precio, se conserva el actual (no se recalcula sin pedirlo)

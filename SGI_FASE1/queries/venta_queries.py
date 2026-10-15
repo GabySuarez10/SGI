@@ -77,7 +77,9 @@ def crear_venta(data):
             producto = db.session.get(Producto, local.codigo)
             es_figura = (producto.tipo if producto else "figura") in (None, "", "figura")
             precio = precio_por_modalidad(
-                modalidad, local.precio_venta, local.precio_mayorista, config, es_figura
+                modalidad, local.precio_venta, local.precio_mayorista, config, es_figura,
+                producto.precio_pintar_local if producto else None,
+                producto.precio_terminada if producto else None,
             )
         else:
             precio = entero(precio, "precio_unitario", 0)

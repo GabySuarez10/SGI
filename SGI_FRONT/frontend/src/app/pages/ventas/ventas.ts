@@ -13,13 +13,14 @@ import {
 import {
   MODALIDADES_VENTA,
   ModalidadVenta,
-  adicionalSugerido,
   esModalidadKit,
-  llevaAdicional,
+  precioEditableEnVenta,
   precioPorModalidad
 } from '../../utils/precios';
 import { mensajeDeError } from '../../utils/http-error';
 import { Ampliar } from '../../components/visor-imagen/ampliar.directive';
+import { Escaner } from '../../components/escaner/escaner';
+import { buscarPorCodigo } from '../../utils/codigos';
 import { IMAGEN_POR_DEFECTO, imagenNoCarga } from '../../utils/imagen';
 import { hoyISO } from '../../utils/fecha';
 import {
@@ -42,18 +43,20 @@ interface ProductoVenta {
   // Precios del producto en el local (ya incluyen el envío)
   precioCrudo: number;
   precioMayor: number;
+  precioPintarLocal: number;   // solo figuras (sugerido crudo × 2, editable en el producto)
+  precioTerminada: number;     // solo figuras (sugerido pintar en el local × 2)
 
   cantidad: number;
 
-  // "Pintar en el local" y "Pintada": adicional propio de esta figura
-  // (null = usa el adicional general de la venta)
-  adicional: number | null;
+  // "Pintar en el local" y "Pintada": precio escrito a mano en esta venta
+  // (null = usa el precio guardado en el producto)
+  precioManual: number | null;
 }
 
 @Component({
   selector: 'app-ventas',
   standalone: true,
-  imports: [CommonModule, FormsModule, Ampliar],
+  imports: [CommonModule, FormsModule, Ampliar, Escaner],
   templateUrl: './ventas.html',
   styleUrl: './ventas.css'
 })
@@ -73,10 +76,6 @@ export class Ventas implements OnInit {
   // Valores editables en Configuración (precio del kit por contrato, etc.)
   valores: IValoresConfiguracion = VALORES_POR_DEFECTO;
 
-  // "Pintar en el local" y "Pintada": valor que se suma al precio crudo de
-  // cada figura. Se toma el sugerido de Configuración y se puede cambiar
-  // en cada venta (y por figura).
-  adicionalGeneral = 0;
 
   busqueda = '';
 
@@ -97,6 +96,10 @@ export class Ventas implements OnInit {
 
   cargando = false;
   guardando = false;
+
+  // Resultado del último escaneo
+  mensajeEscaneo = '';
+  estadoEscaneo: 'ok' | 'error' | '' = '';
   error = '';
 
   imagenPorDefecto = IMAGEN_POR_DEFECTO;
@@ -123,7 +126,6 @@ export class Ventas implements OnInit {
     }).subscribe({
       next: ({ inventario, configuracion }) => {
         this.valores = configuracion.valores;
-        this.adicionalGeneral = adicionalSugerido(this.modalidad, configuracion.valores);
         this.productos = inventario.map(item => ({
           codigo: String(item.codigo),
           referencia: item.referencia ?? '',
@@ -134,8 +136,10 @@ export class Ventas implements OnInit {
           existencias: item.existencias,
           precioCrudo: item.precio_venta,
           precioMayor: item.precio_mayorista,
+          precioPintarLocal: item.precio_pintar_local ?? item.precio_venta * 2,
+          precioTerminada: item.precio_terminada ?? item.precio_venta * 4,
           cantidad: 0,
-          adicional: null
+          precioManual: null
         }));
         this.cargando = false;
       },
@@ -186,27 +190,18 @@ export class Ventas implements OnInit {
   // CANTIDADES Y KITS
   // ================================
 
-  // Al cambiar de modalidad se carga el adicional sugerido de esa modalidad
-  // y se descartan los valores escritos por figura
+  // Al cambiar de modalidad se descartan los precios escritos a mano
   cambiarModalidad(modalidad: ModalidadVenta): void {
     if (modalidad === this.modalidad) {
       return;
     }
     this.modalidad = modalidad;
-    this.adicionalGeneral = adicionalSugerido(modalidad, this.valores);
-    this.productos.forEach(producto => (producto.adicional = null));
+    this.productos.forEach(producto => (producto.precioManual = null));
   }
 
-  get llevaAdicional(): boolean {
-    return llevaAdicional(this.modalidad);
-  }
-
-  get adicionalSugerido(): number {
-    return adicionalSugerido(this.modalidad, this.valores);
-  }
-
-  get textoAdicional(): string {
-    return this.modalidad === 'Pintar en el local' ? 'pintar en el local' : 'figura pintada';
+  // "Pintar en el local" y "Pintada": el precio de cada figura se puede cambiar
+  get precioEditable(): boolean {
+    return precioEditableEnVenta(this.modalidad);
   }
 
   get esKit(): boolean {
@@ -256,15 +251,8 @@ export class Ventas implements OnInit {
   // PRECIOS
   // ================================
 
-  // Adicional de esta figura (el propio o el general de la venta)
-  getAdicional(producto: ProductoVenta): number {
-    const propio = producto.adicional;
-    return propio === null || `${propio}` === ''
-      ? Number(this.adicionalGeneral) || 0
-      : Number(propio) || 0;
-  }
-
-  getPrecio(producto: ProductoVenta): number {
+  // Precio que trae el producto para la modalidad elegida
+  getPrecioSugerido(producto: ProductoVenta): number {
     // Pinturas, pinceles y otros: precio de detal, o por mayor en ventas por mayor
     if (producto.tipo !== 'figura') {
       return this.modalidad === 'Por mayor (local)' || this.modalidad === 'Empresa por mayor'
@@ -273,20 +261,32 @@ export class Ventas implements OnInit {
     }
     return precioPorModalidad(
       this.modalidad,
-      producto.precioCrudo,
-      producto.precioMayor,
-      this.valores,
-      this.getAdicional(producto)
+      {
+        crudo: producto.precioCrudo,
+        mayor: producto.precioMayor,
+        pintarLocal: producto.precioPintarLocal,
+        terminada: producto.precioTerminada
+      },
+      this.valores
     );
   }
 
-  // Al cambiar el adicional general, las figuras sin valor propio lo toman
-  restablecerAdicional(producto: ProductoVenta): void {
-    producto.adicional = null;
+  // ¿Esta figura tiene un precio escrito a mano en esta venta?
+  tienePrecioManual(producto: ProductoVenta): boolean {
+    return this.precioEditable &&
+      producto.tipo === 'figura' &&
+      producto.precioManual !== null &&
+      `${producto.precioManual}` !== '';
   }
 
-  restablecerAdicionalGeneral(): void {
-    this.adicionalGeneral = this.adicionalSugerido;
+  getPrecio(producto: ProductoVenta): number {
+    return this.tienePrecioManual(producto)
+      ? Number(producto.precioManual) || 0
+      : this.getPrecioSugerido(producto);
+  }
+
+  restablecerPrecio(producto: ProductoVenta): void {
+    producto.precioManual = null;
   }
 
   getSubtotal(producto: ProductoVenta): number {
@@ -307,11 +307,11 @@ export class Ventas implements OnInit {
       case 'Empresa por mayor':
         return 'Precio por mayor';
       case 'Pintar en el local':
-        return 'Precio crudo + adicional por pintar en el local';
+        return 'Precio "pintar en el local" de cada figura (editable)';
       case 'Kit para llevar':
         return `Precio crudo + $${this.valores.valor_kit_local.toLocaleString('es-CO')} del kit`;
       case 'Pintada':
-        return `Precio crudo + adicional por pintada`;
+        return 'Precio "figura terminada" de cada figura (editable)';
       case 'Empresa con contrato':
         return `Kit de contrato: $${this.valores.precio_kit_contrato.toLocaleString('es-CO')}`;
       default:
@@ -328,6 +328,28 @@ export class Ventas implements OnInit {
     if (producto.cantidad < producto.existencias) {
       producto.cantidad++;
     }
+  }
+
+  // Escanear una etiqueta suma una unidad de ese producto a la venta
+  agregarPorCodigo(codigo: string): void {
+    const producto = buscarPorCodigo(this.productos, codigo);
+    if (!producto) {
+      this.estadoEscaneo = 'error';
+      this.mensajeEscaneo = `"${codigo}" no está en el inventario del local.`;
+      return;
+    }
+    if (producto.cantidad >= producto.existencias) {
+      this.estadoEscaneo = 'error';
+      this.mensajeEscaneo = producto.existencias === 0
+        ? `${producto.nombre}: no hay unidades en el local.`
+        : `${producto.nombre}: ya agregaste las ${producto.existencias} unidades que hay en el local.`;
+      return;
+    }
+    producto.cantidad++;
+    this.estadoEscaneo = 'ok';
+    this.mensajeEscaneo =
+      `✓ ${producto.nombre} · ${producto.cantidad} en esta venta · ` +
+      `$${this.getPrecio(producto).toLocaleString('es-CO')} c/u`;
   }
 
   disminuirCantidad(producto: ProductoVenta): void {
@@ -354,13 +376,9 @@ export class Ventas implements OnInit {
     }
 
     if (
-      this.llevaAdicional &&
-      (Number(this.adicionalGeneral) < 0 ||
-        this.productosSeleccionados.some(
-          producto => producto.tipo === 'figura' && this.getAdicional(producto) < 0
-        ))
+      this.productosSeleccionados.some(producto => this.getPrecio(producto) < 0)
     ) {
-      alert('El valor adicional no puede ser negativo.');
+      alert('El precio de una figura no puede ser negativo.');
       return;
     }
 
@@ -385,7 +403,9 @@ export class Ventas implements OnInit {
     const seleccionados = this.productosSeleccionados;
 
     const detalle = seleccionados
-      .map(producto => `${producto.cantidad} × ${producto.nombre}`)
+      .map(producto =>
+        `${producto.cantidad} × ${producto.nombre} ($${this.getPrecio(producto).toLocaleString('es-CO')} c/u)`
+      )
       .join('\n');
 
     const resumen =
@@ -393,13 +413,6 @@ export class Ventas implements OnInit {
       `Cliente / destino:\n${this.cliente}\n\n` +
       `Modalidad:\n${this.modalidad}\n\n` +
       `${detalle}\n\n` +
-      (this.llevaAdicional
-        ? `Adicional por ${this.textoAdicional}: ` +
-          seleccionados
-            .filter(producto => producto.tipo === 'figura')
-            .map(producto => `$${this.getAdicional(producto).toLocaleString('es-CO')}`)
-            .join(', ') + '\n'
-        : '') +
       `Total de unidades: ${this.totalUnidades}\n` +
       (this.esKit
         ? `Kits: ${this.totalKits}\n` +
@@ -428,6 +441,7 @@ export class Ventas implements OnInit {
 
         // Limpiar el formulario y recargar existencias actualizadas
         this.cliente = '';
+        this.mensajeEscaneo = '';
         this.observacion = '';
         this.busqueda = '';
         this.cargarProductos();

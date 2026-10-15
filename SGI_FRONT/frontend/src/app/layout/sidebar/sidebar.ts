@@ -57,7 +57,8 @@ export class Sidebar {
         { texto: 'Bodega', ruta: '/bodega', icono: 'bodega' },
         { texto: 'Local', ruta: '/local', icono: 'local' },
         { texto: 'Pinturas, pinceles y otros', ruta: '/materiales', icono: 'materiales' },
-        { texto: 'Traslados', ruta: '/traslados', icono: 'traslados' }
+        { texto: 'Traslados', ruta: '/traslados', icono: 'traslados' },
+        { texto: 'Etiquetas y códigos', ruta: '/etiquetas', icono: 'etiquetas' }
       ]
     },
     {

@@ -72,7 +72,10 @@ CREATE TABLE IF NOT EXISTS producto (
     precio_mayorista  INTEGER DEFAULT 0,
     tipo              VARCHAR(20) DEFAULT 'figura',
     coleccion         VARCHAR(60),
-    categoria         VARCHAR(40)
+    categoria         VARCHAR(40),
+    -- Solo figuras. NULL = sugerido (crudo × 2 y pintar en el local × 2)
+    precio_pintar_local INTEGER,
+    precio_terminada    INTEGER
 );
 
 ALTER TABLE producto ADD COLUMN IF NOT EXISTS envio_categoria VARCHAR(40);
@@ -82,6 +85,8 @@ ALTER TABLE producto ADD COLUMN IF NOT EXISTS precio_mayorista INTEGER DEFAULT 0
 ALTER TABLE producto ADD COLUMN IF NOT EXISTS tipo VARCHAR(20) DEFAULT 'figura';
 ALTER TABLE producto ADD COLUMN IF NOT EXISTS coleccion VARCHAR(60);
 ALTER TABLE producto ADD COLUMN IF NOT EXISTS categoria VARCHAR(40);
+ALTER TABLE producto ADD COLUMN IF NOT EXISTS precio_pintar_local INTEGER;
+ALTER TABLE producto ADD COLUMN IF NOT EXISTS precio_terminada INTEGER;
 ALTER TABLE producto ALTER COLUMN tamano TYPE VARCHAR(60);
 
 -- ---------------------------------------------------------------------

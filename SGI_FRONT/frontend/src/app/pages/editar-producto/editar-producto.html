@@ -302,6 +302,39 @@
   </section>
 
 
+  <!-- CÓDIGO QR Y CÓDIGO DE BARRAS -->
+  <section class="zona-codigo" *ngIf="!cargando && datosEtiqueta">
+    <div class="zona-codigo-etiqueta">
+      <app-etiqueta-producto [datos]="datosEtiqueta"></app-etiqueta-producto>
+    </div>
+    <div class="zona-codigo-texto">
+      <strong>Código QR y código de barras</strong>
+      <p>
+        Se crean solos con la referencia <b>{{ datosEtiqueta.codigo }}</b>. Al escanearla en Ventas,
+        Traslados o Pedidos, el sistema reconoce este producto.
+      </p>
+      <p class="zona-codigo-aviso" *ngIf="!producto.referencia">
+        Este producto no tiene referencia; la etiqueta usa su código interno.
+      </p>
+      <div class="zona-codigo-botones">
+        <button type="button" class="sgi-btn sgi-btn-secundario sgi-btn-pequeno" (click)="descargarEtiqueta()">
+          <app-icono nombre="descargar" [tamano]="16"></app-icono> Descargar PNG
+        </button>
+        <button type="button" class="sgi-btn sgi-btn-secundario sgi-btn-pequeno" (click)="copiarEtiqueta()">
+          <app-icono nombre="copiar" [tamano]="16"></app-icono> Copiar imagen
+        </button>
+        <button type="button" class="sgi-btn sgi-btn-secundario sgi-btn-pequeno" (click)="copiarCodigo()">
+          Copiar código
+        </button>
+        <a class="sgi-btn sgi-btn-primario sgi-btn-pequeno" [routerLink]="['/etiquetas']" [queryParams]="{ codigo: producto.codigo }">
+          <app-icono nombre="imprimir" [tamano]="16"></app-icono> Imprimir etiquetas
+        </a>
+      </div>
+      <p class="zona-codigo-mensaje" *ngIf="avisoEtiqueta" role="status">{{ avisoEtiqueta }}</p>
+    </div>
+  </section>
+
+
   <!-- ELIMINAR -->
   <section class="zona-eliminar" *ngIf="!cargando && producto.codigo">
     <div>

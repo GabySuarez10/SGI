@@ -6,7 +6,7 @@ import {
   IValoresConfiguracion,
   VALORES_POR_DEFECTO
 } from '../../interfaces/configuracion.interface';
-import { calcularPrecios } from '../../utils/precios';
+import { calcularPrecios, sugeridoPintarLocal, sugeridoTerminada } from '../../utils/precios';
 
 // Campos de precio que comparte el formulario de nuevo y de editar producto
 export interface IDatosPrecio {
@@ -15,14 +15,19 @@ export interface IDatosPrecio {
   envio: number;
   precio_venta: number;      // crudo + envío
   precio_mayorista: number;  // por mayor + envío
+  precio_pintar_local: number; // solo figuras: sugerido crudo × 2
+  precio_terminada: number;    // solo figuras: sugerido pintar en el local × 2
 }
 
 export const ENVIO_PERSONALIZADO = 'Personalizado';
 
 /*
-  Calcula solo el precio crudo y por mayor a partir del precio de fábrica y del
-  envío, pero deja editar ambos campos. Si el usuario los cambia a mano, ya no
-  se recalculan hasta que pulse "Usar calculado".
+  Calcula los precios sugeridos y deja editarlos todos:
+    crudo y por mayor  <- precio de fábrica y envío
+    pintar en el local <- crudo × 2
+    figura terminada   <- pintar en el local × 2
+  Si el usuario cambia un precio a mano, ya no se recalcula hasta que pulse
+  "Usar calculado".
 
   Uso: <app-precio-producto [datos]="producto" [tarifas]="tarifas"
                             [valores]="valores" [limite]="3150"></app-precio-producto>
@@ -51,6 +56,8 @@ export class PrecioProducto implements OnInit, OnChanges {
 
   crudoEditado = false;
   mayorEditado = false;
+  pintarEditado = false;
+  terminadaEditada = false;
 
   ngOnInit(): void {
     // En edición: si los precios guardados no coinciden con la fórmula,
@@ -61,6 +68,10 @@ export class PrecioProducto implements OnInit, OnChanges {
     const calculado = this.calculado;
     this.crudoEditado = !!this.datos.precio_venta && this.datos.precio_venta !== calculado.crudo;
     this.mayorEditado = !!this.datos.precio_mayorista && this.datos.precio_mayorista !== calculado.mayor;
+    this.pintarEditado =
+      !!this.datos.precio_pintar_local && this.datos.precio_pintar_local !== this.sugeridoPintar;
+    this.terminadaEditada =
+      !!this.datos.precio_terminada && this.datos.precio_terminada !== this.sugeridoTerminada;
     this.recalcular();
   }
 
@@ -73,11 +84,28 @@ export class PrecioProducto implements OnInit, OnChanges {
     if (cambios['esFigura'] && !this.esFigura && this.datos) {
       this.datos.envio = 0;
       this.datos.envio_categoria = '';
+      this.datos.precio_pintar_local = 0;
+      this.datos.precio_terminada = 0;
+    }
+    // Si pasa de material a figura, vuelve a sugerir todos los precios
+    if (cambios['esFigura'] && !cambios['esFigura'].firstChange && this.esFigura && this.datos) {
+      this.pintarEditado = false;
+      this.terminadaEditada = false;
+      this.recalcular();
     }
   }
 
   get calculado(): { crudo: number; mayor: number } {
     return calcularPrecios(this.datos.costo, this.datos.envio, this.valores);
+  }
+
+  // Sugeridos a partir del precio crudo y de pintar en el local actuales
+  get sugeridoPintar(): number {
+    return sugeridoPintarLocal(this.datos.precio_venta);
+  }
+
+  get sugeridoTerminada(): number {
+    return sugeridoTerminada(this.datos.precio_pintar_local);
   }
 
   get superaLimite(): boolean {
@@ -110,6 +138,20 @@ export class PrecioProducto implements OnInit, OnChanges {
     if (!this.mayorEditado) {
       this.datos.precio_mayorista = mayor;
     }
+    this.recalcularPintura();
+  }
+
+  // Pintar en el local sigue al crudo y la terminada sigue a pintar en el local
+  private recalcularPintura(): void {
+    if (!this.esFigura) {
+      return;
+    }
+    if (!this.pintarEditado) {
+      this.datos.precio_pintar_local = this.sugeridoPintar;
+    }
+    if (!this.terminadaEditada) {
+      this.datos.precio_terminada = this.sugeridoTerminada;
+    }
   }
 
   elegirEnvio(categoria: string): void {
@@ -129,6 +171,28 @@ export class PrecioProducto implements OnInit, OnChanges {
   editarCrudo(valor: number): void {
     this.datos.precio_venta = Number(valor) || 0;
     this.crudoEditado = this.esFigura && this.datos.precio_venta !== this.calculado.crudo;
+    this.recalcularPintura();
+  }
+
+  editarPintar(valor: number): void {
+    this.datos.precio_pintar_local = Number(valor) || 0;
+    this.pintarEditado = this.datos.precio_pintar_local !== this.sugeridoPintar;
+    this.recalcularPintura();
+  }
+
+  editarTerminada(valor: number): void {
+    this.datos.precio_terminada = Number(valor) || 0;
+    this.terminadaEditada = this.datos.precio_terminada !== this.sugeridoTerminada;
+  }
+
+  usarSugeridoPintar(): void {
+    this.pintarEditado = false;
+    this.recalcularPintura();
+  }
+
+  usarSugeridoTerminada(): void {
+    this.terminadaEditada = false;
+    this.recalcularPintura();
   }
 
   editarMayor(valor: number): void {

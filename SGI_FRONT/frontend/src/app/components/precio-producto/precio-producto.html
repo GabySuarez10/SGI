@@ -99,6 +99,63 @@
   </div>
 
 
+  <!-- PRECIOS DE LA FIGURA PINTADA (solo figuras) -->
+  <div class="precios-pintura" *ngIf="esFigura">
+
+    <p class="precios-pintura-titulo">Precios con pintura</p>
+
+    <div class="sgi-grid">
+
+      <!-- PINTAR EN EL LOCAL -->
+      <div class="sgi-campo" [class.calculado]="!pintarEditado" [class.editado]="pintarEditado">
+        <label [for]="idPrefijo + '-pintar'">
+          Pintar en el local (COP)
+        </label>
+        <input
+          [id]="idPrefijo + '-pintar'"
+          type="number"
+          min="0"
+          [ngModel]="datos.precio_pintar_local"
+          (ngModelChange)="editarPintar($event)">
+        <small *ngIf="!pintarEditado">
+          Precio crudo × 2 (sugerido)
+        </small>
+        <small *ngIf="pintarEditado">
+          Editado a mano · sugerido: ${{ sugeridoPintar | number }}
+          <button type="button" class="sgi-btn sgi-btn-enlace" (click)="usarSugeridoPintar()">
+            Usar sugerido
+          </button>
+        </small>
+      </div>
+
+
+      <!-- FIGURA TERMINADA -->
+      <div class="sgi-campo" [class.calculado]="!terminadaEditada" [class.editado]="terminadaEditada">
+        <label [for]="idPrefijo + '-terminada'">
+          Figura terminada (COP)
+        </label>
+        <input
+          [id]="idPrefijo + '-terminada'"
+          type="number"
+          min="0"
+          [ngModel]="datos.precio_terminada"
+          (ngModelChange)="editarTerminada($event)">
+        <small *ngIf="!terminadaEditada">
+          Pintar en el local × 2 (sugerido)
+        </small>
+        <small *ngIf="terminadaEditada">
+          Editado a mano · sugerido: ${{ sugeridoTerminada | number }}
+          <button type="button" class="sgi-btn sgi-btn-enlace" (click)="usarSugeridoTerminada()">
+            Usar sugerido
+          </button>
+        </small>
+      </div>
+
+    </div>
+
+  </div>
+
+
   <div class="sgi-aviso peligro" *ngIf="superaLimite">
     El precio de fábrica (${{ datos.costo | number }}) supera el límite de
     ${{ limite | number }} pactado con el proveedor.

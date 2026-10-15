@@ -761,3 +761,9 @@
   font-family: inherit;
   font-size: 14px;
 }
+
+
+/* Escanear productos */
+.escaner-pedido {
+  margin-bottom: 16px;
+}

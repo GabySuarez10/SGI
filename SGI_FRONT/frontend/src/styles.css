@@ -544,7 +544,8 @@ button:disabled {
 .productos-page,
 .proveedores-page,
 .traslados-page,
-.ventas-page {
+.ventas-page,
+.etiquetas-page {
   width: 100%;
   max-width: 1320px;
   margin-left: auto;
@@ -722,6 +723,72 @@ img.imagen-ampliable:focus-visible {
 
 @media (max-width: 720px) {
   .opciones-tipo-proveedor {
+    grid-template-columns: 1fr;
+  }
+}
+
+
+/* =========================================================
+   Código QR y de barras de un producto (Editar producto)
+   ========================================================= */
+.zona-codigo {
+  display: grid;
+  grid-template-columns: minmax(200px, 300px) 1fr;
+  align-items: center;
+  gap: 20px;
+  margin-top: 24px;
+  padding: 18px;
+  border: 1px solid var(--borde);
+  border-radius: 14px;
+  background: var(--superficie);
+}
+
+.zona-codigo-etiqueta {
+  padding: 8px;
+  border: 1px dashed #cbd5e1;
+  border-radius: 10px;
+}
+
+.zona-codigo-texto {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.zona-codigo-texto strong {
+  font-size: 16px;
+  color: var(--tinta);
+}
+
+.zona-codigo-texto p {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--tinta-suave);
+}
+
+.zona-codigo-aviso {
+  color: var(--ambar) !important;
+}
+
+.zona-codigo-botones {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.zona-codigo-botones a.sgi-btn {
+  text-decoration: none;
+}
+
+.zona-codigo-mensaje {
+  font-weight: 600;
+  color: var(--exito) !important;
+}
+
+@media (max-width: 700px) {
+  .zona-codigo {
     grid-template-columns: 1fr;
   }
 }

@@ -85,9 +85,14 @@ Así los materiales usan los mismos inventarios (bodega/local), traslados, pedid
 ```
 precio crudo (detal)  = precio de fábrica × 4       + envío
 precio por mayor      = (precio de fábrica × 4) ÷ 2 + envío
+pintar en el local    = precio crudo × 2
+figura terminada      = pintar en el local × 2
 ```
 
-Ejemplo: Oso navidad, fábrica 2.000 → crudo 8.000, por mayor 4.000 (sin envío).
+Ejemplo: Oso navidad, fábrica 2.000 → crudo 8.000, por mayor 4.000, pintar en el local 16.000,
+terminada 32.000 (sin envío). Pintar en el local y terminada se guardan en
+`producto.precio_pintar_local` y `producto.precio_terminada` (migración 005): NULL = sugerido
+(sigue al crudo si este cambia); un número = precio escrito a mano.
 El envío se elige de la tabla de tarifas (o se escribe otro valor). El 4 y el 2 se cambian en
 Configuración. Los dos precios se calculan solos pero son editables.
 
@@ -96,17 +101,34 @@ Modalidades de venta:
 | Modalidad              | Precio por figura                                           |
 |------------------------|-------------------------------------------------------------|
 | Detal                  | precio crudo (figura en yeso blanco)                        |
-| Pintar en el local     | precio crudo + valor por pintar en el local (pinturas y técnica) |
+| Pintar en el local     | precio "pintar en el local" del producto (editable en la venta) |
 | Kit para llevar        | precio crudo + valor del kit (5 pinturas + 1 pincel)        |
-| Pintada                | precio crudo + valor adicional (se escribe en cada venta)   |
+| Pintada                | precio "figura terminada" del producto (editable en la venta) |
 | Por mayor (local)      | precio por mayor                                            |
 | Empresa por mayor      | precio por mayor                                            |
 | Empresa con contrato   | precio general del kit por contrato                         |
 
-Los valores de "pintar en el local", "kit para llevar", el adicional sugerido de "pintada" y el
-precio del kit por contrato se editan en Configuración.
+El valor del "kit para llevar" y el precio del kit por contrato se editan en Configuración.
+(Las claves `valor_pintar_local` y `valor_pintada` de la tabla `configuracion` ya no se usan.)
 
 ---
+
+## 🏷️ Códigos QR y de barras
+
+No hay que crear ni subir imágenes: el **frontend** genera el código QR y el
+código de barras (Code 128) de cada producto a partir de su **referencia**
+(ej. `DB00001`). Por eso la referencia debe ser **única** y usar solo letras sin
+tilde, números o guiones (máx. 15); la API lo valida al crear y al editar.
+
+- Página **Etiquetas y códigos** (`/etiquetas`): elegir productos y copias,
+  imprimir (o guardar PDF), descargar PNG o copiar la imagen / el código.
+- Escanear con lector USB/Bluetooth (se comporta como teclado + Enter) o con la
+  cámara del teléfono en Ventas, Traslados, Nuevo pedido, Recepción del pedido,
+  Productos, Bodega, Local y Nuevo producto.
+- Cámara: Android/Chrome lee QR y barras con el lector nativo del navegador;
+  iPhone/Safari lee el QR con la librería `jsqr`. La cámara exige que el sitio
+  se abra con **https** (o en localhost).
+- No requiere cambios en la base de datos.
 
 ## 🗂️ Estructura
 

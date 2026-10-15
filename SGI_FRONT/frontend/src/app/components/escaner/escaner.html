@@ -1,0 +1,86 @@
+<div class="escaner">
+
+  <form class="escaner-barra" (ngSubmit)="enviarTexto()">
+
+    <span class="escaner-icono" aria-hidden="true">
+      <app-icono nombre="escanear" [tamano]="20"></app-icono>
+    </span>
+
+    <input
+      type="text"
+      name="codigoEscaneado"
+      inputmode="text"
+      autocomplete="off"
+      autocapitalize="characters"
+      spellcheck="false"
+      aria-label="Código del producto"
+      [placeholder]="placeholder"
+      [(ngModel)]="texto">
+
+    <button type="button" class="sgi-btn sgi-btn-secundario escaner-camara" (click)="abrirCamara()">
+      <app-icono nombre="camara" [tamano]="18"></app-icono>
+      <span>Cámara</span>
+    </button>
+
+  </form>
+
+  <p
+    class="escaner-mensaje"
+    *ngIf="mensaje && !camaraAbierta"
+    [class.ok]="estado === 'ok'"
+    [class.error]="estado === 'error'"
+    role="status"
+    aria-live="polite">
+    {{ mensaje }}
+  </p>
+
+</div>
+
+
+<!-- CÁMARA -->
+<div
+  class="camara"
+  *ngIf="camaraAbierta"
+  role="dialog"
+  aria-modal="true"
+  aria-label="Escanear con la cámara">
+
+  <div class="camara-panel">
+
+    <header class="camara-encabezado">
+      <strong>Escanear con la cámara</strong>
+      <button type="button" class="camara-cerrar" aria-label="Cerrar cámara" (click)="cerrarCamara()">
+        <app-icono nombre="cerrar" [tamano]="20"></app-icono>
+      </button>
+    </header>
+
+    <div class="camara-visor" *ngIf="!errorCamara">
+      <video #video muted playsinline></video>
+      <span class="camara-marco" aria-hidden="true"></span>
+      <span class="camara-cargando" *ngIf="iniciandoCamara">Abriendo la cámara…</span>
+    </div>
+
+    <p class="camara-error" *ngIf="errorCamara">{{ errorCamara }}</p>
+
+    <p class="camara-ayuda" *ngIf="!errorCamara">
+      Apunta al <strong>código QR</strong> de la etiqueta. Puedes escanear varios seguidos;
+      cierra cuando termines.
+    </p>
+
+    <p
+      class="escaner-mensaje"
+      *ngIf="mensaje && ultimoLeido"
+      [class.ok]="estado === 'ok'"
+      [class.error]="estado === 'error'"
+      role="status"
+      aria-live="polite">
+      {{ mensaje }}
+    </p>
+
+    <button type="button" class="sgi-btn sgi-btn-primario camara-listo" (click)="cerrarCamara()">
+      Listo
+    </button>
+
+  </div>
+
+</div>

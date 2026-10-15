@@ -47,9 +47,7 @@ export class Configuracion implements OnInit {
   readonly camposPrecios: CampoPrecio[] = [
     { clave: 'multiplicador_crudo', titulo: 'Multiplicador del precio crudo', ayuda: 'Precio de fábrica × este valor (4).' },
     { clave: 'divisor_mayor', titulo: 'Divisor del precio por mayor', ayuda: 'Precio crudo ÷ este valor (2).' },
-    { clave: 'valor_pintar_local', titulo: 'Adicional sugerido por pintar en el local (COP)', ayuda: 'Se suma al precio crudo (pinturas y técnica); se puede cambiar en cada venta.' },
     { clave: 'valor_kit_local', titulo: 'Valor del kit para llevar (COP)', ayuda: 'Se suma al precio crudo: 5 pinturas + 1 pincel para pintar en casa.' },
-    { clave: 'valor_pintada', titulo: 'Adicional sugerido por figura pintada (COP)', ayuda: 'Se suma al precio crudo; se puede cambiar en cada venta.' },
     { clave: 'precio_kit_contrato', titulo: 'Precio del kit por contrato (COP)', ayuda: 'Precio por kit para empresas con contrato.' },
     { clave: 'pinturas_por_kit', titulo: 'Pinturas por kit', ayuda: 'Pinturas que lleva cada kit.' },
     { clave: 'pinceles_por_kit', titulo: 'Pinceles por kit', ayuda: 'Pinceles que lleva cada kit.' }

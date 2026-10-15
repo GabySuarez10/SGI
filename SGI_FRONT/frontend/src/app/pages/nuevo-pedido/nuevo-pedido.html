@@ -176,6 +176,16 @@
       </div>
 
 
+      <!-- ESCANEAR: lector o cámara del teléfono -->
+      <app-escaner
+        class="escaner-pedido"
+        placeholder="Escanea la etiqueta para sumar una unidad al pedido"
+        [mensaje]="mensajeEscaneo"
+        [estado]="estadoEscaneo"
+        (escaneado)="agregarPorCodigo($event)">
+      </app-escaner>
+
+
       <!-- BUSCADOR -->
       <div class="search-area">
 

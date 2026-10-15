@@ -6,6 +6,8 @@ import { IInventarioBodega } from '../../interfaces/inventario.interface';
 import { InventarioService } from '../../services/inventario.service';
 import { mensajeDeError } from '../../utils/http-error';
 import { Ampliar } from '../../components/visor-imagen/ampliar.directive';
+import { Escaner } from '../../components/escaner/escaner';
+import { buscarPorCodigo, codigoDeProducto } from '../../utils/codigos';
 import {
   VistaProductos,
   categoriasDe,
@@ -17,7 +19,7 @@ import { IMAGEN_POR_DEFECTO, imagenNoCarga } from '../../utils/imagen';
 
 @Component({
   selector: 'app-bodega',
-  imports: [NgFor, NgIf, DecimalPipe, FormsModule, RouterLink, Ampliar],
+  imports: [NgFor, NgIf, DecimalPipe, FormsModule, RouterLink, Ampliar, Escaner],
   templateUrl: './bodega.html',
   styleUrl: './bodega.css',
 })
@@ -35,6 +37,10 @@ export class Bodega implements OnInit {
 
   productos: IInventarioBodega[] = [];
   cargando = false;
+
+  // Resultado del último escaneo
+  mensajeEscaneo = '';
+  estadoEscaneo: 'ok' | 'error' | '' = '';
   error = '';
 
   imagenPorDefecto = IMAGEN_POR_DEFECTO;
@@ -117,6 +123,21 @@ export class Bodega implements OnInit {
   // Abre el formulario de edición y vuelve a esta página al guardar
   editarProducto(codigo: number): void {
     this.router.navigate(['/editar-producto', codigo], { queryParams: { desde: 'bodega' } });
+  }
+
+  // Escanear una etiqueta deja a la vista solo ese producto
+  mostrarPorCodigo(codigo: string): void {
+    const producto = buscarPorCodigo(this.productos, codigo);
+    if (!producto) {
+      this.estadoEscaneo = 'error';
+      this.mensajeEscaneo = `"${codigo}" no está en la bodega.`;
+      return;
+    }
+    this.limpiarFiltros();
+    this.vista = 'todos';
+    this.busqueda = codigoDeProducto(producto);
+    this.estadoEscaneo = 'ok';
+    this.mensajeEscaneo = `✓ ${producto.nombre} · Bodega ${producto.existencias} unidades`;
   }
 
   limpiarFiltros(): void {

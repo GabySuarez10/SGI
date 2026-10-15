@@ -1,0 +1,176 @@
+:host {
+  display: block;
+}
+
+.escaner {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.escaner-barra {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 6px 6px 12px;
+  border: 1.5px dashed #b8bfe0;
+  border-radius: var(--radio, 12px);
+  background: var(--ultramar-suave, #eef0fb);
+}
+
+.escaner-barra:focus-within {
+  border-style: solid;
+  border-color: var(--ultramar, #2f3a8f);
+  background: #ffffff;
+}
+
+.escaner-icono {
+  display: inline-flex;
+  color: var(--ultramar, #2f3a8f);
+}
+
+.escaner-barra input {
+  flex: 1;
+  min-width: 0;
+  height: 38px;
+  border: none;
+  background: transparent;
+  font-family: inherit;
+  font-size: 15px;
+  letter-spacing: 0.02em;
+  color: var(--tinta, #1f2433);
+  outline: none;
+}
+
+.escaner-barra input::placeholder {
+  color: #7a8199;
+  letter-spacing: 0;
+}
+
+.escaner-camara {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.escaner-mensaje {
+  margin: 0;
+  padding: 8px 12px;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 600;
+  background: #f1f5f9;
+  color: var(--tinta, #1f2433);
+}
+
+.escaner-mensaje.ok {
+  background: #ecfdf3;
+  color: var(--exito, #15803d);
+}
+
+.escaner-mensaje.error {
+  background: #fef2f2;
+  color: var(--peligro, #b91c1c);
+}
+
+
+/* ================================
+   Cámara
+================================ */
+.camara {
+  position: fixed;
+  inset: 0;
+  z-index: 2100;
+  display: grid;
+  place-items: center;
+  padding: 16px;
+  background: rgba(15, 18, 32, 0.82);
+}
+
+.camara-panel {
+  width: min(480px, 100%);
+  max-height: calc(100dvh - 32px);
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px;
+  border-radius: 16px;
+  background: #ffffff;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.35);
+}
+
+.camara-encabezado {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 16px;
+  color: var(--tinta, #1f2433);
+}
+
+.camara-cerrar {
+  width: 40px;
+  height: 40px;
+  display: grid;
+  place-items: center;
+  border: none;
+  border-radius: 50%;
+  background: #f1f5f9;
+  color: var(--tinta, #1f2433);
+  cursor: pointer;
+}
+
+.camara-visor {
+  position: relative;
+  overflow: hidden;
+  aspect-ratio: 3 / 4;
+  max-height: 60dvh;
+  border-radius: 12px;
+  background: #0f1220;
+}
+
+.camara-visor video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* Recuadro guía en el centro */
+.camara-marco {
+  position: absolute;
+  inset: 22% 15%;
+  border: 3px solid rgba(255, 255, 255, 0.9);
+  border-radius: 14px;
+  box-shadow: 0 0 0 9999px rgba(15, 18, 32, 0.35);
+  pointer-events: none;
+}
+
+.camara-cargando {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  color: #ffffff;
+  font-size: 14px;
+}
+
+.camara-ayuda,
+.camara-error {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.45;
+  color: var(--tinta-suave, #5b6275);
+}
+
+.camara-error {
+  padding: 12px;
+  border-radius: 10px;
+  background: #fef2f2;
+  color: var(--peligro, #b91c1c);
+}
+
+.camara-listo {
+  width: 100%;
+}

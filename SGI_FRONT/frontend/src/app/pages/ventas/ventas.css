@@ -1001,14 +1001,7 @@
 }
 
 
-/* "Pintar en el local" y "Pintada": valor adicional */
-.adicional-general-fila {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 10px;
-}
-
+/* "Pintar en el local" y "Pintada": precio editable por figura */
 .adicional-general {
   display: flex;
   flex-wrap: wrap;
@@ -1096,4 +1089,10 @@
   background: #ffffff;
   font-family: inherit;
   font-size: 14px;
+}
+
+
+/* Escanear productos */
+.escaner-venta {
+  margin: 4px 0 18px;
 }

@@ -6,6 +6,8 @@ import { IInventarioLocal } from '../../interfaces/inventario.interface';
 import { InventarioService } from '../../services/inventario.service';
 import { mensajeDeError } from '../../utils/http-error';
 import { Ampliar } from '../../components/visor-imagen/ampliar.directive';
+import { Escaner } from '../../components/escaner/escaner';
+import { buscarPorCodigo, codigoDeProducto } from '../../utils/codigos';
 import {
   VistaProductos,
   categoriasDe,
@@ -17,7 +19,7 @@ import { IMAGEN_POR_DEFECTO, imagenNoCarga } from '../../utils/imagen';
 
 @Component({
   selector: 'app-local',
-  imports: [NgFor, NgIf, DecimalPipe, FormsModule, RouterLink, Ampliar],
+  imports: [NgFor, NgIf, DecimalPipe, FormsModule, RouterLink, Ampliar, Escaner],
   templateUrl: './local.html',
   styleUrl: './local.css',
 })
@@ -35,6 +37,10 @@ export class Local implements OnInit {
 
   productos: IInventarioLocal[] = [];
   cargando = false;
+
+  // Resultado del último escaneo
+  mensajeEscaneo = '';
+  estadoEscaneo: 'ok' | 'error' | '' = '';
   error = '';
 
   imagenPorDefecto = IMAGEN_POR_DEFECTO;
@@ -117,6 +123,21 @@ export class Local implements OnInit {
   // Abre el formulario de edición y vuelve a esta página al guardar
   editarProducto(codigo: number): void {
     this.router.navigate(['/editar-producto', codigo], { queryParams: { desde: 'local' } });
+  }
+
+  // Escanear una etiqueta deja a la vista solo ese producto
+  mostrarPorCodigo(codigo: string): void {
+    const producto = buscarPorCodigo(this.productos, codigo);
+    if (!producto) {
+      this.estadoEscaneo = 'error';
+      this.mensajeEscaneo = `"${codigo}" no está en el local.`;
+      return;
+    }
+    this.limpiarFiltros();
+    this.vista = 'todos';
+    this.busqueda = codigoDeProducto(producto);
+    this.estadoEscaneo = 'ok';
+    this.mensajeEscaneo = `✓ ${producto.nombre} · Local ${producto.existencias} unidades`;
   }
 
   limpiarFiltros(): void {

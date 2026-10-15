@@ -74,6 +74,16 @@
 
   <!-- Filtros -->
 
+  <!-- ESCANEAR: muestra el producto de la etiqueta -->
+  <app-escaner
+    class="escaner-lista"
+    placeholder="Escanea una etiqueta para ver ese producto"
+    [mensaje]="mensajeEscaneo"
+    [estado]="estadoEscaneo"
+    (escaneado)="mostrarPorCodigo($event)">
+  </app-escaner>
+
+
   <div class="filters-card">
 
     <div class="search-box">

@@ -456,3 +456,9 @@
 .tipo-chip {
   margin: 2px 0 6px;
 }
+
+
+/* Escanear etiquetas */
+.escaner-lista {
+  margin-bottom: 16px;
+}

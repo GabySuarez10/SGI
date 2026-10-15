@@ -39,7 +39,22 @@ const ICONOS: Record<string, string[]> = {
   cerrar: ['M6 6l12 12', 'M18 6 6 18'],
   salir: ['M15 4h4v16h-4', 'M10 8l-4 4 4 4', 'M6 12h10'],
   usuario: ['M8 8a4 4 0 1 0 8 0a4 4 0 1 0 -8 0', 'M4 21c0-4 3.6-6 8-6s8 2 8 6'],
-  abajo: ['M6 9l6 6 6-6']
+  abajo: ['M6 9l6 6 6-6'],
+  escanear: [
+    'M4 8V5a1 1 0 0 1 1-1h3', 'M16 4h3a1 1 0 0 1 1 1v3', 'M20 16v3a1 1 0 0 1-1 1h-3', 'M8 20H5a1 1 0 0 1-1-1v-3',
+    'M8 9v6', 'M11 9v6', 'M14 9v6', 'M17 9v6'
+  ],
+  camara: [
+    'M3 8a2 2 0 0 1 2-2h2l2-2h6l2 2h2a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z',
+    'M9 13a3 3 0 1 0 6 0a3 3 0 1 0 -6 0'
+  ],
+  etiquetas: [
+    'M3 12V4a1 1 0 0 1 1-1h8l9 9-9 9z',
+    'M7.5 7.5h.01'
+  ],
+  descargar: ['M12 4v11', 'M7 10l5 5 5-5', 'M5 20h14'],
+  copiar: ['M9 9h11v11H9z', 'M5 15H4V4h11v1'],
+  imprimir: ['M7 9V3h10v6', 'M7 17H4v-7h16v7h-3', 'M7 14h10v7H7z']
 };
 
 @Component({

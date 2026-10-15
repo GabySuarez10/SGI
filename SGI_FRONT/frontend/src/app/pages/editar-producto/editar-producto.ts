@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { forkJoin } from 'rxjs';
 import { IProducto, IProductoEdicion } from '../../interfaces/producto.interface';
 import { IProveedor } from '../../interfaces/proveedor.interface';
@@ -23,11 +23,16 @@ import { ICategoria } from '../../interfaces/categoria.interface';
 import { CategoriaService } from '../../services/categoria.service';
 import { TIPOS_PRODUCTO, esMaterial, proveedorVende } from '../../utils/tipos';
 import { IMAGEN_POR_DEFECTO, esUrlImagen, imagenNoCarga } from '../../utils/imagen';
+import { EtiquetaProducto } from '../../components/etiqueta-producto/etiqueta-producto';
+import { Icono } from '../../components/icono/icono';
+import { codigoDeProducto } from '../../utils/codigos';
+import { DatosEtiqueta, OPCIONES_POR_DEFECTO, etiquetaSvg, preciosDeProducto } from '../../utils/etiqueta';
+import { copiarSvgComoImagen, copiarTexto, descargarSvgComoPng, nombreArchivo } from '../../utils/descargas';
 
 @Component({
   selector: 'app-editar-producto',
   standalone: true,
-  imports: [CommonModule, FormsModule, TablaEnvios, PrecioProducto, Ampliar],
+  imports: [CommonModule, FormsModule, RouterLink, TablaEnvios, PrecioProducto, Ampliar, EtiquetaProducto, Icono],
   templateUrl: './editar-producto.html',
   styleUrl: './editar-producto.css'
 })
@@ -46,6 +51,8 @@ export class EditarProducto implements OnInit {
     envio: 0,
     precio_venta: 0,
     precio_mayorista: 0,
+    precio_pintar_local: 0,
+    precio_terminada: 0,
     en_bodega: false,
     en_local: false,
     existencias: 0,
@@ -73,6 +80,10 @@ export class EditarProducto implements OnInit {
   cargando = false;
   guardando = false;
   eliminando = false;
+
+  // Etiqueta con QR y código de barras (se genera con la referencia)
+  datosEtiqueta: DatosEtiqueta | null = null;
+  avisoEtiqueta = '';
   error = '';
 
   // Página desde donde se abrió (productos, bodega o local)
@@ -130,6 +141,7 @@ export class EditarProducto implements OnInit {
         this.proveedores = proveedores;
         this.tarifas = configuracion.tarifas_envio;
         this.valores = configuracion.valores;
+        this.prepararEtiqueta();
         this.cargando = false;
       },
       error: err => {
@@ -186,6 +198,8 @@ export class EditarProducto implements OnInit {
       envio: Number(this.producto.envio) || 0,
       precio_venta: Number(this.producto.precio_venta) || 0,
       precio_mayorista: Number(this.producto.precio_mayorista) || 0,
+      precio_pintar_local: Number(this.producto.precio_pintar_local) || 0,
+      precio_terminada: Number(this.producto.precio_terminada) || 0,
       tipo: this.producto.tipo,
       coleccion: this.producto.tipo === 'pintura' ? this.producto.coleccion : '',
       categoria: this.producto.tipo === 'figura' ? this.producto.categoria : ''
@@ -225,6 +239,55 @@ export class EditarProducto implements OnInit {
 
   cancelar(): void {
     this.router.navigate([this.volverA]);
+  }
+
+  prepararEtiqueta(): void {
+    const detalle = this.producto.tipo === 'pintura' ? this.producto.coleccion : this.producto.tamano;
+    this.datosEtiqueta = {
+      codigo: codigoDeProducto(this.producto),
+      nombre: this.producto.nombre,
+      detalle: detalle || '',
+      esFigura: this.producto.tipo === 'figura',
+      precios: preciosDeProducto(this.producto, this.valores.valor_kit_local)
+    };
+  }
+
+  private svgEtiqueta(): string {
+    return this.datosEtiqueta
+      ? etiquetaSvg(this.datosEtiqueta, OPCIONES_POR_DEFECTO)
+      : '';
+  }
+
+  async descargarEtiqueta(): Promise<void> {
+    if (!this.datosEtiqueta) {
+      return;
+    }
+    try {
+      await descargarSvgComoPng(this.svgEtiqueta(), nombreArchivo(this.datosEtiqueta.codigo, this.producto.nombre), 3);
+    } catch (error) {
+      this.avisoEtiqueta = (error as Error).message;
+    }
+  }
+
+  async copiarEtiqueta(): Promise<void> {
+    try {
+      await copiarSvgComoImagen(this.svgEtiqueta(), 3);
+      this.avisoEtiqueta = 'Etiqueta copiada como imagen.';
+    } catch (error) {
+      this.avisoEtiqueta = (error as Error).message;
+    }
+  }
+
+  async copiarCodigo(): Promise<void> {
+    if (!this.datosEtiqueta) {
+      return;
+    }
+    try {
+      await copiarTexto(this.datosEtiqueta.codigo);
+      this.avisoEtiqueta = `Código ${this.datosEtiqueta.codigo} copiado.`;
+    } catch {
+      this.avisoEtiqueta = 'No se pudo copiar el código.';
+    }
   }
 
   eliminarProducto(): void {

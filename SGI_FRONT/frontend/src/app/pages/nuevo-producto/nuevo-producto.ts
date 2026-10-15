@@ -29,11 +29,14 @@ import { TablaEnvios } from '../../components/tabla-envios/tabla-envios';
 import { PrecioProducto } from '../../components/precio-producto/precio-producto';
 import { mensajeDeError } from '../../utils/http-error';
 import { Ampliar } from '../../components/visor-imagen/ampliar.directive';
+import { Escaner } from '../../components/escaner/escaner';
+import { buscarPorCodigo } from '../../utils/codigos';
+import { IProducto } from '../../interfaces/producto.interface';
 import { esUrlImagen, imagenNoCarga } from '../../utils/imagen';
 
 @Component({
   selector: 'app-nuevo-producto',
-  imports: [FormsModule, NgIf, NgFor, DecimalPipe, TablaEnvios, PrecioProducto, Ampliar],
+  imports: [FormsModule, NgIf, NgFor, DecimalPipe, TablaEnvios, PrecioProducto, Ampliar, Escaner],
   templateUrl: './nuevo-producto.html',
   styleUrl: './nuevo-producto.css',
 })
@@ -71,6 +74,12 @@ export class NuevoProducto implements OnInit {
   guardando = false;
   error = '';
 
+  // Escanear una etiqueta: si el producto ya existe se ofrece abrirlo
+  mensajeEscaneo = '';
+  estadoEscaneo: 'ok' | 'error' | '' = '';
+  productoEscaneado: IProducto | null = null;
+  private catalogo: IProducto[] | null = null;
+
   imagenNoCarga = imagenNoCarga;
 
   constructor(
@@ -82,6 +91,51 @@ export class NuevoProducto implements OnInit {
     private route: ActivatedRoute,
     private router: Router
   ) {}
+
+  agregarPorCodigo(codigo: string): void {
+    const revisar = (catalogo: IProducto[]) => {
+      this.catalogo = catalogo;
+      const producto = buscarPorCodigo(catalogo, codigo);
+      if (producto) {
+        this.productoEscaneado = producto;
+        this.estadoEscaneo = 'error';
+        this.mensajeEscaneo =
+          `"${producto.nombre}" ya existe (${producto.referencia || producto.codigo}). ` +
+          'Para sumar unidades ábrelo y ajusta sus existencias.';
+        return;
+      }
+      this.productoEscaneado = null;
+      const primero = this.productos[0];
+      if (primero && !primero.referencia.trim()) {
+        primero.referencia = codigo.trim().toUpperCase();
+        this.estadoEscaneo = 'ok';
+        this.mensajeEscaneo = `"${primero.referencia}" no existe todavía: se usará como referencia del producto 1.`;
+      } else {
+        this.estadoEscaneo = 'ok';
+        this.mensajeEscaneo = `"${codigo}" no existe todavía. Puedes crearlo con este formulario.`;
+      }
+    };
+
+    if (this.catalogo) {
+      revisar(this.catalogo);
+      return;
+    }
+    this.productoService.getProductos().subscribe({
+      next: revisar,
+      error: err => {
+        this.estadoEscaneo = 'error';
+        this.mensajeEscaneo = mensajeDeError(err);
+      }
+    });
+  }
+
+  abrirEscaneado(): void {
+    if (!this.productoEscaneado) {
+      return;
+    }
+    const desde = this.route.snapshot.queryParamMap.get('desde') || this.ubicacion;
+    this.router.navigate(['/editar-producto', this.productoEscaneado.codigo], { queryParams: { desde } });
+  }
 
   ngOnInit(): void {
     // Parámetros opcionales: ?ubicacion=local&tipo=pintura&coleccion=Gamusa&desde=materiales
@@ -225,6 +279,8 @@ export class NuevoProducto implements OnInit {
       envio: 0,
       precio_venta: 0,
       precio_mayorista: 0,
+      precio_pintar_local: 0,
+      precio_terminada: 0,
       existencias: 0,
       tipo: 'figura',
       coleccion: '',
@@ -328,6 +384,8 @@ export class NuevoProducto implements OnInit {
         envio: Number(producto.envio) || 0,
         precio_venta: Number(producto.precio_venta) || 0,
         precio_mayorista: Number(producto.precio_mayorista) || 0,
+        precio_pintar_local: this.esMaterial ? 0 : Number(producto.precio_pintar_local) || 0,
+        precio_terminada: this.esMaterial ? 0 : Number(producto.precio_terminada) || 0,
         existencias: Number(producto.existencias) || 0
       }))
     }).subscribe({

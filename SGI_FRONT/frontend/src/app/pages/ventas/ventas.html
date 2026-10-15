@@ -132,12 +132,12 @@
       ================================= -->
 
       <!-- ================================
-           PINTAR EN EL LOCAL / PINTADA: VALOR ADICIONAL
+           PINTAR EN EL LOCAL / PINTADA: PRECIO DEL PRODUCTO
       ================================= -->
 
       <div
         class="kit-notice full-width pintada-notice"
-        *ngIf="llevaAdicional"
+        *ngIf="precioEditable"
       >
 
         <span class="notice-icon">
@@ -153,32 +153,16 @@
             Figura vendida pintada
           </strong>
 
-          <p>
-            Se suma un valor adicional al precio crudo de cada figura
-            (sugerido en Configuración: ${{ adicionalSugerido.toLocaleString('es-CO') }}).
-            Puedes cambiarlo para esta venta o por figura en los productos seleccionados.
+          <p *ngIf="modalidad === 'Pintar en el local'">
+            Cada figura usa su precio de "pintar en el local" (sugerido: crudo × 2).
           </p>
-
-          <div class="adicional-general">
-            <label for="adicionalGeneral">
-              Valor adicional por figura (COP)
-            </label>
-            <div class="adicional-general-fila">
-              <input
-                id="adicionalGeneral"
-                type="number"
-                min="0"
-                step="100"
-                [(ngModel)]="adicionalGeneral">
-              <button
-                *ngIf="adicionalGeneral !== adicionalSugerido"
-                type="button"
-                class="sgi-btn sgi-btn-enlace"
-                (click)="restablecerAdicionalGeneral()">
-                Usar sugerido
-              </button>
-            </div>
-          </div>
+          <p *ngIf="modalidad === 'Pintada'">
+            Cada figura usa su precio de "figura terminada" (sugerido: pintar en el local × 2).
+          </p>
+          <p>
+            Si lo necesitas, cambia el precio de una figura solo para esta venta en
+            los productos seleccionados. Para cambiarlo siempre, edita el producto.
+          </p>
 
         </div>
 
@@ -309,6 +293,16 @@
       </div>
 
     </div>
+
+
+    <!-- ESCANEAR: lector o cámara del teléfono -->
+    <app-escaner
+      class="escaner-venta"
+      placeholder="Escanea la etiqueta o escribe la referencia y pulsa Enter"
+      [mensaje]="mensajeEscaneo"
+      [estado]="estadoEscaneo"
+      (escaneado)="agregarPorCodigo($event)">
+    </app-escaner>
 
 
     <!-- ================================
@@ -475,26 +469,26 @@
             *ngIf="producto.cantidad > 0"
           >
 
-            <div *ngIf="llevaAdicional && producto.tipo === 'figura'" class="adicional-figura">
+            <div *ngIf="precioEditable && producto.tipo === 'figura'" class="adicional-figura">
 
-              <label [for]="'adicional-' + producto.codigo">
-                Adicional
+              <label [for]="'precio-' + producto.codigo">
+                Precio para esta venta
               </label>
 
               <input
-                [id]="'adicional-' + producto.codigo"
+                [id]="'precio-' + producto.codigo"
                 type="number"
                 min="0"
                 step="100"
-                [placeholder]="'' + adicionalGeneral"
-                [(ngModel)]="producto.adicional">
+                [placeholder]="'' + getPrecioSugerido(producto)"
+                [(ngModel)]="producto.precioManual">
 
               <button
-                *ngIf="producto.adicional !== null"
+                *ngIf="tienePrecioManual(producto)"
                 type="button"
                 class="sgi-btn sgi-btn-enlace"
-                (click)="restablecerAdicional(producto)">
-                Usar general
+                (click)="restablecerPrecio(producto)">
+                Usar ${{ getPrecioSugerido(producto).toLocaleString('es-CO') }}
               </button>
 
             </div>
