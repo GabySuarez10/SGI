@@ -33,6 +33,17 @@
   </div>
 
 
+  <!-- CAJA DEL DÍA -->
+  <p class="aviso-caja" *ngIf="cajaRevisada && !cajaHoy">
+    La caja de hoy aún no está abierta.
+    <a routerLink="/caja">Abrir caja</a> para que el cuadre del día quede completo.
+  </p>
+  <p class="aviso-caja cerrada" *ngIf="cajaCerrada">
+    La caja de hoy ya está cerrada: no se pueden registrar más ventas hoy.
+    <a routerLink="/caja">Ir a Caja</a>
+  </p>
+
+
   <!-- ================================
        INFORMACIÓN DE LA VENTA
   ================================= -->
@@ -186,7 +197,13 @@
 
           <p>
             Cada figura seleccionada lleva
-            <strong>{{ valores.pinturas_por_kit }} pinturas y {{ valores.pinceles_por_kit }} pincel(es)</strong>.
+            <strong>{{ valores.pinturas_por_kit }} pinturas y {{ valores.pinceles_por_kit }} pincel(es)</strong>,
+            que se descuentan de <strong>pinturas y pinceles para kits ({{ nombreLugarKits }})</strong>.
+          </p>
+
+          <p class="aviso-kits" *ngIf="!materialesKitsExisten">
+            Aún no existen "Pinturas para kits" y "Pinceles para kits". Ejecuta el SQL de materiales
+            para kits y carga sus unidades en Local y Bodega.
           </p>
 
           <p *ngIf="modalidad === 'Kit para llevar'">
@@ -691,7 +708,7 @@
         <div>
 
           <strong>
-            Pinturas
+            Pinturas para kits ({{ nombreLugarKits }})
           </strong>
 
           <span>
@@ -724,7 +741,7 @@
         <div>
 
           <strong>
-            Pinceles
+            Pinceles para kits ({{ nombreLugarKits }})
           </strong>
 
           <span>
@@ -812,6 +829,66 @@
 
     </div>
 
+
+
+    <!-- ================================
+         PAGO (efectivo, Nequi, transferencia, tarjeta o mixto)
+    ================================= -->
+
+    <div class="pago">
+
+      <div class="pago-titulo">
+        <strong>Pago</strong>
+        <span>Total ${{ totalVenta.toLocaleString('es-CO') }}</span>
+      </div>
+
+      <div class="pago-linea" *ngFor="let pago of pagos; let i = index; let ultimo = last">
+        <select [attr.aria-label]="'Medio de pago ' + (i + 1)" [(ngModel)]="pago.medio">
+          <option *ngFor="let medio of mediosPago" [value]="medio">{{ medio }}</option>
+        </select>
+
+        <input
+          *ngIf="!ultimo"
+          type="number"
+          min="0"
+          step="100"
+          [attr.aria-label]="'Valor con ' + pago.medio"
+          [(ngModel)]="pago.valor">
+
+        <span class="pago-resto" *ngIf="ultimo" [class.error]="valorPago(i) < 0">
+          ${{ valorPago(i).toLocaleString('es-CO') }}
+          <small *ngIf="pagos.length > 1">(el resto)</small>
+        </span>
+
+        <button
+          type="button"
+          class="pago-quitar"
+          *ngIf="pagos.length > 1"
+          [attr.aria-label]="'Quitar ' + pago.medio"
+          (click)="quitarMedioPago(i)">
+          ✕
+        </button>
+      </div>
+
+      <button type="button" class="sgi-btn sgi-btn-enlace" *ngIf="pagos.length < mediosPago.length" (click)="agregarMedioPago()">
+        + Pagar con otro medio (pago mixto)
+      </button>
+
+      <div class="pago-efectivo" *ngIf="efectivoEnPago > 0">
+        <label for="recibidoVenta">Efectivo recibido</label>
+        <input
+          id="recibidoVenta"
+          type="number"
+          min="0"
+          step="1000"
+          [placeholder]="'' + efectivoEnPago"
+          [(ngModel)]="recibido">
+        <span *ngIf="recibido">Cambio: <strong>${{ cambio.toLocaleString('es-CO') }}</strong></span>
+      </div>
+
+      <p class="pago-error" *ngIf="!pagoValido">Los valores superan el total de la venta.</p>
+
+    </div>
 
 
     <!-- BOTÓN -->

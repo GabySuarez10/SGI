@@ -15,6 +15,7 @@ from models.configuracion import TarifaEnvio, TarifaKit, Configuracion
 from models.coleccion_material import ColeccionMaterial
 from models.categoria_figura import CategoriaFigura
 from models.factura import DatosFacturacion, Factura
+from models.caja import Caja, MovimientoCaja
 
 __all__ = [
     "Usuario",
@@ -32,4 +33,6 @@ __all__ = [
     "CategoriaFigura",
     "DatosFacturacion",
     "Factura",
+    "Caja",
+    "MovimientoCaja",
 ]

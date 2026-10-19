@@ -661,3 +661,85 @@ CREATE INDEX IF NOT EXISTS idx_factura_venta ON factura (venta);
 -- Columna agregada después (por si la tabla ya existía sin ella)
 ALTER TABLE factura ADD COLUMN IF NOT EXISTS fecha_vencimiento DATE;
 
+-- =====================================================================
+-- PINTURAS Y PINCELES PARA KITS (igual a migraciones/007_materiales_kits.sql)
+-- =====================================================================
+INSERT INTO coleccion_material (nombre, descripcion, orden)
+VALUES ('Kits', 'Pinturas reservadas para armar kits (5 por figura)', 6)
+ON CONFLICT (nombre) DO NOTHING;
+
+-- Por si la secuencia de códigos quedó atrás de los datos cargados a mano
+SELECT setval(pg_get_serial_sequence('producto', 'codigo'),
+              GREATEST((SELECT COALESCE(MAX(codigo), 0) FROM producto), 1));
+
+INSERT INTO producto (referencia, nombre, imagen, proveedor, tamano, descripcion,
+                      costo, envio, precio_venta, precio_mayorista, tipo, coleccion)
+SELECT 'KIT-PINTURAS', 'Pinturas para kits', '',
+       (SELECT nombre FROM proveedor WHERE tipo IN ('materiales', 'ambos') ORDER BY nombre LIMIT 1),
+       'Unidad', 'Pinturas que se descuentan al vender kits (5 por figura)',
+       0, 0, 0, 0, 'pintura', 'Kits'
+WHERE NOT EXISTS (SELECT 1 FROM producto WHERE upper(referencia) = 'KIT-PINTURAS');
+
+INSERT INTO producto (referencia, nombre, imagen, proveedor, tamano, descripcion,
+                      costo, envio, precio_venta, precio_mayorista, tipo, coleccion)
+SELECT 'KIT-PINCELES', 'Pinceles para kits', '',
+       (SELECT nombre FROM proveedor WHERE tipo IN ('materiales', 'ambos') ORDER BY nombre LIMIT 1),
+       'Unidad', 'Pinceles que se descuentan al vender kits (1 por figura)',
+       0, 0, 0, 0, 'pincel', NULL
+WHERE NOT EXISTS (SELECT 1 FROM producto WHERE upper(referencia) = 'KIT-PINCELES');
+
+-- Fila en el local y en la bodega con 0 unidades
+INSERT INTO inventario_local (codigo, nombre, imagen, proveedor, tamano, existencias, precio_venta, precio_mayorista)
+SELECT p.codigo, p.nombre, p.imagen, p.proveedor, p.tamano, 0, 0, 0
+FROM producto p
+WHERE upper(p.referencia) IN ('KIT-PINTURAS', 'KIT-PINCELES')
+  AND NOT EXISTS (SELECT 1 FROM inventario_local l WHERE l.codigo = p.codigo);
+
+INSERT INTO inventario_bodega (codigo, nombre, imagen, proveedor, tamano, descripcion, costo, existencias)
+SELECT p.codigo, p.nombre, p.imagen, p.proveedor, p.tamano, p.descripcion, 0, 0
+FROM producto p
+WHERE upper(p.referencia) IN ('KIT-PINTURAS', 'KIT-PINCELES')
+  AND NOT EXISTS (SELECT 1 FROM inventario_bodega b WHERE b.codigo = p.codigo);
+
+-- =====================================================================
+-- CUADRE DE CAJA (igual a migraciones/008_caja.sql)
+-- =====================================================================
+
+-- Medio de pago de cada venta (listas, como producto/cantidad: permite pago mixto)
+ALTER TABLE venta ADD COLUMN IF NOT EXISTS medios_pago TEXT;   -- ej. "Efectivo,Nequi / Daviplata"
+ALTER TABLE venta ADD COLUMN IF NOT EXISTS valores_pago TEXT;  -- ej. "20000,14900"
+ALTER TABLE venta ADD COLUMN IF NOT EXISTS recibido INTEGER;   -- efectivo que entregó el cliente
+ALTER TABLE venta ADD COLUMN IF NOT EXISTS caja INTEGER;       -- caja del día en que se cobró
+
+-- Una caja por día
+CREATE TABLE IF NOT EXISTS caja (
+    codigo             SERIAL PRIMARY KEY,
+    fecha              DATE NOT NULL UNIQUE,
+    base               INTEGER NOT NULL DEFAULT 0,
+    abierta_por        VARCHAR(100),
+    hora_apertura      TIMESTAMP NOT NULL DEFAULT now(),
+    estado             VARCHAR(20) NOT NULL DEFAULT 'abierta',   -- abierta | cerrada
+    efectivo_esperado  INTEGER,
+    efectivo_contado   INTEGER,
+    diferencia         INTEGER,
+    conteo             TEXT,        -- billetes y monedas contados (JSON) o vacío si se escribió el total
+    resumen            TEXT,        -- totales por medio de pago al cerrar (JSON)
+    cerrada_por        VARCHAR(100),
+    hora_cierre        TIMESTAMP,
+    observaciones      TEXT
+);
+
+-- Entradas y salidas de efectivo que no son ventas
+CREATE TABLE IF NOT EXISTS movimiento_caja (
+    codigo     SERIAL PRIMARY KEY,
+    caja       INTEGER NOT NULL,
+    fecha      TIMESTAMP NOT NULL DEFAULT now(),
+    tipo       VARCHAR(10) NOT NULL,            -- entrada | salida
+    valor      INTEGER NOT NULL,
+    motivo     TEXT NOT NULL,
+    categoria  VARCHAR(40),
+    usuario    VARCHAR(100)
+);
+
+CREATE INDEX IF NOT EXISTS idx_movimiento_caja_caja ON movimiento_caja (caja);
+

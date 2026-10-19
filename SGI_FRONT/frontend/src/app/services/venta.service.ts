@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
-import { IVenta, IVentaNueva } from '../interfaces/venta.interface';
+import { IMaterialesKits, IVenta, IVentaNueva } from '../interfaces/venta.interface';
 
 @Injectable({
   providedIn: 'root'
@@ -19,6 +19,11 @@ export class VentaService {
   // Descuenta las unidades del local y guarda la venta
   registrarVenta(venta: IVentaNueva): Observable<IVenta> {
     return this.httpClient.post<IVenta>(this.apiUrl, venta);
+  }
+
+  // Pinturas y pinceles para kits disponibles en el local y en la bodega
+  getMaterialesKits(): Observable<IMaterialesKits> {
+    return this.httpClient.get<IMaterialesKits>(`${this.apiUrl}/kits-materiales`);
   }
 
   anularVenta(codigo: number): Observable<unknown> {

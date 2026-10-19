@@ -53,7 +53,7 @@
 
 .tipos {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 10px;
   margin: 0;
   padding: 0;
@@ -203,4 +203,19 @@
   .acciones .sgi-btn {
     flex: 1;
   }
+}
+
+.nota-sin {
+  margin: 0;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: #f1f5f9;
+  color: #334155;
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.campo small.pago-venta {
+  color: #334155;
+  font-size: 13px;
 }

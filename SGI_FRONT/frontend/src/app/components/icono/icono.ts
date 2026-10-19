@@ -55,7 +55,8 @@ const ICONOS: Record<string, string[]> = {
   descargar: ['M12 4v11', 'M7 10l5 5 5-5', 'M5 20h14'],
   copiar: ['M9 9h11v11H9z', 'M5 15H4V4h11v1'],
   imprimir: ['M7 9V3h10v6', 'M7 17H4v-7h16v7h-3', 'M7 14h10v7H7z'],
-  factura: ['M6 3h9l4 4v14H6z', 'M14 3v5h5', 'M9 12h7', 'M9 16h7', 'M9 8h3']
+  factura: ['M6 3h9l4 4v14H6z', 'M14 3v5h5', 'M9 12h7', 'M9 16h7', 'M9 8h3'],
+  caja: ['M3 7h18v12H3z', 'M3 11h18', 'M7 15h3', 'M16 3l-4 4-4-4']
 };
 
 @Component({

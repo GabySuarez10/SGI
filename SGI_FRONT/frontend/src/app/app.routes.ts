@@ -21,6 +21,7 @@ import { EditarProveedor } from './pages/editar-proveedor/editar-proveedor';
 import { Materiales } from './pages/materiales/materiales';
 import { Etiquetas } from './pages/etiquetas/etiquetas';
 import { Facturas } from './pages/facturas/facturas';
+import { Caja } from './pages/caja/caja';
 import { authGuard } from './guards/auth.guard';
 
 export const routes: Routes = [
@@ -53,6 +54,7 @@ export const routes: Routes = [
       { path: 'materiales', component: Materiales },
       { path: 'etiquetas', component: Etiquetas },
       { path: 'facturas', component: Facturas },
+      { path: 'caja', component: Caja },
     ]
   },
 

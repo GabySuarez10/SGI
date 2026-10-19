@@ -38,7 +38,10 @@ NOMBRE_TIPO = {
 ESTADOS = ("pendiente_envio", "aceptada", "rechazada", "anulada")
 TIPOS_DOCUMENTO = ("CC", "NIT", "CE", "TI", "PP", "PEP", "PPT", "NIT_EXT", "RC", "DIE")
 FORMAS_PAGO = ("Contado", "Crédito")
-MEDIOS_PAGO = ("Efectivo", "Tarjeta débito", "Tarjeta crédito", "Transferencia", "Nequi", "Daviplata", "Otro")
+MEDIOS_PAGO = (
+    "Efectivo", "Nequi / Daviplata", "Transferencia bancaria", "Tarjeta", "Mixto",
+    "Tarjeta débito", "Tarjeta crédito", "Transferencia", "Nequi", "Daviplata", "Otro",
+)
 
 # Consumidor final (Resolución 000165 de 2023)
 CONSUMIDOR_FINAL = {"tipo_documento": "CC", "documento": "222222222222", "nombre": "Consumidor final"}

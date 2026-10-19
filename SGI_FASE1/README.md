@@ -139,6 +139,14 @@ Precio de "Kit para llevar" = precio crudo + kit. Si la figura no tiene tamaño 
 kit se usa el de su tamaño de envío y, si tampoco, el valor general de Configuración.
 En Ventas se puede elegir otro tamaño o escribir el valor para cada figura.
 
+### Pinturas y pinceles para kits
+
+Productos fijos `KIT-PINTURAS` ("Pinturas para kits") y `KIT-PINCELES` ("Pinceles para
+kits"), con existencias en el local y en la bodega (migración 007; se mueven con Traslados).
+Al vender: **Kit para llevar** descuenta 5 pinturas + 1 pincel por figura del **local**;
+**Empresa con contrato** (recreacionales) los descuenta de la **bodega**. Al anular la venta
+se devuelven. No se pueden eliminar. `GET /api/ventas/kits-materiales` muestra lo disponible.
+
 ## 🧾 Facturación (bases)
 
 Tablas `datos_facturacion` (clave → valor) y `factura`. Rutas en `/api/facturas`.
@@ -155,6 +163,20 @@ Tablas `datos_facturacion` (clave → valor) y `factura`. Rutas en `/api/factura
   CUFE/CUDE lo hace un proveedor tecnológico (o la solución gratuita de la DIAN).
   Luego se registra con `PUT /api/facturas/<codigo>/dian`.
 - Una venta con factura activa no se puede anular sin anular antes la factura.
+
+## 💵 Cuadre de caja
+
+Migración 008: columnas `venta.medios_pago` / `valores_pago` (listas: pago mixto),
+`venta.recibido`, `venta.caja`, y tablas `caja` (una por día) y `movimiento_caja`.
+
+- Medios: Efectivo, Nequi / Daviplata, Transferencia bancaria, Tarjeta. Los pagos
+  deben sumar el total de la venta.
+- Abrir caja con la base → entradas/salidas de efectivo con motivo → cerrar contando
+  por billetes y monedas **o** escribiendo el total.
+- Efectivo esperado = base + ventas en efectivo + entradas − salidas.
+- Con la caja del día cerrada no se registran ni anulan ventas de ese día (se puede reabrir con motivo).
+- Rutas: `/api/caja/hoy`, `/api/caja/abrir`, `/api/caja/<id>/movimientos`,
+  `/api/caja/<id>/cerrar`, `/api/caja/<id>/reabrir`, `/api/caja` (historial).
 
 ## 🗂️ Estructura
 

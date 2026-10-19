@@ -26,3 +26,10 @@ def eliminar(codigo):
     """Anula la venta y devuelve las unidades al local."""
     q.eliminar_venta(codigo)
     return jsonify({"message": f"Venta {codigo} anulada"})
+
+
+@ventas_bp.get("/kits-materiales")
+def kits_materiales():
+    """Pinturas y pinceles para kits disponibles en el local y en la bodega."""
+    from queries import kit_queries
+    return jsonify(kit_queries.existencias_kits())

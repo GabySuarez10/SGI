@@ -1109,3 +1109,129 @@
   font-family: inherit;
   font-size: 13px;
 }
+
+.aviso-kits {
+  margin-top: 6px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  background: #fff7ed;
+  color: #9a3412;
+  font-size: 13px;
+}
+
+
+/* Caja del día */
+.aviso-caja {
+  margin: 0 0 16px;
+  padding: 10px 14px;
+  border-radius: 12px;
+  background: #fff7ed;
+  color: #9a3412;
+  font-size: 14px;
+}
+
+.aviso-caja.cerrada {
+  background: #fef2f2;
+  color: #b91c1c;
+}
+
+.aviso-caja a {
+  color: inherit;
+  font-weight: 700;
+}
+
+/* Pago (efectivo, Nequi, transferencia, tarjeta o mixto) */
+.pago {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 16px;
+  padding: 14px;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  background: #f8fafc;
+}
+
+.pago-titulo {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  font-size: 14px;
+  color: #1f2433;
+}
+
+.pago-linea {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 130px 32px;
+  align-items: center;
+  gap: 8px;
+}
+
+.pago-linea select,
+.pago-linea input,
+.pago-efectivo input {
+  height: 38px;
+  padding: 0 10px;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  background: #ffffff;
+  font-family: inherit;
+  font-size: 14px;
+  min-width: 0;
+}
+
+.pago-resto {
+  font-weight: 700;
+  text-align: right;
+  white-space: nowrap;
+}
+
+.pago-resto small {
+  display: block;
+  font-weight: 400;
+  font-size: 11px;
+  color: #64748b;
+}
+
+.pago-resto.error {
+  color: #b91c1c;
+}
+
+.pago-quitar {
+  width: 32px;
+  height: 32px;
+  border: none;
+  border-radius: 8px;
+  background: #e2e8f0;
+  cursor: pointer;
+}
+
+.pago-efectivo {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 12px;
+  padding-top: 6px;
+  border-top: 1px dashed #cbd5e1;
+  font-size: 14px;
+}
+
+.pago-efectivo label {
+  font-weight: 600;
+  color: #334155;
+}
+
+.pago-efectivo input {
+  width: 140px;
+}
+
+.pago-efectivo strong {
+  color: #15803d;
+}
+
+.pago-error {
+  margin: 0;
+  color: #b91c1c;
+  font-size: 13px;
+  font-weight: 600;
+}

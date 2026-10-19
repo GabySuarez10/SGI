@@ -22,7 +22,10 @@ import { mensajeDeError } from '../../utils/http-error';
 import { Ampliar } from '../../components/visor-imagen/ampliar.directive';
 import { Escaner } from '../../components/escaner/escaner';
 import { Facturar } from '../../components/facturar/facturar';
-import { IVenta } from '../../interfaces/venta.interface';
+import { IMaterialesKits, IVenta, esMaterialDeKit } from '../../interfaces/venta.interface';
+import { CajaService } from '../../services/caja.service';
+import { ICaja, MEDIOS_PAGO, MedioPago } from '../../interfaces/caja.interface';
+import { RouterLink } from '@angular/router';
 import { buscarPorCodigo } from '../../utils/codigos';
 import { IMAGEN_POR_DEFECTO, imagenNoCarga } from '../../utils/imagen';
 import { hoyISO } from '../../utils/fecha';
@@ -67,7 +70,7 @@ const KIT_OTRO = 'otro';
 @Component({
   selector: 'app-ventas',
   standalone: true,
-  imports: [CommonModule, FormsModule, Ampliar, Escaner, Facturar],
+  imports: [CommonModule, FormsModule, RouterLink, Ampliar, Escaner, Facturar],
   templateUrl: './ventas.html',
   styleUrl: './ventas.css'
 })
@@ -111,6 +114,22 @@ export class Ventas implements OnInit {
   cargando = false;
   guardando = false;
 
+  // ================================
+  // CAJA Y PAGO
+  // ================================
+
+  // Caja de hoy (null = aún no se abre)
+  cajaHoy: ICaja | null = null;
+  cajaRevisada = false;
+
+  readonly mediosPago = MEDIOS_PAGO;
+  // Cómo paga el cliente. Pago mixto: varias líneas; la última cubre el resto.
+  pagos: { medio: MedioPago; valor: number | null }[] = [{ medio: 'Efectivo', valor: null }];
+  recibido: number | null = null;    // efectivo que entrega el cliente
+
+  // Pinturas y pinceles para kits (local y bodega)
+  materialesKits: IMaterialesKits | null = null;
+
   // Venta recién registrada: abre la ventana para facturarla
   ventaRegistrada: IVenta | null = null;
 
@@ -126,7 +145,8 @@ export class Ventas implements OnInit {
     private inventarioService: InventarioService,
     private ventaService: VentaService,
     private authService: AuthService,
-    private configuracionService: ConfiguracionService
+    private configuracionService: ConfiguracionService,
+    private cajaService: CajaService
   ) {}
 
   ngOnInit(): void {
@@ -139,12 +159,18 @@ export class Ventas implements OnInit {
 
     forkJoin({
       inventario: this.inventarioService.getLocal(),
-      configuracion: this.configuracionService.getConfiguracion()
+      configuracion: this.configuracionService.getConfiguracion(),
+      kits: this.ventaService.getMaterialesKits(),
+      caja: this.cajaService.getHoy()
     }).subscribe({
-      next: ({ inventario, configuracion }) => {
+      next: ({ inventario, configuracion, kits, caja }) => {
+        this.cajaHoy = caja.caja;
+        this.cajaRevisada = true;
+        this.materialesKits = kits;
         this.valores = configuracion.valores;
         this.tarifasKit = configuracion.tarifas_kit ?? [];
-        this.productos = inventario.map(item => ({
+        // Las pinturas y pinceles para kits no se venden sueltos: se descuentan solos
+        this.productos = inventario.filter(item => !esMaterialDeKit(item.referencia)).map(item => ({
           codigo: String(item.codigo),
           referencia: item.referencia ?? '',
           tipo: item.tipo ?? 'figura',
@@ -252,16 +278,25 @@ export class Ventas implements OnInit {
   }
 
   // Existencias reales de pinturas y pinceles en el local
+  // Kit para llevar: del local · Empresa con contrato (recreacionales): de la bodega
+  get lugarKits(): 'local' | 'bodega' {
+    return this.modalidad === 'Empresa con contrato' ? 'bodega' : 'local';
+  }
+
+  get nombreLugarKits(): string {
+    return this.lugarKits === 'bodega' ? 'Bodega' : 'Local';
+  }
+
   get pinturasDisponibles(): number {
-    return this.productos
-      .filter(producto => producto.tipo === 'pintura')
-      .reduce((total, producto) => total + producto.existencias, 0);
+    return this.materialesKits?.['KIT-PINTURAS']?.[this.lugarKits] ?? 0;
   }
 
   get pincelesDisponibles(): number {
-    return this.productos
-      .filter(producto => producto.tipo === 'pincel')
-      .reduce((total, producto) => total + producto.existencias, 0);
+    return this.materialesKits?.['KIT-PINCELES']?.[this.lugarKits] ?? 0;
+  }
+
+  get materialesKitsExisten(): boolean {
+    return !!this.materialesKits?.['KIT-PINTURAS']?.existe && !!this.materialesKits?.['KIT-PINCELES']?.existe;
   }
 
   get pinturasNecesarias(): number {
@@ -310,6 +345,47 @@ export class Ventas implements OnInit {
     return this.tienePrecioManual(producto)
       ? Number(producto.precioManual) || 0
       : this.getPrecioSugerido(producto);
+  }
+
+  // Valor de cada línea de pago: la última siempre es "el resto"
+  valorPago(indice: number): number {
+    if (indice === this.pagos.length - 1) {
+      const otros = this.pagos.slice(0, -1).reduce((total, pago) => total + (Number(pago.valor) || 0), 0);
+      return this.totalVenta - otros;
+    }
+    return Number(this.pagos[indice].valor) || 0;
+  }
+
+  get pagoValido(): boolean {
+    return this.pagos.every((_, i) => this.valorPago(i) >= 0);
+  }
+
+  get efectivoEnPago(): number {
+    return this.pagos.reduce((total, pago, i) => total + (pago.medio === 'Efectivo' ? this.valorPago(i) : 0), 0);
+  }
+
+  get cambio(): number {
+    return this.recibido ? Math.max(Number(this.recibido) - this.efectivoEnPago, 0) : 0;
+  }
+
+  agregarMedioPago(): void {
+    // La línea que era "el resto" queda con su valor actual y la nueva toma el resto
+    const ultimo = this.pagos.length - 1;
+    this.pagos[ultimo].valor = this.valorPago(ultimo);
+    const usado = new Set(this.pagos.map(pago => pago.medio));
+    const siguiente = MEDIOS_PAGO.find(medio => !usado.has(medio)) ?? 'Efectivo';
+    this.pagos.push({ medio: siguiente, valor: null });
+  }
+
+  quitarMedioPago(indice: number): void {
+    this.pagos.splice(indice, 1);
+    if (this.pagos.length) {
+      this.pagos[this.pagos.length - 1].valor = null;
+    }
+  }
+
+  get cajaCerrada(): boolean {
+    return this.cajaHoy?.estado === 'cerrada';
   }
 
   restablecerPrecio(producto: ProductoVenta): void {
@@ -448,7 +524,7 @@ export class Ventas implements OnInit {
 
     if (this.esKit && this.pinturasNecesarias > this.pinturasDisponibles) {
       alert(
-        `No hay suficientes pinturas.\n\n` +
+        `No hay suficientes pinturas para kits (${this.nombreLugarKits}).\n\n` +
         `Necesarias: ${this.pinturasNecesarias}\n` +
         `Disponibles: ${this.pinturasDisponibles}`
       );
@@ -457,10 +533,25 @@ export class Ventas implements OnInit {
 
     if (this.esKit && this.pincelesNecesarios > this.pincelesDisponibles) {
       alert(
-        `No hay suficientes pinceles.\n\n` +
+        `No hay suficientes pinceles para kits (${this.nombreLugarKits}).\n\n` +
         `Necesarios: ${this.pincelesNecesarios}\n` +
         `Disponibles: ${this.pincelesDisponibles}`
       );
+      return;
+    }
+
+    if (this.cajaCerrada) {
+      alert('La caja de hoy ya está cerrada. Reábrela en Caja para registrar más ventas.');
+      return;
+    }
+
+    if (!this.pagoValido) {
+      alert('Los valores del pago superan el total de la venta. Revisa los medios de pago.');
+      return;
+    }
+
+    if (this.efectivoEnPago > 0 && this.recibido && Number(this.recibido) < this.efectivoEnPago) {
+      alert('El efectivo recibido es menor que lo que se paga en efectivo.');
       return;
     }
 
@@ -478,7 +569,11 @@ export class Ventas implements OnInit {
       cliente: this.cliente.trim(),
       observacion: this.observacion.trim(),
       usuario: this.authService.usuarioActual?.nombre ?? '',
-      fecha: this.fecha
+      fecha: this.fecha,
+      pagos: this.pagos
+        .map((pago, i) => ({ medio: pago.medio, valor: this.valorPago(i) }))
+        .filter(pago => pago.valor > 0),
+      recibido: this.efectivoEnPago > 0 && this.recibido ? Number(this.recibido) : null
     }).subscribe({
       next: venta => {
         this.guardando = false;
@@ -488,6 +583,8 @@ export class Ventas implements OnInit {
         // Limpiar el formulario y recargar existencias actualizadas
         this.cliente = '';
         this.mensajeEscaneo = '';
+        this.pagos = [{ medio: 'Efectivo', valor: null }];
+        this.recibido = null;
         this.observacion = '';
         this.busqueda = '';
         this.cargarProductos();

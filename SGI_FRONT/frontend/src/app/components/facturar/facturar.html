@@ -13,17 +13,29 @@
     <!-- TIPO DE DOCUMENTO -->
     <fieldset class="tipos">
       <legend>Documento</legend>
-      <label class="tipo" [class.activo]="tipo === 'pos'">
-        <input type="radio" name="tipoFactura" [checked]="tipo === 'pos'" (change)="cambiarTipo('pos')">
+      <label class="tipo" [class.activo]="!sinFactura && tipo === 'pos'">
+        <input type="radio" name="tipoFactura" [checked]="!sinFactura && tipo === 'pos'" (change)="cambiarTipo('pos')">
         <strong>Tirilla POS</strong>
         <small>Documento equivalente para el cliente del mostrador</small>
       </label>
-      <label class="tipo" [class.activo]="tipo === 'electronica'">
-        <input type="radio" name="tipoFactura" [checked]="tipo === 'electronica'" (change)="cambiarTipo('electronica')">
+      <label class="tipo" [class.activo]="!sinFactura && tipo === 'electronica'">
+        <input type="radio" name="tipoFactura" [checked]="!sinFactura && tipo === 'electronica'" (change)="cambiarTipo('electronica')">
         <strong>Factura electrónica</strong>
         <small>Para empresas o clientes que la piden con sus datos</small>
       </label>
+      <label class="tipo" [class.activo]="sinFactura">
+        <input type="radio" name="tipoFactura" [checked]="sinFactura" (change)="elegirSinFactura()">
+        <strong>Sin factura</strong>
+        <small>El cliente no la quiere: no se imprime nada</small>
+      </label>
     </fieldset>
+
+    <p class="nota-sin" *ngIf="sinFactura">
+      La venta ya quedó registrada. Si después el cliente pide su factura, la emites en
+      <strong>Facturas → Ventas sin facturar</strong>.
+    </p>
+
+    <ng-container *ngIf="!sinFactura">
 
     <p class="aviso" *ngIf="!resolucionLista">
       Aún no está registrada la resolución de numeración DIAN de este documento: saldrá marcado
@@ -78,6 +90,12 @@
         <label for="fDias">Días de crédito</label>
         <input id="fDias" name="dias" type="number" min="1" [(ngModel)]="diasCredito">
       </div>
+      <div class="campo ancho" *ngIf="pagoRegistrado">
+        <small class="pago-venta">
+          Pago registrado en la venta:
+          <span *ngFor="let medio of venta.medios_pago; let i = index; let ultimo = last">{{ medio }} {{ pesos(venta.valores_pago[i]) }}{{ ultimo ? '' : ' + ' }}</span>
+        </small>
+      </div>
       <div class="campo">
         <label for="fMedio">Medio de pago</label>
         <select id="fMedio" name="medio" [(ngModel)]="medioPago">
@@ -96,14 +114,13 @@
       </div>
     </div>
 
+    </ng-container>
+
     <p class="error" *ngIf="error" role="alert">{{ error }}</p>
 
     <footer class="acciones">
-      <button type="button" class="sgi-btn sgi-btn-secundario" (click)="cerrar.emit()" [disabled]="emitiendo">
-        Sin factura
-      </button>
       <button type="submit" class="sgi-btn sgi-btn-primario" [disabled]="emitiendo">
-        {{ emitiendo ? 'Emitiendo…' : (tipo === 'pos' ? 'Emitir e imprimir tirilla' : 'Emitir factura electrónica') }}
+        {{ sinFactura ? 'Terminar sin factura' : emitiendo ? 'Emitiendo…' : (tipo === 'pos' ? 'Emitir e imprimir tirilla' : 'Emitir factura electrónica') }}
       </button>
     </footer>
 

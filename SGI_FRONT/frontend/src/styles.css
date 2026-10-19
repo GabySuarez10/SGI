@@ -546,7 +546,8 @@ button:disabled {
 .traslados-page,
 .ventas-page,
 .etiquetas-page,
-.facturas-page {
+.facturas-page,
+.caja-page {
   width: 100%;
   max-width: 1320px;
   margin-left: auto;

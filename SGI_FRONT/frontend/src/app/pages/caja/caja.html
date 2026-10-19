@@ -1,0 +1,259 @@
+<div class="caja-page">
+
+  <div class="page-header encabezado-fijo">
+    <div>
+      <span class="page-label">Ventas</span>
+      <h1>Caja</h1>
+      <p>Cuadre del día: {{ hoy | date:'EEEE d \'de\' MMMM' }}</p>
+    </div>
+    <div class="acciones-encabezado" *ngIf="pestana === 'hoy' && caja?.estado === 'abierta' && resumen">
+      <span class="resumen-rapido">
+        Ventas: <strong>${{ resumen.total_ventas.toLocaleString('es-CO') }}</strong>
+        · Efectivo esperado: <strong>${{ resumen.efectivo_esperado.toLocaleString('es-CO') }}</strong>
+      </span>
+    </div>
+  </div>
+
+  <div class="pestanas" role="tablist">
+    <button type="button" role="tab" [class.activa]="pestana === 'hoy'" [attr.aria-selected]="pestana === 'hoy'" (click)="pestana = 'hoy'; cargarHoy()">Hoy</button>
+    <button type="button" role="tab" [class.activa]="pestana === 'historial'" [attr.aria-selected]="pestana === 'historial'" (click)="cargarHistorial()">Historial de cierres</button>
+  </div>
+
+  <p class="sgi-aviso" *ngIf="aviso" role="status">{{ aviso }}</p>
+  <p class="mensaje-error" *ngIf="error">{{ error }}</p>
+  <p class="estado-carga" *ngIf="cargando">Cargando…</p>
+
+
+  <!-- =================== HOY =================== -->
+  <ng-container *ngIf="pestana === 'hoy' && !cargando">
+
+    <!-- ABRIR CAJA -->
+    <section class="tarjeta abrir" *ngIf="!caja">
+      <h2>Abrir caja</h2>
+      <p>Escribe el efectivo con el que empieza el día (la base para dar cambio).</p>
+      <form class="fila-form" (ngSubmit)="abrir()">
+        <div class="campo">
+          <label for="baseCaja">Base inicial (COP)</label>
+          <input id="baseCaja" name="base" type="number" min="0" step="1000" placeholder="Ej. 100000" [(ngModel)]="base">
+        </div>
+        <button type="submit" class="sgi-btn sgi-btn-primario" [disabled]="abriendo">
+          {{ abriendo ? 'Abriendo…' : 'Abrir caja' }}
+        </button>
+      </form>
+    </section>
+
+
+    <!-- CAJA ABIERTA -->
+    <ng-container *ngIf="caja && caja.estado === 'abierta' && resumen">
+
+      <p class="estado-caja">
+        Abierta por <strong>{{ caja.abierta_por || '—' }}</strong> a las {{ caja.hora_apertura | date:'h:mm a' }}
+        · Base <strong>${{ caja.base.toLocaleString('es-CO') }}</strong>
+      </p>
+
+      <!-- VENTAS POR MEDIO DE PAGO -->
+      <section class="medios">
+        <article class="medio total">
+          <span>Ventas del día ({{ resumen.ventas }})</span>
+          <strong>${{ resumen.total_ventas.toLocaleString('es-CO') }}</strong>
+        </article>
+        <article class="medio" *ngFor="let m of resumen.por_medio" [class.efectivo]="m.medio === 'Efectivo'">
+          <span>{{ m.medio }} <small>({{ m.pagos }})</small></span>
+          <strong>${{ m.valor.toLocaleString('es-CO') }}</strong>
+        </article>
+        <article class="medio aviso" *ngIf="resumen.sin_registrar.ventas">
+          <span>Sin medio registrado ({{ resumen.sin_registrar.ventas }})</span>
+          <strong>${{ resumen.sin_registrar.total.toLocaleString('es-CO') }}</strong>
+        </article>
+      </section>
+
+      <div class="dos-columnas">
+
+        <!-- EFECTIVO ESPERADO -->
+        <section class="tarjeta">
+          <h2>Efectivo esperado</h2>
+          <div class="linea"><span>Base inicial</span><span>${{ caja.base.toLocaleString('es-CO') }}</span></div>
+          <div class="linea"><span>+ Ventas en efectivo</span><span>${{ efectivoVentas(resumen).toLocaleString('es-CO') }}</span></div>
+          <div class="linea"><span>+ Entradas</span><span>${{ resumen.entradas.toLocaleString('es-CO') }}</span></div>
+          <div class="linea"><span>− Salidas</span><span>${{ resumen.salidas.toLocaleString('es-CO') }}</span></div>
+          <div class="linea total"><span>Debe haber en caja</span><span>${{ resumen.efectivo_esperado.toLocaleString('es-CO') }}</span></div>
+        </section>
+
+        <!-- ENTRADAS Y SALIDAS -->
+        <section class="tarjeta">
+          <h2>Entradas y salidas de efectivo</h2>
+          <form class="movimiento-form" (ngSubmit)="agregarMovimiento()">
+            <div class="segmento" role="radiogroup" aria-label="Tipo de movimiento">
+              <button type="button" [class.activo]="movTipo === 'salida'" (click)="cambiarTipoMovimiento('salida')">Salida</button>
+              <button type="button" [class.activo]="movTipo === 'entrada'" (click)="cambiarTipoMovimiento('entrada')">Entrada</button>
+            </div>
+            <select name="categoria" aria-label="Categoría" [(ngModel)]="movCategoria">
+              <option *ngFor="let c of categoriasMovimiento" [value]="c">{{ c }}</option>
+            </select>
+            <input name="valor" type="number" min="1" step="100" placeholder="Valor" aria-label="Valor" [(ngModel)]="movValor">
+            <input name="motivo" class="ancho" placeholder="Motivo (ej. pago a Arte y Color, factura 123)" aria-label="Motivo" [(ngModel)]="movMotivo">
+            <button type="submit" class="sgi-btn sgi-btn-secundario sgi-btn-pequeno" [disabled]="guardandoMov">Agregar</button>
+          </form>
+
+          <ul class="movimientos" *ngIf="resumen.movimientos.length">
+            <li *ngFor="let m of resumen.movimientos" [class.salida]="m.tipo === 'salida'">
+              <span>
+                <strong>{{ m.tipo === 'entrada' ? '+' : '−' }}${{ m.valor.toLocaleString('es-CO') }}</strong>
+                {{ m.categoria }} · {{ m.motivo }}
+                <small>{{ m.fecha | date:'h:mm a' }} {{ m.usuario }}</small>
+              </span>
+              <button type="button" class="quitar" [attr.aria-label]="'Eliminar ' + m.motivo" (click)="eliminarMovimiento(m.codigo)">✕</button>
+            </li>
+          </ul>
+          <p class="vacio" *ngIf="!resumen.movimientos.length">Sin movimientos hoy.</p>
+        </section>
+
+      </div>
+
+      <!-- PAGOS QUE NO SON EFECTIVO -->
+      <section class="tarjeta" *ngIf="resumen.no_efectivo.length">
+        <h2>Revisa contra el banco, Nequi o el datáfono</h2>
+        <div class="tabla-envoltura">
+          <table class="tabla">
+            <thead><tr><th>Hora</th><th>Venta</th><th>Medio</th><th>Cliente</th><th class="num">Valor</th></tr></thead>
+            <tbody>
+              <tr *ngFor="let p of resumen.no_efectivo">
+                <td>{{ p.hora | date:'h:mm a' }}</td>
+                <td>#{{ p.venta }}</td>
+                <td>{{ p.medio }}</td>
+                <td>{{ p.cliente }}</td>
+                <td class="num">${{ p.valor.toLocaleString('es-CO') }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- CERRAR CAJA -->
+      <section class="tarjeta cierre">
+        <h2>Cerrar caja</h2>
+
+        <div class="segmento" role="radiogroup" aria-label="Cómo contar el efectivo">
+          <button type="button" [class.activo]="modoConteo === 'billetes'" (click)="modoConteo = 'billetes'">Contar por billetes y monedas</button>
+          <button type="button" [class.activo]="modoConteo === 'total'" (click)="modoConteo = 'total'">Escribir el total</button>
+        </div>
+
+        <div class="billetes" *ngIf="modoConteo === 'billetes'">
+          <div class="billete" *ngFor="let d of denominaciones">
+            <label [for]="'den-' + d">${{ d.toLocaleString('es-CO') }}</label>
+            <span>×</span>
+            <input [id]="'den-' + d" type="number" min="0" placeholder="0" [(ngModel)]="conteo[d]" [name]="'den-' + d">
+            <span class="subtotal">{{ pesos(subtotalBillete(d)) }}</span>
+          </div>
+        </div>
+
+        <div class="campo total-escrito" *ngIf="modoConteo === 'total'">
+          <label for="totalContado">Efectivo contado (COP)</label>
+          <input id="totalContado" type="number" min="0" step="100" placeholder="Ej. 245000" [(ngModel)]="totalEscrito">
+        </div>
+
+        <div class="resultado" *ngIf="efectivoContado !== null"
+             [class.cuadra]="diferenciaActual === 0" [class.sobra]="(diferenciaActual ?? 0) > 0" [class.falta]="(diferenciaActual ?? 0) < 0">
+          <div><span>Contado</span><strong>${{ (efectivoContado ?? 0).toLocaleString('es-CO') }}</strong></div>
+          <div><span>Esperado</span><strong>${{ resumen.efectivo_esperado.toLocaleString('es-CO') }}</strong></div>
+          <div><span>Resultado</span><strong>{{ textoDiferencia(diferenciaActual) }}</strong></div>
+        </div>
+
+        <div class="campo">
+          <label for="obsCierre">Observaciones <span *ngIf="diferenciaActual">(obligatorio si no cuadra)</span></label>
+          <input id="obsCierre" [(ngModel)]="observaciones" placeholder="Ej. faltan $2.000 de un cambio mal dado">
+        </div>
+
+        <div class="acciones-cierre">
+          <button type="button" class="sgi-btn sgi-btn-primario" [disabled]="cerrando" (click)="cerrar()">
+            {{ cerrando ? 'Cerrando…' : 'Cerrar caja e imprimir' }}
+          </button>
+        </div>
+      </section>
+
+    </ng-container>
+
+
+    <!-- CAJA DE HOY YA CERRADA -->
+    <section class="tarjeta cerrada" *ngIf="caja && caja.estado === 'cerrada'">
+      <h2>La caja de hoy está cerrada</h2>
+      <div class="resultado"
+           [class.cuadra]="caja.diferencia === 0" [class.sobra]="(caja.diferencia ?? 0) > 0" [class.falta]="(caja.diferencia ?? 0) < 0">
+        <div><span>Ventas</span><strong>${{ (caja.resumen?.total_ventas ?? 0).toLocaleString('es-CO') }}</strong></div>
+        <div><span>Esperado</span><strong>${{ (caja.efectivo_esperado ?? 0).toLocaleString('es-CO') }}</strong></div>
+        <div><span>Contado</span><strong>${{ (caja.efectivo_contado ?? 0).toLocaleString('es-CO') }}</strong></div>
+        <div><span>Resultado</span><strong>{{ textoDiferencia(caja.diferencia) }}</strong></div>
+      </div>
+      <p class="detalle">Cerró {{ caja.cerrada_por || '—' }} a las {{ caja.hora_cierre | date:'h:mm a' }}. {{ caja.observaciones }}</p>
+      <div class="acciones-cierre">
+        <button type="button" class="sgi-btn sgi-btn-secundario" (click)="reabrir(caja)">Reabrir caja</button>
+        <button type="button" class="sgi-btn sgi-btn-primario" (click)="imprimir(caja)">Imprimir cierre</button>
+      </div>
+    </section>
+
+  </ng-container>
+
+
+  <!-- =================== HISTORIAL =================== -->
+  <ng-container *ngIf="pestana === 'historial'">
+
+    <div class="tabla-envoltura">
+      <table class="tabla">
+        <thead>
+          <tr>
+            <th>Fecha</th><th class="num">Base</th><th class="num">Ventas</th><th class="num">Esperado</th>
+            <th class="num">Contado</th><th>Resultado</th><th>Cerró</th><th><span class="sr-only">Acciones</span></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let c of cajas" [class.seleccionada]="seleccionada?.codigo === c.codigo">
+            <td><strong>{{ c.fecha }}</strong><small *ngIf="c.estado === 'abierta'">Abierta</small></td>
+            <td class="num">${{ c.base.toLocaleString('es-CO') }}</td>
+            <td class="num">{{ pesosOGuion(totalVentasCaja(c)) }}</td>
+            <td class="num">{{ pesosOGuion(c.efectivo_esperado) }}</td>
+            <td class="num">{{ pesosOGuion(c.efectivo_contado) }}</td>
+            <td>
+              <span class="chip" *ngIf="c.estado === 'cerrada'"
+                    [class.cuadra]="c.diferencia === 0" [class.sobra]="(c.diferencia ?? 0) > 0" [class.falta]="(c.diferencia ?? 0) < 0">
+                {{ textoDiferencia(c.diferencia) }}
+              </span>
+            </td>
+            <td>{{ c.cerrada_por || '—' }}</td>
+            <td class="acciones">
+              <button type="button" class="sgi-btn sgi-btn-secundario sgi-btn-pequeno" (click)="verCaja(c.codigo)">Ver</button>
+              <button type="button" class="sgi-btn sgi-btn-secundario sgi-btn-pequeno" *ngIf="c.estado === 'cerrada'" (click)="imprimir(c)">Imprimir</button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+      <p class="vacio" *ngIf="!cajas.length">Aún no hay cierres de caja.</p>
+    </div>
+
+    <!-- DETALLE DE UN DÍA -->
+    <section class="tarjeta" *ngIf="seleccionada as s">
+      <h2>Caja del {{ s.fecha }}</h2>
+      <p class="detalle">
+        Abrió {{ s.abierta_por || '—' }} {{ s.hora_apertura | date:'h:mm a' }}
+        <span *ngIf="s.estado === 'cerrada'">· Cerró {{ s.cerrada_por || '—' }} {{ s.hora_cierre | date:'h:mm a' }}</span>
+      </p>
+      <div class="medios">
+        <article class="medio" *ngFor="let m of (s.resumen ?? s.resumen_actual)?.por_medio">
+          <span>{{ m.medio }} <small>({{ m.pagos }})</small></span>
+          <strong>${{ m.valor.toLocaleString('es-CO') }}</strong>
+        </article>
+      </div>
+      <div class="linea"><span>Base</span><span>${{ s.base.toLocaleString('es-CO') }}</span></div>
+      <div class="linea"><span>Entradas / salidas</span>
+        <span>+${{ ((s.resumen ?? s.resumen_actual)?.entradas ?? 0).toLocaleString('es-CO') }} / −${{ ((s.resumen ?? s.resumen_actual)?.salidas ?? 0).toLocaleString('es-CO') }}</span></div>
+      <div class="linea total"><span>Efectivo esperado</span><span>${{ (s.efectivo_esperado ?? (s.resumen_actual?.efectivo_esperado ?? 0)).toLocaleString('es-CO') }}</span></div>
+      <div class="linea" *ngIf="s.estado === 'cerrada'"><span>Contado</span><span>${{ (s.efectivo_contado ?? 0).toLocaleString('es-CO') }} · {{ textoDiferencia(s.diferencia) }}</span></div>
+      <p class="detalle" *ngIf="s.observaciones">{{ s.observaciones }}</p>
+      <div class="acciones-cierre" *ngIf="s.estado === 'cerrada'">
+        <button type="button" class="sgi-btn sgi-btn-secundario" (click)="reabrir(s)">Reabrir</button>
+        <button type="button" class="sgi-btn sgi-btn-primario" (click)="imprimir(s)">Imprimir cierre</button>
+      </div>
+    </section>
+
+  </ng-container>
+
+</div>

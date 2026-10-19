@@ -421,6 +421,10 @@ def eliminar_producto(codigo):
     Las ventas, traslados y pedidos ya hechos conservan el nombre en su historial.
     """
     producto = obtener_producto(codigo)
+    if (producto.referencia or "").upper() in ("KIT-PINTURAS", "KIT-PINCELES"):
+        raise ErrorAPI(
+            f"'{producto.nombre}' no se puede eliminar: el sistema lo usa para descontar los kits", 409
+        )
     nombre = (producto.nombre or "").strip().lower()
     for pedido in PedidoProveedor.query.filter(PedidoProveedor.estado.is_(False)):
         if nombre in (p.strip().lower() for p in (pedido.productos or "").split(",")):

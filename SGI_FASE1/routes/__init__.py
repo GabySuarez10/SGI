@@ -16,6 +16,7 @@ from routes.configuracion import configuracion_bp
 from routes.colecciones import colecciones_bp
 from routes.categorias import categorias_bp
 from routes.facturas import facturas_bp
+from routes.caja import caja_bp
 
 BLUEPRINTS = (
     usuarios_bp,
@@ -31,6 +32,7 @@ BLUEPRINTS = (
     colecciones_bp,
     categorias_bp,
     facturas_bp,
+    caja_bp,
 )
 
 

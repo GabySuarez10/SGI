@@ -38,6 +38,8 @@ export class Facturar implements OnInit {
   @Output() cerrar = new EventEmitter<void>();
 
   tipo: TipoFactura = 'pos';
+  // El cliente no quiere ningún documento: no se emite ni se imprime nada
+  sinFactura = false;
   identificarCliente = false;     // solo tirilla: si no, consumidor final
   cliente: IClienteFactura = {
     tipo_documento: 'CC', documento: '', nombre: '', correo: '', direccion: '', telefono: ''
@@ -61,6 +63,20 @@ export class Facturar implements OnInit {
 
   ngOnInit(): void {
     this.tipo = this.tipoInicial;
+
+    // El medio de pago ya quedó registrado en la venta: la factura usa el mismo
+    const medios = this.venta.medios_pago ?? [];
+    if (medios.length === 1) {
+      this.medioPago = medios[0];
+    } else if (medios.length > 1) {
+      this.medioPago = 'Mixto';
+      this.observaciones = 'Pago: ' + medios
+        .map((medio, i) => `${medio} ${pesos(this.venta.valores_pago?.[i] ?? 0)}`)
+        .join(' + ');
+    }
+    if (this.venta.recibido) {
+      this.recibido = this.venta.recibido;
+    }
     this.facturaService.getDatos().subscribe({
       next: ({ datos, opciones }) => {
         this.opciones = opciones;
@@ -80,6 +96,7 @@ export class Facturar implements OnInit {
   }
 
   cambiarTipo(tipo: TipoFactura): void {
+    this.sinFactura = false;
     this.tipo = tipo;
     this.error = '';
     this.revisarResolucion();
@@ -90,7 +107,20 @@ export class Facturar implements OnInit {
   }
 
   get cambio(): number {
-    return this.recibido ? Math.max(Number(this.recibido) - this.venta.total, 0) : 0;
+    return this.recibido ? Math.max(Number(this.recibido) - this.efectivoVenta, 0) : 0;
+  }
+
+  // Parte de la venta pagada en efectivo (toda si no hay pagos registrados)
+  get efectivoVenta(): number {
+    const medios = this.venta.medios_pago ?? [];
+    if (!medios.length) {
+      return this.venta.total;
+    }
+    return medios.reduce((total, medio, i) => total + (medio === 'Efectivo' ? this.venta.valores_pago?.[i] ?? 0 : 0), 0);
+  }
+
+  get pagoRegistrado(): boolean {
+    return (this.venta.medios_pago ?? []).length > 0;
   }
 
   @HostListener('document:keydown.escape')
@@ -100,8 +130,18 @@ export class Facturar implements OnInit {
     }
   }
 
+  elegirSinFactura(): void {
+    this.sinFactura = true;
+    this.error = '';
+  }
+
   emitir(): void {
     this.error = '';
+    if (this.sinFactura) {
+      // La venta ya quedó registrada; luego se puede facturar desde Facturas → Ventas sin facturar
+      this.cerrar.emit();
+      return;
+    }
     if (this.tipo === 'electronica') {
       const faltan = [
         !this.cliente.documento.trim() && 'número de documento',
@@ -113,7 +153,7 @@ export class Facturar implements OnInit {
         return;
       }
     }
-    if (this.medioPago === 'Efectivo' && this.recibido && Number(this.recibido) < this.venta.total) {
+    if (this.medioPago === 'Efectivo' && this.recibido && Number(this.recibido) < this.efectivoVenta) {
       this.error = 'El valor recibido es menor que el total.';
       return;
     }

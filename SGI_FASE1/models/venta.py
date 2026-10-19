@@ -24,6 +24,11 @@ class Venta(db.Model):
     observacion = db.Column("observacion", db.Text)
     usuario = db.Column("usuario", db.String(100))
     modalidad = db.Column("modalidad", db.String(40))
+    # Cómo se pagó (listas paralelas: permite pago mixto). Vacío = "Sin registrar"
+    medios_pago = db.Column("medios_pago", db.Text)
+    valores_pago = db.Column("valores_pago", db.Text)
+    recibido = db.Column("recibido", db.Integer)        # efectivo que entregó el cliente
+    caja = db.Column("caja", db.Integer)                # caja del día
 
     def to_dict(self):
         return {
@@ -37,4 +42,8 @@ class Venta(db.Model):
             "observacion": self.observacion,
             "usuario": self.usuario,
             "modalidad": self.modalidad or "",
+            "medios_pago": texto_a_lista(self.medios_pago),
+            "valores_pago": texto_a_lista_numeros(self.valores_pago),
+            "recibido": self.recibido,
+            "caja": self.caja,
         }
