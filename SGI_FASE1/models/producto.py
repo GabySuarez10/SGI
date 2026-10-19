@@ -31,6 +31,10 @@ class Producto(db.Model):
     # un número = precio escrito a mano por el administrador.
     precio_pintar_local = db.Column("precio_pintar_local", db.Integer, nullable=True)
     precio_terminada = db.Column("precio_terminada", db.Integer, nullable=True)
+    # Kit para llevar (solo figuras): tamaño elegido de la tabla tarifa_kit y su
+    # valor (editable). NULL = se toma de la tabla o del valor general del kit.
+    kit_categoria = db.Column("kit_categoria", db.String(40))
+    precio_kit = db.Column("precio_kit", db.Integer, nullable=True)
 
     def precios_figura(self):
         """(pintar en el local, terminada): el guardado o el sugerido."""
@@ -58,4 +62,6 @@ class Producto(db.Model):
             "categoria": self.categoria or "",
             "precio_pintar_local": pintar_local,
             "precio_terminada": terminada,
+            "kit_categoria": self.kit_categoria or "",
+            "precio_kit": self.precio_kit,
         }

@@ -1,0 +1,191 @@
+<div class="facturas-page">
+
+  <div class="page-header encabezado-fijo">
+    <div>
+      <span class="page-label">Ventas</span>
+      <h1>Facturas</h1>
+      <p>Tirillas POS y facturas electrónicas de las ventas del local.</p>
+    </div>
+    <div class="acciones-encabezado">
+      <span class="resumen-rapido" *ngIf="pestana === 'emitidas'">
+        Facturado: <strong>{{ pesos(totalFacturado) }}</strong>
+      </span>
+    </div>
+  </div>
+
+  <div class="pestanas" role="tablist">
+    <button type="button" role="tab" [class.activa]="pestana === 'emitidas'" [attr.aria-selected]="pestana === 'emitidas'" (click)="pestana = 'emitidas'">
+      Emitidas <span>{{ facturas.length }}</span>
+    </button>
+    <button type="button" role="tab" [class.activa]="pestana === 'pendientes'" [attr.aria-selected]="pestana === 'pendientes'" (click)="pestana = 'pendientes'">
+      Ventas sin facturar <span>{{ ventasPendientes.length }}</span>
+    </button>
+    <button type="button" role="tab" [class.activa]="pestana === 'datos'" [attr.aria-selected]="pestana === 'datos'" (click)="pestana = 'datos'">
+      Datos del negocio
+      <span class="alerta" *ngIf="!resolucionPosLista || !datos['nit']">!</span>
+    </button>
+  </div>
+
+  <p class="sgi-aviso" *ngIf="aviso" role="status">{{ aviso }}</p>
+  <p class="mensaje-error" *ngIf="error">{{ error }}</p>
+  <p class="estado-carga" *ngIf="cargando">Cargando…</p>
+
+  <p class="nota" *ngIf="!cargando && pestana !== 'datos' && (!resolucionPosLista || !datos['nit'])">
+    Faltan los datos de la DIAN (NIT y resolución de numeración). Mientras tanto los documentos salen
+    marcados <strong>"sin validez fiscal"</strong>. Complétalos en <button type="button" class="sgi-btn sgi-btn-enlace" (click)="pestana = 'datos'">Datos del negocio</button>.
+  </p>
+
+
+  <!-- ================= EMITIDAS ================= -->
+  <section *ngIf="pestana === 'emitidas' && !cargando">
+
+    <div class="filtros">
+      <input type="search" aria-label="Buscar factura" placeholder="Buscar por número, cliente, documento o venta…" [(ngModel)]="busqueda">
+      <select aria-label="Tipo" [(ngModel)]="filtroTipo">
+        <option value="">Todos los documentos</option>
+        <option value="pos">Tirillas POS</option>
+        <option value="electronica">Facturas electrónicas</option>
+      </select>
+      <select aria-label="Estado" [(ngModel)]="filtroEstado">
+        <option value="">Todos los estados</option>
+        <option value="pendiente_envio">Pendiente DIAN</option>
+        <option value="aceptada">Aceptada DIAN</option>
+        <option value="rechazada">Rechazada DIAN</option>
+        <option value="anulada">Anulada</option>
+      </select>
+    </div>
+
+    <div class="tabla-envoltura">
+      <table class="tabla-facturas">
+        <thead>
+          <tr>
+            <th>Número</th>
+            <th>Documento</th>
+            <th>Fecha</th>
+            <th>Cliente</th>
+            <th class="num">Total</th>
+            <th>Estado</th>
+            <th><span class="sr-only">Acciones</span></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let f of facturasFiltradas; trackBy: trackFactura" [class.anulada]="f.estado === 'anulada'">
+            <td><strong>{{ f.numero_completo }}</strong><small *ngIf="f.venta">Venta #{{ f.venta }}</small></td>
+            <td>{{ f.tipo === 'pos' ? 'Tirilla POS' : 'Factura electrónica' }}</td>
+            <td>{{ f.fecha | date:'dd/MM/yyyy HH:mm' }}</td>
+            <td>{{ f.cliente.nombre }}<small>{{ f.cliente.tipo_documento }} {{ f.cliente.documento }}</small></td>
+            <td class="num">{{ pesos(f.total) }}</td>
+            <td><span [class]="'estado ' + f.estado">{{ nombresEstado[f.estado] }}</span></td>
+            <td class="acciones">
+              <button type="button" class="sgi-btn sgi-btn-secundario sgi-btn-pequeno" (click)="imprimir(f)">Imprimir</button>
+              <button type="button" class="sgi-btn sgi-btn-secundario sgi-btn-pequeno" *ngIf="f.estado !== 'anulada'" (click)="registrarCufe(f)">
+                {{ f.tipo === 'pos' ? 'CUDE' : 'CUFE' }}
+              </button>
+              <button type="button" class="sgi-btn sgi-btn-secundario sgi-btn-pequeno" *ngIf="f.tipo === 'pos' && f.estado !== 'anulada' && f.venta" (click)="pasarAElectronica(f)">
+                A factura electrónica
+              </button>
+              <button type="button" class="btn-anular" *ngIf="f.estado !== 'anulada'" (click)="anular(f)">Anular</button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+      <p class="vacio" *ngIf="facturasFiltradas.length === 0">No hay facturas con estos filtros.</p>
+    </div>
+
+  </section>
+
+
+  <!-- ================= VENTAS SIN FACTURAR ================= -->
+  <section *ngIf="pestana === 'pendientes' && !cargando">
+
+    <div class="tabla-envoltura">
+      <table class="tabla-facturas">
+        <thead>
+          <tr>
+            <th>Venta</th>
+            <th>Fecha</th>
+            <th>Cliente</th>
+            <th>Modalidad</th>
+            <th class="num">Total</th>
+            <th><span class="sr-only">Acciones</span></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let v of ventasPendientes">
+            <td><strong>#{{ v.codigo }}</strong><small>{{ v.producto.length }} producto(s)</small></td>
+            <td>{{ v.fecha | date:'dd/MM/yyyy HH:mm' }}</td>
+            <td>{{ v.cliente }}</td>
+            <td>{{ v.modalidad }}</td>
+            <td class="num">{{ pesos(v.total) }}</td>
+            <td class="acciones">
+              <button type="button" class="sgi-btn sgi-btn-primario sgi-btn-pequeno" (click)="facturarVenta(v, 'pos')">Tirilla</button>
+              <button type="button" class="sgi-btn sgi-btn-secundario sgi-btn-pequeno" (click)="facturarVenta(v, 'electronica')">Factura electrónica</button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+      <p class="vacio" *ngIf="ventasPendientes.length === 0">Todas las ventas tienen factura.</p>
+    </div>
+
+  </section>
+
+
+  <!-- ================= DATOS DEL NEGOCIO ================= -->
+  <form *ngIf="pestana === 'datos' && !cargando" class="datos" (ngSubmit)="guardarDatos()">
+
+    <p class="nota">
+      Estas son las <strong>bases</strong> de la facturación. Cuando tengan el RUT, la resolución de numeración
+      de la DIAN y el proveedor tecnológico, completa estos datos: las nuevas tirillas y facturas los usarán.
+      Hasta que el proveedor tecnológico envíe cada documento a la DIAN, quedan como "Pendiente DIAN"; luego se
+      registra el CUFE/CUDE con el botón de cada factura.
+    </p>
+
+    <section class="seccion" *ngFor="let seccion of secciones">
+      <h2>{{ seccion.titulo }}</h2>
+      <p>{{ seccion.ayuda }}</p>
+      <div class="grilla">
+        <div class="campo" *ngFor="let campo of seccion.campos" [class.ancho]="campo.ancho">
+          <label [for]="'dato-' + campo.clave">{{ campo.titulo }}</label>
+
+          <select *ngIf="campo.tipo === 'si-no'" [id]="'dato-' + campo.clave" [name]="campo.clave" [(ngModel)]="datos[campo.clave]">
+            <option *ngFor="let o of siNo" [value]="o.valor">{{ o.nombre }}</option>
+          </select>
+
+          <select *ngIf="campo.tipo === 'select'" [id]="'dato-' + campo.clave" [name]="campo.clave" [(ngModel)]="datos[campo.clave]">
+            <option *ngFor="let o of campo.opciones" [value]="o.valor">{{ o.nombre }}</option>
+          </select>
+
+          <input
+            *ngIf="!campo.tipo || campo.tipo === 'texto' || campo.tipo === 'numero' || campo.tipo === 'fecha'"
+            [id]="'dato-' + campo.clave"
+            [name]="campo.clave"
+            [type]="campo.tipo === 'numero' ? 'number' : campo.tipo === 'fecha' ? 'date' : 'text'"
+            [(ngModel)]="datos[campo.clave]">
+
+          <small *ngIf="campo.ayuda">{{ campo.ayuda }}</small>
+        </div>
+      </div>
+    </section>
+
+    <p class="mensaje-exito" *ngIf="mensajeDatos" role="status">{{ mensajeDatos }}</p>
+    <p class="mensaje-error" *ngIf="errorDatos" role="alert">{{ errorDatos }}</p>
+
+    <div class="guardar">
+      <button type="submit" class="sgi-btn sgi-btn-primario" [disabled]="guardandoDatos">
+        {{ guardandoDatos ? 'Guardando…' : 'Guardar datos de facturación' }}
+      </button>
+    </div>
+
+  </form>
+
+</div>
+
+
+<app-facturar
+  *ngIf="ventaAFacturar"
+  [venta]="ventaAFacturar"
+  [tipoInicial]="tipoInicial"
+  [titulo]="tipoInicial === 'electronica' ? 'Factura electrónica' : 'Facturar venta'"
+  (emitida)="alEmitir($event)"
+  (cerrar)="ventaAFacturar = null">
+</app-facturar>

@@ -16,6 +16,9 @@ export interface IProducto {
   precio_mayorista: number;// precio por mayor (incluye envío)
   precio_pintar_local: number; // solo figuras: sugerido crudo × 2 (editable)
   precio_terminada: number;    // solo figuras: sugerido pintar en el local × 2 (editable)
+  kit_categoria: string;       // solo figuras: tamaño del kit (Pequeño...) o 'Personalizado'
+  precio_kit: number | null;   // valor del kit guardado (null = el de la tabla o el general)
+  precio_kit_efectivo?: number; // valor del kit que se cobra (calculado por la API)
   tipo: TipoProducto;      // figura | pintura | pincel | otro
   coleccion: string;       // solo pinturas: Acrílicas, Pátinas, Gamusa...
   categoria: string;       // solo figuras: Navidad, Materas, Juveniles...
@@ -46,6 +49,8 @@ export interface IProductoNuevo {
   precio_mayorista: number;
   precio_pintar_local: number;
   precio_terminada: number;
+  kit_categoria: string;
+  precio_kit: number | null;
   existencias: number;     // unidades con las que entra a la ubicación elegida
   tipo: TipoProducto;
   coleccion: string;

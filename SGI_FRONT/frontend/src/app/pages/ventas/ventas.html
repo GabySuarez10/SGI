@@ -190,8 +190,9 @@
           </p>
 
           <p *ngIf="modalidad === 'Kit para llevar'">
-            Precio: precio crudo de la figura +
-            <strong>${{ valores.valor_kit_local.toLocaleString('es-CO') }}</strong> del kit.
+            Precio: precio crudo de la figura + el kit según su tamaño
+            (<span *ngFor="let tarifa of tarifasKit; let ultimo = last">{{ tarifa.nombre }} ${{ tarifa.precio.toLocaleString('es-CO') }}{{ ultimo ? '' : ' · ' }}</span>).
+            En cada figura puedes elegir otro tamaño o escribir el valor.
           </p>
 
           <p *ngIf="modalidad === 'Empresa con contrato'">
@@ -468,6 +469,35 @@
             class="product-price"
             *ngIf="producto.cantidad > 0"
           >
+
+            <!-- KIT PARA LLEVAR: tamaño del kit o valor escrito -->
+            <div *ngIf="esKitLlevar && producto.tipo === 'figura'" class="adicional-figura kit-figura">
+
+              <label [for]="'kit-' + producto.codigo">
+                Kit
+              </label>
+
+              <select
+                [id]="'kit-' + producto.codigo"
+                [ngModel]="producto.kitElegido"
+                (ngModelChange)="elegirKit(producto, $event)">
+                <option value="">{{ textoKitProducto(producto) }}</option>
+                <option *ngFor="let tarifa of tarifasKit" [value]="tarifa.nombre">
+                  {{ tarifa.nombre }} · ${{ tarifa.precio.toLocaleString('es-CO') }}
+                </option>
+                <option [value]="kitOtro">Otro valor...</option>
+              </select>
+
+              <input
+                *ngIf="producto.kitElegido === kitOtro"
+                type="number"
+                min="0"
+                step="100"
+                aria-label="Valor del kit"
+                [(ngModel)]="producto.kitManual">
+
+            </div>
+
 
             <div *ngIf="precioEditable && producto.tipo === 'figura'" class="adicional-figura">
 
@@ -802,3 +832,13 @@
   </section>
 
 </div>
+
+
+<!-- FACTURAR LA VENTA RECIÉN REGISTRADA -->
+<app-facturar
+  *ngIf="ventaRegistrada"
+  [venta]="ventaRegistrada"
+  titulo="Venta registrada ✓"
+  (emitida)="ventaRegistrada = null"
+  (cerrar)="ventaRegistrada = null">
+</app-facturar>

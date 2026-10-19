@@ -4,6 +4,7 @@ from database import db
 from utils.precios import precios_pintura
 from models import InventarioBodega, InventarioLocal, Producto
 from queries.comunes import obtener_o_404, buscar_por_nombre, entero
+from queries.configuracion_queries import valores as valores_configuracion, mapa_tarifas_kit, kit_de_producto
 from utils.errores import NoEncontrado
 
 # ------------------------------------------------------------------
@@ -21,13 +22,15 @@ def con_tipo(filas):
     del catálogo, y los precios de pintar en el local y figura terminada.
     """
     catalogo = _datos_catalogo()
+    tarifas_kit, config = mapa_tarifas_kit(), valores_configuracion()
     resultado = []
     for fila in filas:
         item = fila.to_dict()
         producto = catalogo.get(fila.codigo)
         if producto is None:
             item.update(tipo="figura", coleccion="", referencia="", categoria="",
-                        precio_pintar_local=0, precio_terminada=0)
+                        precio_pintar_local=0, precio_terminada=0,
+                        precio_kit=config.get("valor_kit_local", 0), kit_categoria="")
         else:
             tipo = producto.tipo or "figura"
             pintar, terminada = (0, 0)
@@ -41,6 +44,8 @@ def con_tipo(filas):
                 tipo=tipo, coleccion=producto.coleccion or "", referencia=producto.referencia or "",
                 categoria=producto.categoria or "",
                 precio_pintar_local=pintar, precio_terminada=terminada,
+                precio_kit=kit_de_producto(producto, tarifas_kit, config),
+                kit_categoria=producto.kit_categoria or "",
             )
         resultado.append(item)
     return resultado

@@ -17,6 +17,8 @@ export interface IDatosPrecio {
   precio_mayorista: number;  // por mayor + envío
   precio_pintar_local: number; // solo figuras: sugerido crudo × 2
   precio_terminada: number;    // solo figuras: sugerido pintar en el local × 2
+  kit_categoria: string;       // solo figuras: tamaño del kit, 'Personalizado' o '' (según envío)
+  precio_kit: number | null;   // valor del kit (null = el de la tabla)
 }
 
 export const ENVIO_PERSONALIZADO = 'Personalizado';
@@ -42,6 +44,8 @@ export class PrecioProducto implements OnInit, OnChanges {
 
   @Input({ required: true }) datos!: IDatosPrecio;
   @Input() tarifas: ITarifaEnvio[] = [];
+  // Valor del kit para llevar por tamaño (Pequeño $6.000, Mediano $8.000...)
+  @Input() tarifasKit: ITarifaEnvio[] = [];
   @Input() valores: IValoresConfiguracion = VALORES_POR_DEFECTO;
   // Precio máximo por figura pactado con el proveedor (null = sin límite)
   @Input() limite: number | null = null;
@@ -86,6 +90,8 @@ export class PrecioProducto implements OnInit, OnChanges {
       this.datos.envio_categoria = '';
       this.datos.precio_pintar_local = 0;
       this.datos.precio_terminada = 0;
+      this.datos.kit_categoria = '';
+      this.datos.precio_kit = null;
     }
     // Si pasa de material a figura, vuelve a sugerir todos los precios
     if (cambios['esFigura'] && !cambios['esFigura'].firstChange && this.esFigura && this.datos) {
@@ -106,6 +112,60 @@ export class PrecioProducto implements OnInit, OnChanges {
 
   get sugeridoTerminada(): number {
     return sugeridoTerminada(this.datos.precio_pintar_local);
+  }
+
+  // ================================
+  // KIT PARA LLEVAR (5 pinturas + 1 pincel)
+  // ================================
+
+  private tarifaKit(nombre: string): ITarifaEnvio | undefined {
+    const buscado = (nombre || '').trim().toLowerCase();
+    return buscado ? this.tarifasKit.find(tarifa => tarifa.nombre.toLowerCase() === buscado) : undefined;
+  }
+
+  // Opción que muestra el selector del kit
+  get kitSeleccionado(): string {
+    const categoria = this.datos.kit_categoria || '';
+    if (categoria === this.personalizado) {
+      return this.personalizado;
+    }
+    return this.tarifaKit(categoria) ? this.tarifaKit(categoria)!.nombre : '';
+  }
+
+  // Sin tamaño elegido: se usa el del envío si existe en la tabla de kits
+  get kitPorEnvio(): ITarifaEnvio | undefined {
+    return this.tarifaKit(this.datos.envio_categoria);
+  }
+
+  // Valor del kit que se cobra con esta figura
+  get valorKit(): number {
+    if (this.datos.precio_kit !== null && this.datos.precio_kit !== undefined && `${this.datos.precio_kit}` !== '') {
+      return Number(this.datos.precio_kit) || 0;
+    }
+    return (this.tarifaKit(this.datos.kit_categoria) ?? this.kitPorEnvio)?.precio ?? this.valores.valor_kit_local;
+  }
+
+  get kitEditable(): boolean {
+    return this.kitSeleccionado === this.personalizado;
+  }
+
+  elegirKit(nombre: string): void {
+    if (nombre === this.personalizado) {
+      const actual = this.valorKit;
+      this.datos.kit_categoria = this.personalizado;
+      this.datos.precio_kit = actual;
+    } else if (!nombre) {
+      this.datos.kit_categoria = '';
+      this.datos.precio_kit = null;
+    } else {
+      this.datos.kit_categoria = nombre;
+      this.datos.precio_kit = this.tarifaKit(nombre)?.precio ?? null;
+    }
+  }
+
+  editarKit(valor: number): void {
+    this.datos.kit_categoria = this.personalizado;
+    this.datos.precio_kit = Number(valor) || 0;
   }
 
   get superaLimite(): boolean {

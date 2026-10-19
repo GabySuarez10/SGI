@@ -7,6 +7,7 @@ import { VentaService } from '../../services/venta.service';
 import { AuthService } from '../../services/auth.service';
 import { ConfiguracionService } from '../../services/configuracion.service';
 import {
+  ITarifaEnvio,
   IValoresConfiguracion,
   VALORES_POR_DEFECTO
 } from '../../interfaces/configuracion.interface';
@@ -20,6 +21,8 @@ import {
 import { mensajeDeError } from '../../utils/http-error';
 import { Ampliar } from '../../components/visor-imagen/ampliar.directive';
 import { Escaner } from '../../components/escaner/escaner';
+import { Facturar } from '../../components/facturar/facturar';
+import { IVenta } from '../../interfaces/venta.interface';
 import { buscarPorCodigo } from '../../utils/codigos';
 import { IMAGEN_POR_DEFECTO, imagenNoCarga } from '../../utils/imagen';
 import { hoyISO } from '../../utils/fecha';
@@ -51,12 +54,20 @@ interface ProductoVenta {
   // "Pintar en el local" y "Pintada": precio escrito a mano en esta venta
   // (null = usa el precio guardado en el producto)
   precioManual: number | null;
+
+  // "Kit para llevar": valor del kit
+  kitProducto: number;        // el del producto (según su tamaño)
+  kitCategoria: string;       // tamaño de kit guardado en el producto
+  kitElegido: string;         // '' = el del producto · nombre de la tabla · 'otro'
+  kitManual: number | null;   // valor escrito a mano (con 'otro')
 }
+
+const KIT_OTRO = 'otro';
 
 @Component({
   selector: 'app-ventas',
   standalone: true,
-  imports: [CommonModule, FormsModule, Ampliar, Escaner],
+  imports: [CommonModule, FormsModule, Ampliar, Escaner, Facturar],
   templateUrl: './ventas.html',
   styleUrl: './ventas.css'
 })
@@ -75,6 +86,9 @@ export class Ventas implements OnInit {
 
   // Valores editables en Configuración (precio del kit por contrato, etc.)
   valores: IValoresConfiguracion = VALORES_POR_DEFECTO;
+
+  // Kit para llevar por tamaño (Pequeño $6.000, Mediano $8.000...)
+  tarifasKit: ITarifaEnvio[] = [];
 
 
   busqueda = '';
@@ -96,6 +110,9 @@ export class Ventas implements OnInit {
 
   cargando = false;
   guardando = false;
+
+  // Venta recién registrada: abre la ventana para facturarla
+  ventaRegistrada: IVenta | null = null;
 
   // Resultado del último escaneo
   mensajeEscaneo = '';
@@ -126,6 +143,7 @@ export class Ventas implements OnInit {
     }).subscribe({
       next: ({ inventario, configuracion }) => {
         this.valores = configuracion.valores;
+        this.tarifasKit = configuracion.tarifas_kit ?? [];
         this.productos = inventario.map(item => ({
           codigo: String(item.codigo),
           referencia: item.referencia ?? '',
@@ -139,7 +157,11 @@ export class Ventas implements OnInit {
           precioPintarLocal: item.precio_pintar_local ?? item.precio_venta * 2,
           precioTerminada: item.precio_terminada ?? item.precio_venta * 4,
           cantidad: 0,
-          precioManual: null
+          precioManual: null,
+          kitProducto: item.precio_kit ?? configuracion.valores.valor_kit_local,
+          kitCategoria: item.kit_categoria ?? '',
+          kitElegido: '',
+          kitManual: null
         }));
         this.cargando = false;
       },
@@ -196,7 +218,11 @@ export class Ventas implements OnInit {
       return;
     }
     this.modalidad = modalidad;
-    this.productos.forEach(producto => (producto.precioManual = null));
+    this.productos.forEach(producto => {
+      producto.precioManual = null;
+      producto.kitElegido = '';
+      producto.kitManual = null;
+    });
   }
 
   // "Pintar en el local" y "Pintada": el precio de cada figura se puede cambiar
@@ -265,7 +291,8 @@ export class Ventas implements OnInit {
         crudo: producto.precioCrudo,
         mayor: producto.precioMayor,
         pintarLocal: producto.precioPintarLocal,
-        terminada: producto.precioTerminada
+        terminada: producto.precioTerminada,
+        kit: this.getKit(producto)
       },
       this.valores
     );
@@ -289,6 +316,43 @@ export class Ventas implements OnInit {
     producto.precioManual = null;
   }
 
+
+  // ================================
+  // KIT PARA LLEVAR POR TAMAÑO
+  // ================================
+
+  readonly kitOtro = KIT_OTRO;
+
+  get esKitLlevar(): boolean {
+    return this.modalidad === 'Kit para llevar';
+  }
+
+  // Valor del kit de esta figura: el del producto, otro tamaño o uno escrito a mano
+  getKit(producto: ProductoVenta): number {
+    if (producto.kitElegido === KIT_OTRO) {
+      return producto.kitManual === null || `${producto.kitManual}` === ''
+        ? producto.kitProducto
+        : Number(producto.kitManual) || 0;
+    }
+    if (producto.kitElegido) {
+      return this.tarifasKit.find(tarifa => tarifa.nombre === producto.kitElegido)?.precio ?? producto.kitProducto;
+    }
+    return producto.kitProducto;
+  }
+
+  // Texto de la opción "el del producto"
+  textoKitProducto(producto: ProductoVenta): string {
+    const tamano = producto.kitCategoria && producto.kitCategoria !== 'Personalizado' ? ` (${producto.kitCategoria})` : '';
+    return `El de la figura${tamano} · $${producto.kitProducto.toLocaleString('es-CO')}`;
+  }
+
+  elegirKit(producto: ProductoVenta, opcion: string): void {
+    producto.kitElegido = opcion;
+    if (opcion === KIT_OTRO && producto.kitManual === null) {
+      producto.kitManual = producto.kitProducto;
+    }
+  }
+
   getSubtotal(producto: ProductoVenta): number {
     return this.getPrecio(producto) * producto.cantidad;
   }
@@ -309,7 +373,7 @@ export class Ventas implements OnInit {
       case 'Pintar en el local':
         return 'Precio "pintar en el local" de cada figura (editable)';
       case 'Kit para llevar':
-        return `Precio crudo + $${this.valores.valor_kit_local.toLocaleString('es-CO')} del kit`;
+        return 'Precio crudo + kit según el tamaño de la figura';
       case 'Pintada':
         return 'Precio "figura terminada" de cada figura (editable)';
       case 'Empresa con contrato':
@@ -402,25 +466,6 @@ export class Ventas implements OnInit {
 
     const seleccionados = this.productosSeleccionados;
 
-    const detalle = seleccionados
-      .map(producto =>
-        `${producto.cantidad} × ${producto.nombre} ($${this.getPrecio(producto).toLocaleString('es-CO')} c/u)`
-      )
-      .join('\n');
-
-    const resumen =
-      `Salida registrada correctamente.\n\n` +
-      `Cliente / destino:\n${this.cliente}\n\n` +
-      `Modalidad:\n${this.modalidad}\n\n` +
-      `${detalle}\n\n` +
-      `Total de unidades: ${this.totalUnidades}\n` +
-      (this.esKit
-        ? `Kits: ${this.totalKits}\n` +
-          `Pinturas utilizadas: ${this.pinturasNecesarias}\n` +
-          `Pinceles utilizados: ${this.pincelesNecesarios}\n`
-        : '') +
-      `\nTotal: $${this.totalVenta.toLocaleString('es-CO')}`;
-
     this.guardando = true;
     this.error = '';
 
@@ -435,9 +480,10 @@ export class Ventas implements OnInit {
       usuario: this.authService.usuarioActual?.nombre ?? '',
       fecha: this.fecha
     }).subscribe({
-      next: () => {
+      next: venta => {
         this.guardando = false;
-        alert(resumen);
+        // Ofrece emitir la tirilla POS o la factura electrónica de esta venta
+        this.ventaRegistrada = venta;
 
         // Limpiar el formulario y recargar existencias actualizadas
         this.cliente = '';

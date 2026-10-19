@@ -16,7 +16,7 @@ FACTOR_TERMINADA = 2      # terminada = pintar en el local × 2
 # Modalidades de venta y qué precio usa cada una
 DETAL = "Detal"                              # figura en crudo (yeso blanco)
 PINTAR_LOCAL = "Pintar en el local"          # precio "pintar en el local" del producto
-KIT_LLEVAR = "Kit para llevar"               # crudo + 5 pinturas + 1 pincel para la casa
+KIT_LLEVAR = "Kit para llevar"               # crudo + valor del kit según el tamaño (tabla tarifa_kit)
 PINTADA = "Pintada"                          # precio "figura terminada" del producto
 MAYOR_LOCAL = "Por mayor (local)"
 EMPRESA_MAYOR = "Empresa por mayor"
@@ -59,8 +59,25 @@ def precios_pintura(precio_crudo, pintar_guardado=None, terminada_guardado=None)
     return pintar, terminada
 
 
+def precio_kit_figura(kit_guardado, kit_categoria, envio_categoria, tarifas_kit, valor_general):
+    """
+    Valor del kit para llevar de una figura (se suma al precio crudo):
+      1. el valor guardado en el producto (elegido de la tabla o escrito a mano);
+      2. si no tiene, el de la tabla según su tamaño de kit o, si no, su tamaño de envío;
+      3. si tampoco, el valor general del kit de Configuración.
+    tarifas_kit: {nombre en minúsculas: precio}
+    """
+    if kit_guardado is not None:
+        return int(kit_guardado)
+    for nombre in (kit_categoria, envio_categoria):
+        clave = (nombre or "").strip().lower()
+        if clave and clave in tarifas_kit:
+            return int(tarifas_kit[clave])
+    return int(valor_general or 0)
+
+
 def precio_por_modalidad(modalidad, precio_venta, precio_mayorista, config, es_figura=True,
-                         precio_pintar_local=None, precio_terminada=None):
+                         precio_pintar_local=None, precio_terminada=None, precio_kit=None):
     """
     Precio unitario sugerido según la modalidad de la venta.
     Pinturas, pinceles y otros materiales (es_figura=False) se venden a su precio
@@ -73,7 +90,8 @@ def precio_por_modalidad(modalidad, precio_venta, precio_mayorista, config, es_f
     if not es_figura:
         return crudo
     if modalidad == KIT_LLEVAR:
-        return crudo + int(config.get("valor_kit_local", 0))
+        kit = precio_kit if precio_kit is not None else config.get("valor_kit_local", 0)
+        return crudo + int(kit or 0)
     pintar, terminada = precios_pintura(crudo, precio_pintar_local, precio_terminada)
     if modalidad == PINTAR_LOCAL:
         return pintar

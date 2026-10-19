@@ -133,7 +133,10 @@
 
       </div>
 
-      <app-tabla-envios [(tarifas)]="tarifas"></app-tabla-envios>
+      <div class="tablas-tamano">
+        <app-tabla-envios [(tarifas)]="tarifas"></app-tabla-envios>
+        <app-tabla-envios tipo="kit" [(tarifas)]="tarifasKit"></app-tabla-envios>
+      </div>
 
     </div>
 

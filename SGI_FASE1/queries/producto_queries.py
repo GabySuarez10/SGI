@@ -18,7 +18,7 @@ from models import (
     Producto, Proveedor, InventarioBodega, InventarioLocal, ColeccionMaterial, PedidoProveedor,
 )
 from queries.comunes import obtener_o_404, buscar_por_nombre, entero
-from queries.configuracion_queries import valores as valores_configuracion
+from queries.configuracion_queries import valores as valores_configuracion, mapa_tarifas_kit, kit_de_producto
 from queries.categoria_queries import buscar_categoria
 from utils.errores import ErrorAPI
 from utils.precios import calcular_precios, precios_pintura
@@ -36,7 +36,7 @@ TIPOS = ("figura", "pintura", "pincel", "otro")
 # Consultas
 # ------------------------------------------------------------------
 
-def _con_existencias(producto, bodega, local, proveedor=None):
+def _con_existencias(producto, bodega, local, proveedor=None, kit=0):
     """
     Agrega al producto su ubicación, existencias en bodega y local y el límite
     de precio de su proveedor. bodega/local pueden ser None si no hay fila.
@@ -53,6 +53,8 @@ def _con_existencias(producto, bodega, local, proveedor=None):
     if not item["precio_mayorista"] and local:
         item["precio_mayorista"] = local.precio_mayorista or 0
     item["limite_precio_proveedor"] = proveedor.limite_precio if proveedor else None
+    # Valor efectivo del kit para llevar (el guardado, el de la tabla o el general)
+    item["precio_kit_efectivo"] = kit
     return item
 
 
@@ -62,9 +64,13 @@ def listar_productos():
     bodega = {fila.codigo: fila for fila in InventarioBodega.query.all()}
     local = {fila.codigo: fila for fila in InventarioLocal.query.all()}
     proveedores = {p.nombre: p for p in Proveedor.query.all()}
+    tarifas_kit, config = mapa_tarifas_kit(), valores_configuracion()
 
     return [
-        _con_existencias(p, bodega.get(p.codigo), local.get(p.codigo), proveedores.get(p.proveedor))
+        _con_existencias(
+            p, bodega.get(p.codigo), local.get(p.codigo), proveedores.get(p.proveedor),
+            kit_de_producto(p, tarifas_kit, config),
+        )
         for p in productos
     ]
 
@@ -80,6 +86,7 @@ def obtener_producto_detallado(codigo):
         db.session.get(InventarioBodega, codigo),
         db.session.get(InventarioLocal, codigo),
         db.session.get(Proveedor, producto.proveedor) if producto.proveedor else None,
+        kit_de_producto(producto, mapa_tarifas_kit(), valores_configuracion()),
     )
 
 
@@ -219,7 +226,19 @@ def _asignar_precios(producto, datos, config):
     if (producto.tipo or "figura") != "figura":
         producto.precio_pintar_local = None
         producto.precio_terminada = None
+        producto.kit_categoria = None
+        producto.precio_kit = None
         return
+    # Kit para llevar según el tamaño (valor elegido de la tabla o escrito a mano)
+    if "kit_categoria" in datos:
+        producto.kit_categoria = (datos.get("kit_categoria") or "").strip()[:40] or None
+    if "precio_kit" in datos:
+        valor = datos.get("precio_kit")
+        valor = None if valor in (None, "") else entero(valor, "precio del kit", 0)
+        # Si es el mismo valor de la tabla para ese tamaño se guarda NULL, así
+        # sigue a la tabla de kits cuando esta cambie en Configuración.
+        de_tabla = mapa_tarifas_kit().get((producto.kit_categoria or "").strip().lower())
+        producto.precio_kit = None if (valor is not None and valor == de_tabla) else valor
     if "precio_pintar_local" in datos:
         valor = datos.get("precio_pintar_local")
         valor = None if valor in (None, "") else entero(valor, "precio pintar en el local", 0)
@@ -357,7 +376,7 @@ def actualizar_producto(codigo, data):
             setattr(producto, campo, data[campo] or "")
 
     precios = ("costo", "envio", "envio_categoria", "precio_venta", "precio_mayorista",
-               "precio_pintar_local", "precio_terminada")
+               "precio_pintar_local", "precio_terminada", "kit_categoria", "precio_kit")
     if any(campo in data for campo in precios):
         datos_precio = {c: data[c] for c in precios if c in data}
         # Si no se envía un precio, se conserva el actual (no se recalcula sin pedirlo)

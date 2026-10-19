@@ -48,7 +48,7 @@ export const OPCIONES_POR_DEFECTO: OpcionesEtiqueta = {
 
 /*
   Precios de un producto para la etiqueta.
-  kit para llevar = precio crudo + valor del kit (Configuración).
+  kit para llevar = precio crudo + valor del kit de su tamaño (o el general de Configuración).
 */
 export function preciosDeProducto(
   producto: {
@@ -57,6 +57,7 @@ export function preciosDeProducto(
     precio_mayorista: number;
     precio_pintar_local?: number;
     precio_terminada?: number;
+    precio_kit_efectivo?: number;   // kit según el tamaño (lo calcula la API)
   },
   valorKit: number
 ): Partial<Record<TipoPrecio, number>> {
@@ -67,7 +68,8 @@ export function preciosDeProducto(
   };
   if (esFigura) {
     precios.pintar = producto.precio_pintar_local || (producto.precio_venta || 0) * 2;
-    precios.kit = (producto.precio_venta || 0) + (Number(valorKit) || 0);
+    const kit = producto.precio_kit_efectivo ?? valorKit;
+    precios.kit = (producto.precio_venta || 0) + (Number(kit) || 0);
     precios.terminada = producto.precio_terminada || precios.pintar * 2;
   }
   return precios;

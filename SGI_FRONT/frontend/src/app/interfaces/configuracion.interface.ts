@@ -1,3 +1,4 @@
+// Tarifa por tamaño: se usa para el envío y para el kit para llevar
 export interface ITarifaEnvio {
   id?: number;
   nombre: string;     // Mini, Pequeño, Mediano...
@@ -27,6 +28,7 @@ export interface IConfiguracion {
   valores: IValoresConfiguracion;
   detalle: IDetalleConfiguracion[];
   tarifas_envio: ITarifaEnvio[];
+  tarifas_kit: ITarifaEnvio[];   // kit para llevar por tamaño (Pequeño $6.000...)
   modalidades_venta: string[];
 }
 

@@ -1,7 +1,7 @@
 """Tarifas de envío y valores generales editables (tablas tarifa_envio y configuracion)."""
 
 from database import db
-from models import TarifaEnvio, Configuracion
+from models import TarifaEnvio, TarifaKit, Configuracion
 from queries.comunes import entero
 from utils.errores import ErrorAPI
 
@@ -57,38 +57,73 @@ def listar_tarifas():
     return TarifaEnvio.query.order_by(TarifaEnvio.orden, TarifaEnvio.precio).all()
 
 
-def guardar_tarifas(lista):
+def _guardar_tabla(modelo, lista, que="tarifa"):
     """
-    Reemplaza la tabla de tarifas con la lista enviada.
+    Reemplaza una tabla de tarifas (envío o kit) con la lista enviada.
     Body: [ {"id": 1, "nombre": "Mini", "precio": 400}, {"nombre": "Gigante", "precio": 3500} ]
-    Las tarifas que no vengan en la lista se eliminan.
+    Las filas que no vengan en la lista se eliminan.
     """
     if not isinstance(lista, list):
-        raise ErrorAPI("Envía una lista de tarifas")
+        raise ErrorAPI(f"Envía una lista de {que}s")
 
     nombres = set()
     conservar = set()
     for orden, datos in enumerate(lista, start=1):
         nombre = (datos.get("nombre") or "").strip()
         if not nombre:
-            raise ErrorAPI(f"La tarifa {orden} no tiene nombre")
+            raise ErrorAPI(f"La {que} {orden} no tiene nombre")
         if nombre.lower() in nombres:
-            raise ErrorAPI(f"La tarifa '{nombre}' está repetida")
+            raise ErrorAPI(f"La {que} '{nombre}' está repetida")
         nombres.add(nombre.lower())
 
-        tarifa = db.session.get(TarifaEnvio, datos["id"]) if datos.get("id") else None
-        if tarifa is None:
-            tarifa = TarifaEnvio()
-            db.session.add(tarifa)
-        tarifa.nombre = nombre[:40]
-        tarifa.precio = entero(datos.get("precio") or 0, f"precio de '{nombre}'", 0)
-        tarifa.orden = orden
+        fila = db.session.get(modelo, datos["id"]) if datos.get("id") else None
+        if fila is None:
+            fila = modelo()
+            db.session.add(fila)
+        fila.nombre = nombre[:40]
+        fila.precio = entero(datos.get("precio") or 0, f"precio de '{nombre}'", 0)
+        fila.orden = orden
         db.session.flush()
-        conservar.add(tarifa.id)
+        conservar.add(fila.id)
 
-    for tarifa in TarifaEnvio.query.all():
-        if tarifa.id not in conservar:
-            db.session.delete(tarifa)
+    for fila in modelo.query.all():
+        if fila.id not in conservar:
+            db.session.delete(fila)
 
     db.session.commit()
+
+
+def guardar_tarifas(lista):
+    _guardar_tabla(TarifaEnvio, lista, "tarifa")
     return listar_tarifas()
+
+
+# ---------------- Kits por tamaño ----------------
+
+def listar_tarifas_kit():
+    return TarifaKit.query.order_by(TarifaKit.orden, TarifaKit.precio).all()
+
+
+def guardar_tarifas_kit(lista):
+    _guardar_tabla(TarifaKit, lista, "tarifa de kit")
+    return listar_tarifas_kit()
+
+
+def mapa_tarifas_kit():
+    """{nombre en minúsculas: precio} para calcular el kit de cada figura."""
+    try:
+        return {(t.nombre or "").strip().lower(): t.precio or 0 for t in listar_tarifas_kit()}
+    except Exception:  # noqa: BLE001 - la tabla aún no existe (falta ejecutar la migración)
+        db.session.rollback()
+        return {}
+
+
+def kit_de_producto(producto, tarifas_kit, config):
+    """Valor del kit para llevar de un producto (0 si no es figura)."""
+    from utils.precios import precio_kit_figura
+    if producto is None or (producto.tipo or "figura") != "figura":
+        return 0
+    return precio_kit_figura(
+        producto.precio_kit, producto.kit_categoria, producto.envio_categoria,
+        tarifas_kit, config.get("valor_kit_local", 0),
+    )

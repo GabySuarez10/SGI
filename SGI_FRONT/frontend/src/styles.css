@@ -545,7 +545,8 @@ button:disabled {
 .proveedores-page,
 .traslados-page,
 .ventas-page,
-.etiquetas-page {
+.etiquetas-page,
+.facturas-page {
   width: 100%;
   max-width: 1320px;
   margin-left: auto;

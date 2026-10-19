@@ -129,6 +129,39 @@
       </div>
 
 
+      <!-- KIT PARA LLEVAR -->
+      <div class="sgi-campo" [class.editado]="kitEditable">
+        <label [for]="idPrefijo + '-kit'">
+          Kit para llevar (5 pinturas + 1 pincel)
+        </label>
+        <div class="envio">
+          <select
+            [id]="idPrefijo + '-kit'"
+            [ngModel]="kitSeleccionado"
+            (ngModelChange)="elegirKit($event)">
+            <option value="">
+              {{ kitPorEnvio ? 'Según su tamaño (' + kitPorEnvio.nombre + ')' : 'Valor general' }}
+            </option>
+            <option *ngFor="let tarifa of tarifasKit" [value]="tarifa.nombre">
+              {{ tarifa.nombre }} · ${{ tarifa.precio | number }}
+            </option>
+            <option [value]="personalizado">Otro valor...</option>
+          </select>
+
+          <input
+            type="number"
+            min="0"
+            aria-label="Valor del kit"
+            [disabled]="!kitEditable"
+            [ngModel]="valorKit"
+            (ngModelChange)="editarKit($event)">
+        </div>
+        <small>
+          Precio con kit: crudo + kit = <strong>${{ (datos.precio_venta || 0) + valorKit | number }}</strong>
+        </small>
+      </div>
+
+
       <!-- FIGURA TERMINADA -->
       <div class="sgi-campo" [class.calculado]="!terminadaEditada" [class.editado]="terminadaEditada">
         <label [for]="idPrefijo + '-terminada'">

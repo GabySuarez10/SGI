@@ -19,6 +19,13 @@ class Config:
     PORT = int(os.getenv("PORT", 5000))
 
     # Orígenes del front de Angular (ng serve) que pueden llamar a la API
-    CORS_ORIGINS = os.getenv(
-        "CORS_ORIGINS", "http://localhost:4200,http://127.0.0.1:4200"
-    ).split(",")
+    # Orígenes (frontends) que pueden llamar a la API, separados por coma.
+    # Ej. en Render: https://sgi-1-9kg9.onrender.com,http://localhost:4200
+    # Se quitan espacios y la "/" final, que hacen fallar la comparación.
+    CORS_ORIGINS = [
+        origen.strip().rstrip("/")
+        for origen in os.getenv(
+            "CORS_ORIGINS", "http://localhost:4200,http://127.0.0.1:4200"
+        ).split(",")
+        if origen.strip()
+    ]

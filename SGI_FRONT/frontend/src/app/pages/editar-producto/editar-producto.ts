@@ -53,6 +53,8 @@ export class EditarProducto implements OnInit {
     precio_mayorista: 0,
     precio_pintar_local: 0,
     precio_terminada: 0,
+    kit_categoria: '',
+    precio_kit: null,
     en_bodega: false,
     en_local: false,
     existencias: 0,
@@ -75,6 +77,8 @@ export class EditarProducto implements OnInit {
 
   proveedores: IProveedor[] = [];
   tarifas: ITarifaEnvio[] = [];
+  // Valor del kit para llevar según el tamaño
+  tarifasKit: ITarifaEnvio[] = [];
   valores: IValoresConfiguracion = VALORES_POR_DEFECTO;
 
   cargando = false;
@@ -134,12 +138,15 @@ export class EditarProducto implements OnInit {
           envio_categoria: producto.envio_categoria ?? '',
           tipo: producto.tipo ?? 'figura',
           coleccion: producto.coleccion ?? '',
-          categoria: producto.categoria ?? ''
+          categoria: producto.categoria ?? '',
+          kit_categoria: producto.kit_categoria ?? '',
+          precio_kit: producto.precio_kit ?? null
         };
         this.existenciasBodega = producto.en_bodega ? producto.existencias_bodega : null;
         this.existenciasLocal = producto.en_local ? producto.existencias_local : null;
         this.proveedores = proveedores;
         this.tarifas = configuracion.tarifas_envio;
+        this.tarifasKit = configuracion.tarifas_kit ?? [];
         this.valores = configuracion.valores;
         this.prepararEtiqueta();
         this.cargando = false;
@@ -200,6 +207,10 @@ export class EditarProducto implements OnInit {
       precio_mayorista: Number(this.producto.precio_mayorista) || 0,
       precio_pintar_local: Number(this.producto.precio_pintar_local) || 0,
       precio_terminada: Number(this.producto.precio_terminada) || 0,
+      kit_categoria: this.producto.kit_categoria ?? '',
+      precio_kit: this.producto.precio_kit === null || this.producto.precio_kit === undefined
+        ? null
+        : Number(this.producto.precio_kit) || 0,
       tipo: this.producto.tipo,
       coleccion: this.producto.tipo === 'pintura' ? this.producto.coleccion : '',
       categoria: this.producto.tipo === 'figura' ? this.producto.categoria : ''

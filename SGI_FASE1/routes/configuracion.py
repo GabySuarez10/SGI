@@ -13,6 +13,7 @@ def obtener():
         "valores": q.valores(),
         "detalle": [c.to_dict() for c in q.listar_configuracion()],
         "tarifas_envio": [t.to_dict() for t in q.listar_tarifas()],
+        "tarifas_kit": [t.to_dict() for t in q.listar_tarifas_kit()],
         "modalidades_venta": list(MODALIDADES),
     })
 
@@ -32,3 +33,14 @@ def tarifas():
 def guardar_tarifas():
     """[ {id?, nombre, precio}, ... ] reemplaza toda la tabla"""
     return jsonify([t.to_dict() for t in q.guardar_tarifas(request.get_json() or [])])
+
+
+@configuracion_bp.get("/tarifas-kit")
+def tarifas_kit():
+    return jsonify([t.to_dict() for t in q.listar_tarifas_kit()])
+
+
+@configuracion_bp.put("/tarifas-kit")
+def guardar_tarifas_kit():
+    """[ {id?, nombre, precio}, ... ] reemplaza toda la tabla de kits por tamaño"""
+    return jsonify([t.to_dict() for t in q.guardar_tarifas_kit(request.get_json() or [])])

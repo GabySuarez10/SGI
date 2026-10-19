@@ -1096,3 +1096,16 @@
 .escaner-venta {
   margin: 4px 0 18px;
 }
+
+
+/* Kit para llevar: tamaño del kit por figura */
+.kit-figura select {
+  height: 36px;
+  max-width: 100%;
+  padding: 0 8px;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  background: #ffffff;
+  font-family: inherit;
+  font-size: 13px;
+}

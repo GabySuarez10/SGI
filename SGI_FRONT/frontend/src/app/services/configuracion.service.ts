@@ -33,4 +33,13 @@ export class ConfiguracionService {
   guardarTarifasEnvio(tarifas: ITarifaEnvio[]): Observable<ITarifaEnvio[]> {
     return this.httpClient.put<ITarifaEnvio[]>(`${this.apiUrl}/tarifas-envio`, tarifas);
   }
+
+  // Valor del kit para llevar según el tamaño de la figura
+  getTarifasKit(): Observable<ITarifaEnvio[]> {
+    return this.httpClient.get<ITarifaEnvio[]>(`${this.apiUrl}/tarifas-kit`);
+  }
+
+  guardarTarifasKit(tarifas: ITarifaEnvio[]): Observable<ITarifaEnvio[]> {
+    return this.httpClient.put<ITarifaEnvio[]>(`${this.apiUrl}/tarifas-kit`, tarifas);
+  }
 }

@@ -75,6 +75,7 @@ export interface IPreciosFigura {
   mayor: number;
   pintarLocal: number;   // precio "pintar en el local" del producto
   terminada: number;     // precio "figura terminada" del producto
+  kit?: number;          // valor del kit para llevar de esta figura (según su tamaño)
 }
 
 /*
@@ -96,7 +97,7 @@ export function precioPorModalidad(
     case 'Pintada':
       return precios.terminada;
     case 'Kit para llevar':
-      return precios.crudo + valores.valor_kit_local;
+      return precios.crudo + (precios.kit ?? valores.valor_kit_local);
     case 'Empresa con contrato':
       return valores.precio_kit_contrato;
     default:

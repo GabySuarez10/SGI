@@ -40,6 +40,7 @@ export class Configuracion implements OnInit {
   // Precios, kits y envíos (tablas configuracion y tarifa_envio)
   valores: IValoresConfiguracion = { ...VALORES_POR_DEFECTO };
   tarifas: ITarifaEnvio[] = [];
+  tarifasKit: ITarifaEnvio[] = [];   // kit para llevar por tamaño
   guardandoPrecios = false;
   errorPrecios = '';
   mensajePrecios = '';
@@ -47,7 +48,7 @@ export class Configuracion implements OnInit {
   readonly camposPrecios: CampoPrecio[] = [
     { clave: 'multiplicador_crudo', titulo: 'Multiplicador del precio crudo', ayuda: 'Precio de fábrica × este valor (4).' },
     { clave: 'divisor_mayor', titulo: 'Divisor del precio por mayor', ayuda: 'Precio crudo ÷ este valor (2).' },
-    { clave: 'valor_kit_local', titulo: 'Valor del kit para llevar (COP)', ayuda: 'Se suma al precio crudo: 5 pinturas + 1 pincel para pintar en casa.' },
+    { clave: 'valor_kit_local', titulo: 'Valor general del kit para llevar (COP)', ayuda: 'Solo para figuras sin tamaño de kit: los demás usan la tabla "Kit para llevar por tamaño".' },
     { clave: 'precio_kit_contrato', titulo: 'Precio del kit por contrato (COP)', ayuda: 'Precio por kit para empresas con contrato.' },
     { clave: 'pinturas_por_kit', titulo: 'Pinturas por kit', ayuda: 'Pinturas que lleva cada kit.' },
     { clave: 'pinceles_por_kit', titulo: 'Pinceles por kit', ayuda: 'Pinceles que lleva cada kit.' }
@@ -76,6 +77,7 @@ export class Configuracion implements OnInit {
       next: configuracion => {
         this.valores = { ...configuracion.valores };
         this.tarifas = configuracion.tarifas_envio;
+        this.tarifasKit = configuracion.tarifas_kit ?? [];
       },
       error: err => {
         this.errorPrecios = mensajeDeError(err);

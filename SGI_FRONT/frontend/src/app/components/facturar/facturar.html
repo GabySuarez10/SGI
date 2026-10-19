@@ -1,0 +1,112 @@
+<div class="fondo" role="dialog" aria-modal="true" aria-labelledby="tituloFacturar">
+
+  <form class="panel" (ngSubmit)="emitir()">
+
+    <header class="encabezado">
+      <div>
+        <h2 id="tituloFacturar">{{ titulo }}</h2>
+        <p>Venta #{{ venta.codigo }} · {{ venta.cliente }} · <strong>{{ pesos(venta.total) }}</strong></p>
+      </div>
+      <button type="button" class="cerrar" aria-label="Cerrar" (click)="cerrar.emit()">✕</button>
+    </header>
+
+    <!-- TIPO DE DOCUMENTO -->
+    <fieldset class="tipos">
+      <legend>Documento</legend>
+      <label class="tipo" [class.activo]="tipo === 'pos'">
+        <input type="radio" name="tipoFactura" [checked]="tipo === 'pos'" (change)="cambiarTipo('pos')">
+        <strong>Tirilla POS</strong>
+        <small>Documento equivalente para el cliente del mostrador</small>
+      </label>
+      <label class="tipo" [class.activo]="tipo === 'electronica'">
+        <input type="radio" name="tipoFactura" [checked]="tipo === 'electronica'" (change)="cambiarTipo('electronica')">
+        <strong>Factura electrónica</strong>
+        <small>Para empresas o clientes que la piden con sus datos</small>
+      </label>
+    </fieldset>
+
+    <p class="aviso" *ngIf="!resolucionLista">
+      Aún no está registrada la resolución de numeración DIAN de este documento: saldrá marcado
+      "sin validez fiscal". Regístrala en <strong>Facturas → Datos del negocio</strong>.
+    </p>
+
+    <!-- CLIENTE -->
+    <label class="casilla" *ngIf="tipo === 'pos'">
+      <input type="checkbox" name="identificar" [(ngModel)]="identificarCliente">
+      Identificar al cliente (si no, queda como consumidor final)
+    </label>
+
+    <div class="grilla" *ngIf="pideCliente">
+      <div class="campo">
+        <label for="fTipoDoc">Tipo de documento</label>
+        <select id="fTipoDoc" name="tipoDoc" [(ngModel)]="cliente.tipo_documento">
+          <option *ngFor="let t of opciones?.tipos_documento ?? ['CC', 'NIT']" [value]="t">{{ t }}</option>
+        </select>
+      </div>
+      <div class="campo">
+        <label for="fDoc">Número <span *ngIf="tipo === 'electronica'">*</span></label>
+        <input id="fDoc" name="doc" inputmode="numeric" [(ngModel)]="cliente.documento" autocomplete="off">
+      </div>
+      <div class="campo ancho">
+        <label for="fNombre">Nombre o razón social <span *ngIf="tipo === 'electronica'">*</span></label>
+        <input id="fNombre" name="nombre" [(ngModel)]="cliente.nombre">
+      </div>
+      <div class="campo ancho">
+        <label for="fCorreo">Correo <span *ngIf="tipo === 'electronica'">*</span></label>
+        <input id="fCorreo" name="correo" type="email" [(ngModel)]="cliente.correo"
+               placeholder="A este correo llega la factura electrónica">
+      </div>
+      <div class="campo">
+        <label for="fTel">Teléfono</label>
+        <input id="fTel" name="tel" type="tel" [(ngModel)]="cliente.telefono">
+      </div>
+      <div class="campo">
+        <label for="fDir">Dirección</label>
+        <input id="fDir" name="dir" [(ngModel)]="cliente.direccion">
+      </div>
+    </div>
+
+    <!-- PAGO -->
+    <div class="grilla">
+      <div class="campo">
+        <label for="fForma">Forma de pago</label>
+        <select id="fForma" name="forma" [(ngModel)]="formaPago">
+          <option *ngFor="let f of opciones?.formas_pago ?? ['Contado', 'Crédito']" [value]="f">{{ f }}</option>
+        </select>
+      </div>
+      <div class="campo" *ngIf="formaPago === 'Crédito'">
+        <label for="fDias">Días de crédito</label>
+        <input id="fDias" name="dias" type="number" min="1" [(ngModel)]="diasCredito">
+      </div>
+      <div class="campo">
+        <label for="fMedio">Medio de pago</label>
+        <select id="fMedio" name="medio" [(ngModel)]="medioPago">
+          <option *ngFor="let m of opciones?.medios_pago ?? ['Efectivo']" [value]="m">{{ m }}</option>
+        </select>
+      </div>
+      <div class="campo" *ngIf="medioPago === 'Efectivo'">
+        <label for="fRecibido">Recibido (efectivo)</label>
+        <input id="fRecibido" name="recibido" type="number" min="0" step="100" [(ngModel)]="recibido"
+               [placeholder]="'' + venta.total">
+        <small *ngIf="recibido">Cambio: <strong>{{ pesos(cambio) }}</strong></small>
+      </div>
+      <div class="campo ancho">
+        <label for="fObs">Observaciones</label>
+        <input id="fObs" name="obs" [(ngModel)]="observaciones">
+      </div>
+    </div>
+
+    <p class="error" *ngIf="error" role="alert">{{ error }}</p>
+
+    <footer class="acciones">
+      <button type="button" class="sgi-btn sgi-btn-secundario" (click)="cerrar.emit()" [disabled]="emitiendo">
+        Sin factura
+      </button>
+      <button type="submit" class="sgi-btn sgi-btn-primario" [disabled]="emitiendo">
+        {{ emitiendo ? 'Emitiendo…' : (tipo === 'pos' ? 'Emitir e imprimir tirilla' : 'Emitir factura electrónica') }}
+      </button>
+    </footer>
+
+  </form>
+
+</div>

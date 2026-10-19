@@ -63,7 +63,10 @@ export class Sidebar {
     },
     {
       titulo: 'Ventas',
-      enlaces: [{ texto: 'Ventas y salidas', ruta: '/ventas', icono: 'ventas' }]
+      enlaces: [
+        { texto: 'Ventas y salidas', ruta: '/ventas', icono: 'ventas' },
+        { texto: 'Facturas', ruta: '/facturas', icono: 'factura' }
+      ]
     },
     {
       titulo: 'Consultas',

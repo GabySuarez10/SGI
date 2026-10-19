@@ -66,6 +66,8 @@ export class NuevoProducto implements OnInit {
 
   proveedores: IProveedor[] = [];
   tarifas: ITarifaEnvio[] = [];
+  // Valor del kit para llevar según el tamaño
+  tarifasKit: ITarifaEnvio[] = [];
   valores: IValoresConfiguracion = VALORES_POR_DEFECTO;
 
   // Lista de productos que se van a registrar
@@ -164,6 +166,7 @@ export class NuevoProducto implements OnInit {
         this.categorias = categorias;
         this.proveedores = proveedores;
         this.tarifas = configuracion.tarifas_envio;
+        this.tarifasKit = configuracion.tarifas_kit ?? [];
         this.valores = configuracion.valores;
         this.colecciones = colecciones;
       },
@@ -281,6 +284,8 @@ export class NuevoProducto implements OnInit {
       precio_mayorista: 0,
       precio_pintar_local: 0,
       precio_terminada: 0,
+      kit_categoria: '',
+      precio_kit: null,
       existencias: 0,
       tipo: 'figura',
       coleccion: '',
@@ -386,6 +391,8 @@ export class NuevoProducto implements OnInit {
         precio_mayorista: Number(producto.precio_mayorista) || 0,
         precio_pintar_local: this.esMaterial ? 0 : Number(producto.precio_pintar_local) || 0,
         precio_terminada: this.esMaterial ? 0 : Number(producto.precio_terminada) || 0,
+        kit_categoria: this.esMaterial ? '' : producto.kit_categoria,
+        precio_kit: this.esMaterial || producto.precio_kit === null ? null : Number(producto.precio_kit) || 0,
         existencias: Number(producto.existencias) || 0
       }))
     }).subscribe({

@@ -130,6 +130,32 @@ tilde, números o guiones (máx. 15); la API lo valida al crear y al editar.
   se abra con **https** (o en localhost).
 - No requiere cambios en la base de datos.
 
+## 🎨 Kit para llevar por tamaño
+
+Tabla `tarifa_kit` (editable en Configuración): Pequeño $6.000, Mediano $8.000,
+Grande $12.000, Extra grande $15.000. Cada figura guarda su tamaño de kit
+(`producto.kit_categoria`) y, si se escribe a mano, su valor (`producto.precio_kit`).
+Precio de "Kit para llevar" = precio crudo + kit. Si la figura no tiene tamaño de
+kit se usa el de su tamaño de envío y, si tampoco, el valor general de Configuración.
+En Ventas se puede elegir otro tamaño o escribir el valor para cada figura.
+
+## 🧾 Facturación (bases)
+
+Tablas `datos_facturacion` (clave → valor) y `factura`. Rutas en `/api/facturas`.
+
+- **Tirilla POS** (documento equivalente electrónico POS): el cliente es opcional;
+  sin identificar queda como consumidor final `222222222222`.
+- **Factura electrónica de venta**: exige tipo y número de documento, nombre y correo.
+- Contenido y orden según ET art. 617 y Resolución DIAN 000165 de 2023: emisor
+  (NIT, calidades tributarias), denominación, numeración autorizada (resolución,
+  prefijo, rango, vigencia), fecha y hora, adquirente, detalle, IVA discriminado
+  si es responsable, forma y medio de pago, CUFE/CUDE y QR, software.
+- Numeración consecutiva por tipo y prefijo, sin pasarse del rango ni de la vigencia.
+- Las facturas quedan en `pendiente_envio`: firmar, enviar a la DIAN y obtener el
+  CUFE/CUDE lo hace un proveedor tecnológico (o la solución gratuita de la DIAN).
+  Luego se registra con `PUT /api/facturas/<codigo>/dian`.
+- Una venta con factura activa no se puede anular sin anular antes la factura.
+
 ## 🗂️ Estructura
 
 Sigue la misma idea del repositorio de referencia (Classes / QueriesManager / Controllers):

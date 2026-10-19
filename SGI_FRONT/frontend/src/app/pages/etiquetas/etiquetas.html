@@ -42,12 +42,52 @@
       </select>
     </div>
 
-    <div class="sgi-campo">
-      <label for="tamanoEtiqueta">Tamaño al imprimir</label>
+    <!-- IMPRESORA: hoja carta o rollo de etiquetas -->
+    <fieldset class="modo-impresion">
+      <legend>Imprimir en</legend>
+      <label class="opcion-modo" [class.activa]="modoImpresion === 'hoja'">
+        <input type="radio" name="modoImpresion" value="hoja" [(ngModel)]="modoImpresion">
+        <strong>Hoja carta</strong>
+        <small>Impresora normal, papel adhesivo</small>
+      </label>
+      <label class="opcion-modo" [class.activa]="modoImpresion === 'rollo'">
+        <input type="radio" name="modoImpresion" value="rollo" [(ngModel)]="modoImpresion">
+        <strong>Rollo de etiquetas</strong>
+        <small>Impresora térmica de códigos de barras</small>
+      </label>
+    </fieldset>
+
+    <div class="sgi-campo" *ngIf="modoImpresion === 'hoja'">
+      <label for="tamanoEtiqueta">Tamaño de cada etiqueta</label>
       <select id="tamanoEtiqueta" [(ngModel)]="tamano">
         <option *ngFor="let opcion of tamanos" [ngValue]="opcion.valor">{{ opcion.nombre }}</option>
       </select>
     </div>
+
+    <div class="sgi-campo" *ngIf="modoImpresion === 'rollo'">
+      <label for="tamanoRollo">Medida de la etiqueta del rollo</label>
+      <select id="tamanoRollo" [(ngModel)]="rolloId">
+        <option *ngFor="let rollo of rollos" [ngValue]="rollo.id">{{ rollo.ancho }} × {{ rollo.alto }} mm</option>
+        <option ngValue="otro">Otra medida…</option>
+      </select>
+    </div>
+
+    <div class="medida-otro" *ngIf="modoImpresion === 'rollo' && rolloId === 'otro'">
+      <div class="sgi-campo">
+        <label for="rolloAncho">Ancho (mm)</label>
+        <input id="rolloAncho" type="number" min="20" max="150" [(ngModel)]="rolloAncho">
+      </div>
+      <div class="sgi-campo">
+        <label for="rolloAlto">Alto (mm)</label>
+        <input id="rolloAlto" type="number" min="10" max="200" [(ngModel)]="rolloAlto">
+      </div>
+    </div>
+
+    <p class="sgi-aviso aviso-rollo" *ngIf="rolloAjustado">
+      En un rollo de {{ rollo.ancho }} × {{ rollo.alto }} mm el QR, el código de barras y varios precios quedan muy pequeños.
+      <button type="button" class="sgi-btn sgi-btn-enlace" *ngIf="contenido === 'ambos'" (click)="usarSoloQr()">Usar solo QR</button>
+      <span *ngIf="contenido !== 'ambos'">Deja máximo 2 precios para que se lean bien.</span>
+    </p>
 
     <fieldset class="precios-elegidos">
       <legend>Precios impresos en la etiqueta</legend>
@@ -65,8 +105,10 @@
       Los precios quedan impresos para verlos sin escanear (en pinturas y pinceles solo salen detal y por mayor).
       Si cambias un precio, vuelve a imprimir la etiqueta.
       Para el teléfono usa el <strong>QR</strong>; el código de barras es para un lector de caja.
-      Imprime en papel adhesivo (hoja carta o rollo) y, para guardar un PDF, elige
-      "Guardar como PDF" en la ventana de impresión.
+      Con <strong>hoja carta</strong> salen varias etiquetas por hoja con guía de corte. Con
+      <strong>rollo</strong> sale una etiqueta por página del tamaño exacto: en la ventana de impresión
+      elige la impresora de etiquetas y la misma medida de papel. Para guardar un PDF elige
+      "Guardar como PDF".
     </p>
 
   </section>
@@ -153,7 +195,12 @@
       *ngFor="let item of visibles; trackBy: trackPorCodigo"
       [class.elegido]="item.copias > 0">
 
-      <app-etiqueta-producto [datos]="item.datos" [opciones]="opciones"></app-etiqueta-producto>
+      <div
+        class="vista-etiqueta"
+        [class.vista-rollo]="modoImpresion === 'rollo'"
+        [style.aspect-ratio]="modoImpresion === 'rollo' ? proporcionRollo : null">
+        <app-etiqueta-producto [datos]="item.datos" [opciones]="opciones"></app-etiqueta-producto>
+      </div>
 
       <div class="producto-info">
         <strong>{{ item.producto.nombre }}</strong>

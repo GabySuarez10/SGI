@@ -26,6 +26,8 @@ export interface IInventarioLocal {
   precio_mayorista: number;
   precio_pintar_local: number; // del catálogo (solo figuras)
   precio_terminada: number;    // del catálogo (solo figuras)
+  precio_kit: number;          // valor del kit para llevar (solo figuras)
+  kit_categoria: string;
   tipo: TipoProducto;     // del catálogo
   coleccion: string;
   referencia: string;

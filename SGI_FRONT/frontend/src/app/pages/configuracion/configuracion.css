@@ -437,3 +437,11 @@
   color: #94a3b8;
   font-size: 14px;
 }
+
+
+/* Tablas por tamaño: envío y kit para llevar */
+.tablas-tamano {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px;
+}

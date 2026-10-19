@@ -8,7 +8,7 @@ Registrar una venta:
 """
 
 from database import db
-from models import Venta, Producto
+from models import Venta, Producto, Factura
 from queries.comunes import (
     obtener_o_404, validar_listas_mismo_largo, validar_sin_repetidos, entero,
 )
@@ -17,7 +17,7 @@ from utils.errores import ErrorAPI, NoEncontrado
 from utils.fechas import a_fecha
 from utils.listas import lista_textos, lista_numeros, lista_a_texto
 from utils.precios import MODALIDADES, normalizar_modalidad, precio_por_modalidad
-from queries.configuracion_queries import valores as valores_configuracion
+from queries.configuracion_queries import valores as valores_configuracion, mapa_tarifas_kit, kit_de_producto
 
 
 def listar_ventas():
@@ -48,6 +48,7 @@ def crear_venta(data):
     if modalidad not in MODALIDADES:
         raise ErrorAPI(f"Modalidad no válida. Usa una de: {', '.join(MODALIDADES)}")
     config = valores_configuracion()
+    tarifas_kit = mapa_tarifas_kit()
 
     nombres = lista_textos(data.get("producto"))
     cantidades = lista_numeros(data.get("cantidad"))
@@ -80,6 +81,7 @@ def crear_venta(data):
                 modalidad, local.precio_venta, local.precio_mayorista, config, es_figura,
                 producto.precio_pintar_local if producto else None,
                 producto.precio_terminada if producto else None,
+                kit_de_producto(producto, tarifas_kit, config) if producto else None,
             )
         else:
             precio = entero(precio, "precio_unitario", 0)
@@ -111,6 +113,13 @@ def crear_venta(data):
 def eliminar_venta(codigo):
     """Anula una venta: devuelve las unidades al inventario del local."""
     venta = obtener_venta(codigo)
+    activa = Factura.query.filter(Factura.venta == venta.codigo, Factura.estado != "anulada").first()
+    if activa is not None:
+        raise ErrorAPI(
+            f"La venta tiene la {'tirilla' if activa.tipo == 'pos' else 'factura electrónica'} "
+            f"{activa.numero_completo}. Anúlala primero en Facturas.",
+            409,
+        )
     datos = venta.to_dict()
     for nombre, cantidad in zip(datos["producto"], datos["cantidad"]):
         local = fila_local(nombre, crear=True)

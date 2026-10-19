@@ -6,10 +6,13 @@ import { ConfiguracionService } from '../../services/configuracion.service';
 import { mensajeDeError } from '../../utils/http-error';
 
 /*
-  Tablita informativa de precios de envío por tamaño (Mini, Pequeño, ...).
-  Se puede editar ahí mismo y los cambios se guardan en la base de datos.
+  Tablita de precios por tamaño (Mini, Pequeño, ...). Se puede editar ahí
+  mismo y los cambios se guardan en la base de datos.
+    tipo="envio": tarifas de envío (se suman al crudo y al por mayor)
+    tipo="kit":   valor del kit para llevar (5 pinturas + 1 pincel)
 
   Uso:  <app-tabla-envios [(tarifas)]="tarifas"></app-tabla-envios>
+        <app-tabla-envios tipo="kit" [(tarifas)]="tarifasKit"></app-tabla-envios>
 */
 @Component({
   selector: 'app-tabla-envios',
@@ -24,6 +27,22 @@ export class TablaEnvios {
 
   // Muestra el texto de ayuda sobre cómo se suma el envío
   @Input() mostrarAyuda = true;
+
+  @Input() tipo: 'envio' | 'kit' = 'envio';
+
+  get titulo(): string {
+    return this.tipo === 'kit' ? 'Kit para llevar por tamaño' : 'Tarifas de envío por tamaño';
+  }
+
+  get ayuda(): string {
+    return this.tipo === 'kit'
+      ? 'Valor del kit (5 pinturas + 1 pincel) que se suma al precio crudo de la figura.'
+      : 'El envío elegido se suma al precio crudo y al precio por mayor.';
+  }
+
+  get columnaPrecio(): string {
+    return this.tipo === 'kit' ? 'Kit' : 'Envío';
+  }
 
   editando = false;
   borrador: ITarifaEnvio[] = [];
@@ -60,15 +79,16 @@ export class TablaEnvios {
     this.guardando = true;
     this.error = '';
 
-    this.configuracionService
-      .guardarTarifasEnvio(
-        this.borrador.map(tarifa => ({
-          ...tarifa,
-          nombre: tarifa.nombre.trim(),
-          precio: Number(tarifa.precio) || 0
-        }))
-      )
-      .subscribe({
+    const lista = this.borrador.map(tarifa => ({
+      ...tarifa,
+      nombre: tarifa.nombre.trim(),
+      precio: Number(tarifa.precio) || 0
+    }));
+    const peticion = this.tipo === 'kit'
+      ? this.configuracionService.guardarTarifasKit(lista)
+      : this.configuracionService.guardarTarifasEnvio(lista);
+
+    peticion.subscribe({
         next: tarifas => {
           this.guardando = false;
           this.editando = false;

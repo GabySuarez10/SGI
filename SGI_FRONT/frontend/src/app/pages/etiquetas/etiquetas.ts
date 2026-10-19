@@ -20,32 +20,78 @@ import {
   VistaProductos, categoriasDe, coincideCategoria, coincideVista, nombreTipo
 } from '../../utils/tipos';
 
-// Página HTML mínima con las etiquetas repetidas según sus copias
-export function hojaDeImpresion(items: ProductoEtiqueta[], opciones: OpcionesEtiqueta, ancho: string): string {
+// Cómo se imprime: hoja (impresora normal) o rollo (impresora de etiquetas)
+export type FormatoImpresion =
+  | { modo: 'hoja'; ancho: string }                    // ancho de cada etiqueta, ej. '62mm'
+  | { modo: 'rollo'; ancho: number; alto: number };    // medida de la etiqueta del rollo en mm
+
+/*
+  Página HTML mínima con las etiquetas repetidas según sus copias.
+  - Hoja: varias etiquetas por hoja con guía de corte.
+  - Rollo: una etiqueta por página, del tamaño exacto del rollo y sin márgenes
+    (así la impresora térmica avanza etiqueta por etiqueta).
+*/
+export function hojaDeImpresion(items: ProductoEtiqueta[], opciones: OpcionesEtiqueta, formato: FormatoImpresion): string {
   const etiquetas = items
     .map(item => {
       const svg = etiquetaSvg(item.datos, opciones);
       return Array.from({ length: Math.min(Number(item.copias) || 0, 500) }, () => `<div class="e">${svg}</div>`).join('');
     })
     .join('');
+
+  const estilos = formato.modo === 'rollo'
+    ? `
+  @page { size: ${formato.ancho}mm ${formato.alto}mm; margin: 0; }
+  html, body { margin: 0; padding: 0; }
+  .hoja { display: block; }
+  .e {
+    width: ${formato.ancho}mm; height: ${formato.alto}mm; padding: 1.2mm;
+    display: flex; align-items: center; justify-content: center; overflow: hidden;
+    break-after: page; page-break-after: always;
+  }
+  .e:last-child { break-after: auto; page-break-after: auto; }
+  .e > svg { display: block; width: 100%; height: 100%; }
+  @media screen {
+    body { background: #e5e7eb; padding: 12px; }
+    .e { background: #fff; margin: 0 auto 8px; box-shadow: 0 1px 3px rgba(0,0,0,.2); }
+  }`
+    : `
+  @page { margin: 8mm; }
+  .hoja { display: flex; flex-wrap: wrap; gap: 3mm; }
+  .e { width: ${formato.ancho}; padding: 1.5mm; border: 0.2mm dashed #b5b5b5; break-inside: avoid; page-break-inside: avoid; }
+  .e > svg { display: block; width: 100%; height: auto; }`;
+
+  const aviso = formato.modo === 'rollo'
+    ? `Rollo de ${formato.ancho} × ${formato.alto} mm: en la ventana de impresión elige la impresora de etiquetas, ` +
+      `tamaño de papel ${formato.ancho} × ${formato.alto} mm, márgenes "Ninguno" y escala 100 %.`
+    : 'Si no se abre la impresión, usa el menú del navegador → Imprimir. La línea punteada es la guía de corte.';
+
   return `<!doctype html><html lang="es"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Etiquetas Pintarte</title>
 <style>
-  @page { margin: 8mm; }
   * { box-sizing: border-box; }
   body { margin: 0; font-family: Arial, Helvetica, sans-serif; background: #fff; }
-  .hoja { display: flex; flex-wrap: wrap; gap: 3mm; }
-  .e { width: ${ancho}; padding: 1.5mm; border: 0.2mm dashed #b5b5b5; break-inside: avoid; page-break-inside: avoid; }
-  .e > svg { display: block; width: 100%; height: auto; }
   .aviso { margin: 0 0 4mm; font-size: 12px; color: #555; }
-  @media print { .aviso { display: none; } }
+  @media print { .aviso { display: none; } }${estilos}
 </style></head><body>
-<p class="aviso">Si no se abre la impresión, usa el menú del navegador → Imprimir. La línea punteada es la guía de corte.</p>
+<p class="aviso">${aviso}</p>
 <div class="hoja">${etiquetas}</div>
 <script>window.addEventListener('load', function () { setTimeout(function () { window.print(); }, 300); });</script>
 </body></html>`;
 }
+
+// Medidas comunes de rollos de etiquetas (ancho × alto en mm)
+export const ROLLOS: { id: string; ancho: number; alto: number }[] = [
+  { id: '40x25', ancho: 40, alto: 25 },
+  { id: '50x25', ancho: 50, alto: 25 },
+  { id: '50x30', ancho: 50, alto: 30 },
+  { id: '50x40', ancho: 50, alto: 40 },
+  { id: '60x40', ancho: 60, alto: 40 },
+  { id: '70x50', ancho: 70, alto: 50 },
+  { id: '100x50', ancho: 100, alto: 50 },
+  { id: '100x75', ancho: 100, alto: 75 }
+];
 
 interface ProductoEtiqueta {
   producto: IProducto;
@@ -95,6 +141,13 @@ export class Etiquetas implements OnInit {
     crudo: true, mayor: true, pintar: true, kit: true, terminada: false
   };
   tamano: TamanoEtiqueta = 'mediana';
+
+  // Impresora normal (hoja carta) o impresora de etiquetas (rollo)
+  modoImpresion: 'hoja' | 'rollo' = 'hoja';
+  readonly rollos = ROLLOS;
+  rolloId = '50x40';           // medida elegida o 'otro'
+  rolloAncho = 50;             // solo con 'otro'
+  rolloAlto = 40;
   opciones: OpcionesEtiqueta = { contenido: 'ambos', precios: PRECIOS_POR_DEFECTO };
   readonly contenidos: { valor: ContenidoEtiqueta; nombre: string }[] = [
     { valor: 'ambos', nombre: 'QR + código de barras' },
@@ -244,6 +297,43 @@ export class Etiquetas implements OnInit {
     };
   }
 
+  // Medida de la etiqueta del rollo en mm
+  get rollo(): { ancho: number; alto: number } {
+    if (this.rolloId === 'otro') {
+      return {
+        ancho: Math.min(150, Math.max(20, Number(this.rolloAncho) || 50)),
+        alto: Math.min(200, Math.max(10, Number(this.rolloAlto) || 30))
+      };
+    }
+    return ROLLOS.find(rollo => rollo.id === this.rolloId) ?? ROLLOS[3];
+  }
+
+  // Proporción de la vista previa (ancho / alto) en modo rollo
+  get proporcionRollo(): string {
+    return `${this.rollo.ancho} / ${this.rollo.alto}`;
+  }
+
+  // Rollos bajitos: con QR + barras + precios todo queda muy pequeño
+  get rolloAjustado(): boolean {
+    const { ancho, alto } = this.rollo;
+    const cantidadPrecios = this.opciones.precios.length;
+    return this.modoImpresion === 'rollo' && (
+      (alto / ancho < 0.7 && this.contenido === 'ambos') ||
+      (alto <= 25 && cantidadPrecios > 2)
+    );
+  }
+
+  usarSoloQr(): void {
+    this.contenido = 'qr';
+    this.actualizarOpciones();
+  }
+
+  get formatoImpresion(): FormatoImpresion {
+    return this.modoImpresion === 'rollo'
+      ? { modo: 'rollo', ...this.rollo }
+      : { modo: 'hoja', ancho: this.anchoEtiqueta };
+  }
+
   get anchoEtiqueta(): string {
     return { pequena: '50mm', mediana: '62mm', grande: '80mm' }[this.tamano];
   }
@@ -269,7 +359,7 @@ export class Etiquetas implements OnInit {
     }
     this.aviso = '';
     ventana.document.open();
-    ventana.document.write(hojaDeImpresion(this.seleccionados, this.opciones, this.anchoEtiqueta));
+    ventana.document.write(hojaDeImpresion(this.seleccionados, this.opciones, this.formatoImpresion));
     ventana.document.close();
   }
 
